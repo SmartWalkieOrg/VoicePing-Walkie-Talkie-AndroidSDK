@@ -1,3 +1,13 @@
 <resources>
-    <string name="app_name">VoicePingAndroidSDK</string>
+    <string name="app_name">VoicePing Android SDK</string>
+    <string name="title_activity_login">Connect</string>
+    <string name="title_activity_main">VoicePing</string>
+
+    <!-- Strings related to connect functionality -->
+    <string name="prompt_username">Username</string>
+    <string name="prompt_server_address">Server Address</string>
+    <string name="action_connect">Connect</string>
+    <string name="error_invalid_username">This username is invalid</string>
+    <string name="error_invalid_server_address">This server address is invalid</string>
+    <string name="error_field_required">This field is required</string>
 </resources>
