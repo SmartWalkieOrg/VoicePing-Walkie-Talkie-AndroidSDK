@@ -25,7 +25,6 @@ import javax.net.ssl.X509TrustManager;
 public class WebSocketConnection {
     public static final String TAG = WebSocketConnection.class.getSimpleName();
 
-    private ConnectionCallback connectionCallback;
     private WebSocketClient mWebSocketClient;
     private String serverUrl;
 
@@ -33,12 +32,11 @@ public class WebSocketConnection {
         this.serverUrl = serverUrl;
     }
 
-    public void connect(ConnectionCallback connectionCallback) {
-        this.connectionCallback = connectionCallback;
+    public void connect() {
         establishWebSocketConnection();
     }
 
-    public void reconnect(int code, String message) {
+    public void reconnect(int code) {
         disconnect(code, "Close and prepare for reconnection");
         establishWebSocketConnection();
     }
@@ -46,11 +44,6 @@ public class WebSocketConnection {
     private void establishWebSocketConnection() {
 
         if (mWebSocketClient != null && isConnected()) {
-            return;
-        }
-
-        if (connectionCallback != null) {
-        } else {
             return;
         }
 
@@ -144,7 +137,7 @@ public class WebSocketConnection {
                         e.printStackTrace();
                     }
                 } else {
-                    reconnect(CloseFrame.BUGGYCLOSE, "Trying to send data. But client is not connected yet and no connecting is in the process.");
+                    reconnect(CloseFrame.BUGGYCLOSE);
                     return;
                 }
             }
@@ -172,15 +165,11 @@ public class WebSocketConnection {
     }
 
     private void onWebSocketMessage(ByteBuffer bytes) {
-        if (connectionCallback != null) {
-            connectionCallback.onData(1, bytes.array());
-        }
+
     }
 
     private void onWebSocketError(Exception ex) {
-        if (connectionCallback != null) {
-            connectionCallback.onError(1, ex);
-        }
+
     }
 
     private void onWebSocketClose(int code, String reason, boolean remote) {
@@ -206,8 +195,6 @@ public class WebSocketConnection {
 
     private void onWebSocketOpen() {
 
-        if (connectionCallback != null) {
-        }
     }
 
     private WebSocketClient getWebsocketClient(URI uri) {
