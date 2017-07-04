@@ -44,6 +44,10 @@ public class Recorder {
         }
     }
 
+    public boolean isRecording() {
+        return isRecording;
+    }
+
     class RecorderThread extends Thread {
         private AudioRecord audioRecord;
         private AudioManager am;
