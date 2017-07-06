@@ -120,5 +120,4 @@ public enum MessageType {
         }
         return UNKNOWN;
     }
-
 }
