@@ -1,6 +1,7 @@
 package com.smartwalkie.voiceping;
 
 import android.annotation.SuppressLint;
+import android.provider.Settings;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
@@ -32,16 +33,12 @@ public class WebSocketConnection {
         this.serverUrl = serverUrl;
     }
 
-    public void connect() {
-        establishWebSocketConnection();
-    }
-
     public void reconnect(int code) {
         disconnect(code, "Close and prepare for reconnection");
-        establishWebSocketConnection();
+        connect();
     }
 
-    private void establishWebSocketConnection() {
+    public void connect() {
 
         if (mWebSocketClient != null && isConnected()) {
             return;
@@ -194,12 +191,14 @@ public class WebSocketConnection {
     }
 
     private void onWebSocketOpen() {
-
     }
 
     private WebSocketClient getWebsocketClient(URI uri) {
         if (mWebSocketClient == null) {
             HashMap<String, String> header = new HashMap<>();
+            header.put("VoicePingToken", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOTUwMzBmYjAtYmVhMy0xMWU0LWI4YWYtZTMwM2MwZTQ2NGM3IiwidWlkIjo1NiwidXNlcm5hbWUiOiJzaXJpdXMiLCJjaGFubmVsSWRzIjpbMSwyMTc1LDIxOTldfQ.1wq50IorIxIq2xydFQEG8TKFJ3xxra22ts26SR8Du3c");
+            header.put("DeviceId", Settings.Secure.getString(VoicePingApplication.getInstance().getContentResolver(),
+                    Settings.Secure.ANDROID_ID));
             mWebSocketClient = new WebSocketClient(uri, new Draft_17(), header, 0) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {

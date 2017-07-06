@@ -1,4 +1,4 @@
-package com.smartwalkie.voiceping;
+package com.smartwalkie.voiceping.models;
 
 public enum MessageType {
     UNKNOWN(-1),

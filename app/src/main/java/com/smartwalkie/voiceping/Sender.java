@@ -6,6 +6,9 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
+import com.smartwalkie.voiceping.models.ChannelType;
+import com.smartwalkie.voiceping.models.MessageType;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -64,14 +64,14 @@ public class Recorder {
 
             int audioSource;
 
-            audioSource = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+            audioSource = MediaRecorder.AudioSource.VOICE_RECOGNITION;
 
             this.audioRecord = new AudioRecord(
                     audioSource,
                     AudioParams.SAMPLE_RATE,
                     AudioParams.CHANNEL_CONFIG,
                     AudioParams.AUDIO_FORMAT,
-                    AudioParams.RECORD_MIN_BUFFER_SIZE);
+                    100000);
 
             try {
                 audioRecord.startRecording();

@@ -1,4 +1,4 @@
-package com.smartwalkie.voiceping;
+package com.smartwalkie.voiceping.models;
 
 public enum ChannelType {
     Group_type(0),

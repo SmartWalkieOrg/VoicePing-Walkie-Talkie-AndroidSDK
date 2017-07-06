@@ -13,13 +13,19 @@ import android.support.annotation.Nullable;
 public class MainService extends Service {
 
     private IBinder binder;
-
     private class LocalBinder extends Binder { }
+
+    private WebSocketConnection websocket;
+    private Recorder recorder;
 
     @Override
     public void onCreate() {
         super.onCreate();
         binder = new LocalBinder();
+        websocket = new WebSocketConnection("wss://2359staging-router.voiceoverping.net");
+        websocket.connect();
+        recorder = new Recorder();
+        recorder.startRecording();
     }
 
     @Nullable
