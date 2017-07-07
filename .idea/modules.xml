@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/libraries/Java-WebSocket/Java-WebSocket.iml" filepath="$PROJECT_DIR$/libraries/Java-WebSocket/Java-WebSocket.iml" />
       <module fileurl="file://$PROJECT_DIR$/VoicePingAndroidSDK.iml" filepath="$PROJECT_DIR$/VoicePingAndroidSDK.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/msgpack/msgpack.iml" filepath="$PROJECT_DIR$/libraries/msgpack/msgpack.iml" />

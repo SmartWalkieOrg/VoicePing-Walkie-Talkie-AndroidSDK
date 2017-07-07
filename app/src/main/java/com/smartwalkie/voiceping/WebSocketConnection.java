@@ -3,11 +3,14 @@ package com.smartwalkie.voiceping;
 import android.annotation.SuppressLint;
 import android.provider.Settings;
 
+import com.smartwalkie.voiceping.models.Message;
+
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.framing.Framedata;
+import org.java_websocket.framing.FramedataImpl1;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
@@ -28,6 +31,7 @@ public class WebSocketConnection {
 
     private WebSocketClient mWebSocketClient;
     private String serverUrl;
+    public WebSocketConnectionEventListener listener;
 
     public WebSocketConnection(String serverUrl) {
         this.serverUrl = serverUrl;
@@ -161,10 +165,6 @@ public class WebSocketConnection {
 
     }
 
-    private void onWebSocketMessage(ByteBuffer bytes) {
-
-    }
-
     private void onWebSocketError(Exception ex) {
 
     }
@@ -221,12 +221,15 @@ public class WebSocketConnection {
 
                 @Override
                 public void onMessage(ByteBuffer bytes) {
-                    onWebSocketMessage(bytes);
+                    Message message = MessageHelper.getInstance().unpackMessage(bytes.array());
+                    if (listener != null) listener.onMessage(message);
                 }
 
                 @Override
                 public void onWebsocketPing(WebSocket conn, Framedata f) {
-
+                    FramedataImpl1 resp = new FramedataImpl1(f);
+                    resp.setOptcode(Framedata.Opcode.PONG);
+                    conn.sendFrame(resp);
                 }
 
                 @Override
