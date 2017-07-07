@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">VoicePing Android SDK</string>
+    <string name="app_name">VoicePing Client</string>
     <string name="title_activity_login">Connect</string>
     <string name="title_activity_main">VoicePing</string>
 

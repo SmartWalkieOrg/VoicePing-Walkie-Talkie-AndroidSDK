@@ -6,7 +6,7 @@ import com.smartwalkie.voiceping.models.Message;
  * Created by sirius on 7/6/17.
  */
 
-public interface WebSocketConnectionEventListener {
+public interface ConnectionListener {
     void onMessage(Message message);
     void onConnecting(int routerType);
     void onConnect(int routerType);

@@ -26,14 +26,14 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 
 
-public class WebSocketConnection {
-    public static final String TAG = WebSocketConnection.class.getSimpleName();
+public class Connection {
+    public static final String TAG = Connection.class.getSimpleName();
 
     private WebSocketClient mWebSocketClient;
     private String serverUrl;
-    public WebSocketConnectionEventListener listener;
+    public ConnectionListener listener;
 
-    public WebSocketConnection(String serverUrl) {
+    public Connection(String serverUrl) {
         this.serverUrl = serverUrl;
     }
 
@@ -60,20 +60,16 @@ public class WebSocketConnection {
         }
 
         if (mWebSocketClient == null) {
-
             for (int i = 0; i < 2; i++) {
                 mWebSocketClient = getWebsocketClient(uri);
-
                 if (mWebSocketClient != null) {
                     break;
                 }
             }
-
             if (mWebSocketClient == null) {
                 return;
             }
         }
-
 
         if (serverUrl.contains("wss")) {
             SSLContext sslContext;
@@ -82,13 +78,11 @@ public class WebSocketConnection {
                 sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(null, new X509TrustManager[]{new X509TrustManager() {
                     @SuppressLint("TrustAllX509TrustManager")
-
                     @Override
                     public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
                     }
 
                     @SuppressLint("TrustAllX509TrustManager")
-
                     @Override
                     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
                     }
@@ -157,26 +151,6 @@ public class WebSocketConnection {
         return mWebSocketClient != null && mWebSocketClient.isOpen();
     }
 
-    public boolean isConnecting() {
-        return mWebSocketClient != null && mWebSocketClient.isConnecting();
-    }
-
-    private void onWebSocketPong() {
-
-    }
-
-    private void onWebSocketError(Exception ex) {
-
-    }
-
-    private void onWebSocketClose(int code, String reason, boolean remote) {
-
-        if (shouldDisconnect(code)) {
-            disconnect(code, reason);
-        } else {
-        }
-    }
-
     @SuppressWarnings("SimplifiableIfStatement")
     /**
      * Do NOT simplified these if statements. Clearer this way
@@ -190,19 +164,15 @@ public class WebSocketConnection {
         return result && mWebSocketClient != null && !mWebSocketClient.isClosed();
     }
 
-    private void onWebSocketOpen() {
-    }
-
     private WebSocketClient getWebsocketClient(URI uri) {
         if (mWebSocketClient == null) {
             HashMap<String, String> header = new HashMap<>();
             header.put("VoicePingToken", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOTUwMzBmYjAtYmVhMy0xMWU0LWI4YWYtZTMwM2MwZTQ2NGM3IiwidWlkIjo1NiwidXNlcm5hbWUiOiJzaXJpdXMiLCJjaGFubmVsSWRzIjpbMSwyMTc1LDIxOTldfQ.1wq50IorIxIq2xydFQEG8TKFJ3xxra22ts26SR8Du3c");
-            header.put("DeviceId", Settings.Secure.getString(VoicePingApplication.getInstance().getContentResolver(),
+            header.put("DeviceId", Settings.Secure.getString(VoicePingClient.getInstance().getContentResolver(),
                     Settings.Secure.ANDROID_ID));
             mWebSocketClient = new WebSocketClient(uri, new Draft_17(), header, 0) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
-                    onWebSocketOpen();
                 }
 
                 @Override
@@ -211,12 +181,14 @@ public class WebSocketConnection {
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    onWebSocketClose(code, reason, remote);
+                    if (shouldDisconnect(code)) {
+                        disconnect(code, reason);
+                    } else {
+                    }
                 }
 
                 @Override
                 public void onError(Exception ex) {
-                    onWebSocketError(ex);
                 }
 
                 @Override
@@ -234,7 +206,6 @@ public class WebSocketConnection {
 
                 @Override
                 public void onWebsocketPong(WebSocket conn, Framedata f) {
-                    onWebSocketPong();
                 }
             };
         }

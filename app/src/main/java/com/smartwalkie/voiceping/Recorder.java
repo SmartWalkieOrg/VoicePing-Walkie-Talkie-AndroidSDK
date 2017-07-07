@@ -55,7 +55,7 @@ public class Recorder {
         private long mStartRecordingTimestamp;
 
         public RecorderThread() {
-            am = (AudioManager) VoicePingApplication.getInstance().getSystemService(Context.AUDIO_SERVICE);
+            am = (AudioManager) VoicePingClient.getInstance().getSystemService(Context.AUDIO_SERVICE);
         }
 
         @Override

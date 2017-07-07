@@ -10,19 +10,19 @@ import android.support.annotation.Nullable;
  * Created by sirius on 7/3/17.
  */
 
-public class MainService extends Service {
+public class PingService extends Service {
 
     private IBinder binder;
     private class LocalBinder extends Binder { }
 
-    private WebSocketConnection websocket;
+    private Connection websocket;
     private Recorder recorder;
 
     @Override
     public void onCreate() {
         super.onCreate();
         binder = new LocalBinder();
-        websocket = new WebSocketConnection("wss://2359staging-router.voiceoverping.net");
+        websocket = new Connection("wss://2359staging-router.voiceoverping.net");
         websocket.connect();
         recorder = new Recorder();
         recorder.startRecording();

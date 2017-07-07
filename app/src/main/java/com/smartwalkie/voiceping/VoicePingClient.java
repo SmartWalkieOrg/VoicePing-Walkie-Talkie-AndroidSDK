@@ -6,9 +6,9 @@ import android.app.Application;
  * Created by sirius on 7/3/17.
  */
 
-public class VoicePingApplication extends Application {
-    private static VoicePingApplication instance;
-    public static VoicePingApplication getInstance() {
+public class VoicePingClient extends Application {
+    private static VoicePingClient instance;
+    public static VoicePingClient getInstance() {
         return instance;
     }
 

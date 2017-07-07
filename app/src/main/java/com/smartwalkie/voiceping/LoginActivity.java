@@ -176,7 +176,7 @@ public class LoginActivity extends AppCompatActivity {
                 Intent activityIntent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(activityIntent);
                 /*
-                Intent serviceIntent = new Intent(LoginActivity.this, MainService.class);
+                Intent serviceIntent = new Intent(LoginActivity.this, PingService.class);
                 startService(serviceIntent);
                 */
                 finish();

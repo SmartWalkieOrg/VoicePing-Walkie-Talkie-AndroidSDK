@@ -98,7 +98,7 @@ public class Player {
         if (currentState != STOP) {
             playerHandler.sendEmptyMessage(STOP);
         }
-        AudioManager am = (AudioManager) VoicePingApplication.getInstance().getSystemService(Context.AUDIO_SERVICE);
+        AudioManager am = (AudioManager) VoicePingClient.getInstance().getSystemService(Context.AUDIO_SERVICE);
         int result = am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         mStartTalkingTime = System.currentTimeMillis();
         Message message = new Message();
