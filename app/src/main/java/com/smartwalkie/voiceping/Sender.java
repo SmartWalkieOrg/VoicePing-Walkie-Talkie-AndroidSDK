@@ -342,10 +342,10 @@ public class Sender {
 
 
     private boolean isSaveToS3Server(String ackId){
-        if(channelType == ChannelType.Group_type.getType()){
+        if(channelType == ChannelType.GroupType.getType()){
             return true;
         } else {
-            String format = ChannelType.Private_type.getType()+"_"+ MessageType.Audio.getType()+"_";
+            String format = ChannelType.PrivateType.getType()+"_"+ MessageType.Audio.getType()+"_";
             if(ackId.startsWith(format) && !ackId.contains(".opus")){
                 return false;
             } else {

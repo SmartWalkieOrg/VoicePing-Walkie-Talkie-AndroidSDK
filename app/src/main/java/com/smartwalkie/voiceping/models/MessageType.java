@@ -1,7 +1,7 @@
 package com.smartwalkie.voiceping.models;
 
 public enum MessageType {
-    UNKNOWN(-1),
+    Unknown(-1),
     StartTalking(1),
     StopTalking(2),
     Audio(3),
@@ -9,21 +9,21 @@ public enum MessageType {
     Status(5),
     AckStart(6),
     AckEnd(7),
-    ACK_START_FAIL(8),
+    AckStartFail(8),
     DuplicateLogin(9),
-    Update_user(10),
-    Delete_user(11),
-    Update_channel(12),
-    Delete_channel(13),
+    UpdateUser(10),
+    DeleteUser(11),
+    UpdateChannel(12),
+    DeleteChannel(13),
     InvalidUser(14),
-    channel_add_user(15),
-    channel_remove_user(16),
+    ChannelAddUser(15),
+    ChannelRemoveUser(16),
     Text(17),
     Image(18),
-    Offline_message(19),
-    delivered_message(20),
-    read_message(21),
-    ack_text(22);
+    OfflineMessage(19),
+    DeliveredMessage(20),
+    ReadMessage(21),
+    AckText(22);
 
     int type;
     String name;
@@ -53,7 +53,7 @@ public enum MessageType {
                 this.name = "AckEnd";
                 break;
             case 8:
-                this.name = "ACK_START_FAIL";
+                this.name = "AckStartFail";
                 break;
             case 9:
                 this.name = "DuplicateLogin";
@@ -98,10 +98,10 @@ public enum MessageType {
                 this.name = "AckText";
                 break;
             case 23:
-                this.name = "ACK_FAIL";
+                this.name = "AckFail";
                 break;
             case -1:
-                this.name = "UNKNOWN";
+                this.name = "Unknown";
                 break;
         }
     }
@@ -118,6 +118,6 @@ public enum MessageType {
         for (MessageType messageType : MessageType.values()) {
             if(messageType.getType() == type)return messageType;
         }
-        return UNKNOWN;
+        return Unknown;
     }
 }
