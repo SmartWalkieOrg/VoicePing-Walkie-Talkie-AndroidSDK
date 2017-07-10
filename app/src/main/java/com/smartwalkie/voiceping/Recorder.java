@@ -62,16 +62,7 @@ public class Recorder {
         public void run() {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 
-            int audioSource;
-
-            audioSource = MediaRecorder.AudioSource.VOICE_RECOGNITION;
-
-            this.audioRecord = new AudioRecord(
-                    audioSource,
-                    AudioParams.SAMPLE_RATE,
-                    AudioParams.CHANNEL_CONFIG,
-                    AudioParams.AUDIO_FORMAT,
-                    100000);
+            this.audioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, AudioParams.SAMPLE_RATE, AudioParams.CHANNEL_CONFIG, AudioParams.AUDIO_FORMAT, AudioParams.RECORD_MIN_BUFFER_SIZE);
 
             try {
                 audioRecord.startRecording();

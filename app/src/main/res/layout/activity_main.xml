@@ -6,16 +6,33 @@
     android:layout_height="match_parent"
     tools:context="com.smartwalkie.voiceping.MainActivity">
 
-    <Button
-        android:id="@+id/talk_button"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Talk!"
-        android:textStyle="bold"
-        style="?android:textAppearanceSmall"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/talk_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/text_button_talk"
+            android:textStyle="bold"
+            style="?android:textAppearanceSmall"/>
+
+        <Button
+            android:id="@+id/disconnect_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/text_button_disconnect"
+            android:textStyle="bold"
+            style="?android:textAppearanceSmall"/>
+
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -9,16 +9,21 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.smartwalkie.voiceping.events.DisconnectEvent;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import de.greenrobot.event.EventBus;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private Button talkButton;
+    private Button disconnectButton;
 
     public byte[] buffer;
     public static DatagramSocket socket;
@@ -45,13 +50,26 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private final View.OnClickListener disconnectListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View arg0) {
+            Connection connection = Connection.getInstance();
+            connection.disconnect();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        EventBus.getDefault().register(this);
+
         talkButton = (Button) findViewById(R.id.talk_button);
         talkButton.setOnClickListener(talkButtonListener);
+
+        disconnectButton = (Button) findViewById(R.id.disconnect_button);
+        disconnectButton.setOnClickListener(disconnectListener);
     }
 
     private void attemptToTalk() {
@@ -94,5 +112,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         streamThread.start();
+    }
+
+    public void onEvent(DisconnectEvent event) {
+        Log.v(TAG, "onEvent");
+        finish();
     }
 }

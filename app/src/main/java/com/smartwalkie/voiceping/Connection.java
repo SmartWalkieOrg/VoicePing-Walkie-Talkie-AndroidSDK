@@ -3,6 +3,7 @@ package com.smartwalkie.voiceping;
 import android.annotation.SuppressLint;
 import android.provider.Settings;
 
+import com.smartwalkie.voiceping.events.DisconnectEvent;
 import com.smartwalkie.voiceping.models.Message;
 
 import org.java_websocket.WebSocket;
@@ -25,6 +26,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 
+import de.greenrobot.event.EventBus;
+
 
 public class Connection {
     public static final String TAG = Connection.class.getSimpleName();
@@ -33,12 +36,18 @@ public class Connection {
     private String serverUrl;
     public ConnectionListener listener;
 
+    private static Connection instance;
+    public static Connection getInstance() {
+        return instance;
+    }
+
     public Connection(String serverUrl) {
         this.serverUrl = serverUrl;
+        instance = this;
     }
 
     public void reconnect(int code) {
-        disconnect(code, "Close and prepare for reconnection");
+        disconnect();
         connect();
     }
 
@@ -113,11 +122,12 @@ public class Connection {
         }
     }
 
-    public void disconnect(int code, String message) {
+    public void disconnect() {
 
         if (mWebSocketClient != null) {
             mWebSocketClient = null;
         }
+        EventBus.getDefault().post(new DisconnectEvent());
     }
 
     public void send(byte[] data) {
@@ -182,8 +192,9 @@ public class Connection {
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
                     if (shouldDisconnect(code)) {
-                        disconnect(code, reason);
+                        disconnect();
                     } else {
+
                     }
                 }
 

@@ -175,10 +175,8 @@ public class LoginActivity extends AppCompatActivity {
             if (success) {
                 Intent activityIntent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(activityIntent);
-                /*
                 Intent serviceIntent = new Intent(LoginActivity.this, PingService.class);
                 startService(serviceIntent);
-                */
                 finish();
             } else {
                 serverAddressText.setError(getString(R.string.error_invalid_server_address));

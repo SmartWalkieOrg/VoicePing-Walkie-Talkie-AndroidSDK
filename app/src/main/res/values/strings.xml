@@ -3,6 +3,10 @@
     <string name="title_activity_login">Connect</string>
     <string name="title_activity_main">VoicePing</string>
 
+    <string name="text_button_connect">Connect</string>
+    <string name="text_button_talk">Talk!</string>
+    <string name="text_button_disconnect">Disconnect</string>
+
     <!-- Strings related to connect functionality -->
     <string name="prompt_username">Username</string>
     <string name="prompt_server_address">Server Address</string>
