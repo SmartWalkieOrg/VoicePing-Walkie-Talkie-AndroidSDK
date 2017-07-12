@@ -26,6 +26,7 @@ public class PingService extends Service {
 
     private Connection connection;
     private Recorder recorder;
+    private Player player;
 
     @Override
     public void onCreate() {
@@ -44,8 +45,13 @@ public class PingService extends Service {
         binder = new LocalBinder();
         connection = new Connection("wss://2359staging-router.voiceoverping.net");
         connection.connect();
+        /*
         recorder = new Recorder();
         recorder.startRecording();
+        */
+        player = new Player();
+        connection.setIncomingAudioListener(player);
+        player.start();
     }
 
     @Nullable

@@ -1,10 +1,15 @@
 package com.smartwalkie.voiceping;
 
 import android.annotation.SuppressLint;
-import android.provider.Settings;
+import android.provider.Settings.Secure;
+import android.util.Log;
 
 import com.smartwalkie.voiceping.events.DisconnectEvent;
+import com.smartwalkie.voiceping.events.MessageEvent;
+import com.smartwalkie.voiceping.listeners.ConnectionListener;
+import com.smartwalkie.voiceping.listeners.IncomingAudioListener;
 import com.smartwalkie.voiceping.models.Message;
+import com.smartwalkie.voiceping.models.MessageType;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
@@ -32,28 +37,43 @@ import de.greenrobot.event.EventBus;
 public class Connection {
     public static final String TAG = Connection.class.getSimpleName();
 
-    private WebSocketClient mWebSocketClient;
+    private WebSocketClient webSocketClient;
     private String serverUrl;
-    public ConnectionListener listener;
+    private ConnectionListener connectionListener;
+    private IncomingAudioListener incomingAudioListener;
 
+    // Singleton
     private static Connection instance;
     public static Connection getInstance() {
         return instance;
     }
+    // Singleton
 
+    // Public Setters
+    public void setConnectionListener(ConnectionListener connectionListener) {
+        this.connectionListener = connectionListener;
+    }
+
+    public void setIncomingAudioListener(IncomingAudioListener incomingAudioListener) {
+        this.incomingAudioListener = incomingAudioListener;
+    }
+    // Public Setters
+
+    // Constructor
     public Connection(String serverUrl) {
         this.serverUrl = serverUrl;
         instance = this;
     }
+    // Constructor
 
+    // Public Methods
     public void reconnect(int code) {
         disconnect();
         connect();
     }
 
     public void connect() {
-
-        if (mWebSocketClient != null && isConnected()) {
+        if (webSocketClient != null && isConnected()) {
             return;
         }
 
@@ -64,18 +84,18 @@ public class Connection {
             e.printStackTrace();
         }
 
-        if (mWebSocketClient == null) {
-            mWebSocketClient = getWebsocketClient(uri);
+        if (webSocketClient == null) {
+            webSocketClient = getWebSocketClient(uri);
         }
 
-        if (mWebSocketClient == null) {
+        if (webSocketClient == null) {
             for (int i = 0; i < 2; i++) {
-                mWebSocketClient = getWebsocketClient(uri);
-                if (mWebSocketClient != null) {
+                webSocketClient = getWebSocketClient(uri);
+                if (webSocketClient != null) {
                     break;
                 }
             }
-            if (mWebSocketClient == null) {
+            if (webSocketClient == null) {
                 return;
             }
         }
@@ -102,8 +122,8 @@ public class Connection {
                     }
                 }}, new SecureRandom());
 
-                factory = sslContext.getSocketFactory();// (SSLSocketFactory) SSLSocketFactory.getDefault();
-                mWebSocketClient.setSocket(factory.createSocket());
+                factory = sslContext.getSocketFactory();    // (SSLSocketFactory) SSLSocketFactory.getDefault();
+                webSocketClient.setSocket(factory.createSocket());
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -112,32 +132,27 @@ public class Connection {
         }
 
         try {
-
-            if (mWebSocketClient != null) {
-                mWebSocketClient.connect();
+            if (webSocketClient != null) {
+                webSocketClient.connect();
             }
-
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
     }
 
     public void disconnect() {
-
-        if (mWebSocketClient != null) {
-            mWebSocketClient = null;
+        if (webSocketClient != null) {
+            webSocketClient = null;
         }
         EventBus.getDefault().post(new DisconnectEvent());
     }
 
     public void send(byte[] data) {
-
-        if (mWebSocketClient != null) {
+        if (webSocketClient != null) {
             if (!isConnected()) {
-
-                if (mWebSocketClient.isConnecting()) {
+                if (webSocketClient.isConnecting()) {
                     try {
-                        mWebSocketClient.wait(5000);
+                        webSocketClient.wait(5000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -146,10 +161,9 @@ public class Connection {
                     return;
                 }
             }
-
             try {
                 if (isConnected()) {
-                    mWebSocketClient.send(data);
+                    webSocketClient.send(data);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -158,7 +172,7 @@ public class Connection {
     }
 
     public boolean isConnected() {
-        return mWebSocketClient != null && mWebSocketClient.isOpen();
+        return webSocketClient != null && webSocketClient.isOpen();
     }
 
     @SuppressWarnings("SimplifiableIfStatement")
@@ -170,23 +184,25 @@ public class Connection {
         if (code == -1 && isConnected()) {
             result = false;
         }
-
-        return result && mWebSocketClient != null && !mWebSocketClient.isClosed();
+        return result && webSocketClient != null && !webSocketClient.isClosed();
     }
+    // Public Methods
 
-    private WebSocketClient getWebsocketClient(URI uri) {
-        if (mWebSocketClient == null) {
+    private WebSocketClient getWebSocketClient(URI uri) {
+        if (webSocketClient == null) {
             HashMap<String, String> header = new HashMap<>();
             header.put("VoicePingToken", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOTUwMzBmYjAtYmVhMy0xMWU0LWI4YWYtZTMwM2MwZTQ2NGM3IiwidWlkIjo1NiwidXNlcm5hbWUiOiJzaXJpdXMiLCJjaGFubmVsSWRzIjpbMSwyMTc1LDIxOTldfQ.1wq50IorIxIq2xydFQEG8TKFJ3xxra22ts26SR8Du3c");
-            header.put("DeviceId", Settings.Secure.getString(VoicePingClient.getInstance().getContentResolver(),
-                    Settings.Secure.ANDROID_ID));
-            mWebSocketClient = new WebSocketClient(uri, new Draft_17(), header, 0) {
+            header.put("DeviceId", Secure.getString(VoicePingClient.getInstance().getContentResolver(),
+                    Secure.ANDROID_ID));
+            webSocketClient = new WebSocketClient(uri, new Draft_17(), header, 0) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
+                    Log.v(TAG, "onOpen");
                 }
 
                 @Override
                 public void onMessage(String message) {
+                    Log.v(TAG, "onMessage");
                 }
 
                 @Override
@@ -194,22 +210,37 @@ public class Connection {
                     if (shouldDisconnect(code)) {
                         disconnect();
                     } else {
-
                     }
                 }
 
                 @Override
                 public void onError(Exception ex) {
+                    Log.v(TAG, "onError");
                 }
 
                 @Override
                 public void onMessage(ByteBuffer bytes) {
-                    Message message = MessageHelper.getInstance().unpackMessage(bytes.array());
-                    if (listener != null) listener.onMessage(message);
+                    Message message = MessageHelper.unpackMessage(bytes.array());
+                    if (incomingAudioListener != null) {
+                        if (MessageType.intToMessageType(message.messageType) == MessageType.StartTalking) {
+                            incomingAudioListener.onStartTalkingMessage(message);
+                        } else if (MessageType.intToMessageType(message.messageType) == MessageType.Audio) {
+                            incomingAudioListener.onAudioTalkingMessage(message);
+                        } else if (MessageType.intToMessageType(message.messageType) == MessageType.StopTalking) {
+                            incomingAudioListener.onStopTalkingMessage(message);
+                        }
+                    }
+                    Log.v(TAG, "message: " + message.messageType);
+
+                    MessageEvent messageEvent = new MessageEvent(message);
+                    EventBus.getDefault().post(messageEvent);
+
+                    if (connectionListener != null) connectionListener.onMessage(message);
                 }
 
                 @Override
                 public void onWebsocketPing(WebSocket conn, Framedata f) {
+                    Log.v(TAG, "onWebsocketPing");
                     FramedataImpl1 resp = new FramedataImpl1(f);
                     resp.setOptcode(Framedata.Opcode.PONG);
                     conn.sendFrame(resp);
@@ -217,10 +248,10 @@ public class Connection {
 
                 @Override
                 public void onWebsocketPong(WebSocket conn, Framedata f) {
+                    Log.v(TAG, "onWebsocketPong");
                 }
             };
         }
-
-        return mWebSocketClient;
+        return webSocketClient;
     }
 }

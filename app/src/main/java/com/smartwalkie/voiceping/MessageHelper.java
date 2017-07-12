@@ -22,12 +22,11 @@ public class MessageHelper {
 
     public static final String TAG = MessageHelper.class.getSimpleName();
 
-    MessagePack msgPack;
+    private static MessagePack msgPack = new MessagePack();
     private static MessageHelper instance;
 
     private MessageHelper() {
         msgPack = new MessagePack();
-
     }
 
     public static MessageHelper getInstance() {
@@ -38,7 +37,7 @@ public class MessageHelper {
     }
 
 
-    public Message unpackMessage(byte[] payload) {
+    public static Message unpackMessage(byte[] payload) {
         ByteArrayInputStream in = new ByteArrayInputStream(payload);
         MessagePackUnpacker unpacker = (MessagePackUnpacker) msgPack.createUnpacker(in);
 

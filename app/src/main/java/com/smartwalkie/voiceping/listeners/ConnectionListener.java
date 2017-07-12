@@ -1,4 +1,4 @@
-package com.smartwalkie.voiceping;
+package com.smartwalkie.voiceping.listeners;
 
 import com.smartwalkie.voiceping.models.Message;
 

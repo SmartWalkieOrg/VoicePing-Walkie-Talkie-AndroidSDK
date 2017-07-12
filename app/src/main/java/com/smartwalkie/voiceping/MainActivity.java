@@ -40,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
     private final View.OnClickListener talkButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View arg0) {
+            byte[] message = MessageHelper.getInstance().createStartRecordMessage(56, 1987, 1, 1);
+
+            Connection.getInstance().send(message);
+            /*
             if (status == false) {
                 startStreaming();
                 status = true;
@@ -47,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 recorder.release();
                 status = false;
             }
+            */
         }
     };
 
@@ -83,16 +88,16 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 try {
                     DatagramSocket socket = new DatagramSocket();
-                    System.out.println("Socket Created");
+                    Log.v(TAG, "Socket Created");
 
                     byte[] buffer = new byte[minBufSize];
-                    System.out.println("Buffer created of size " + minBufSize);
+                    Log.v(TAG, "Buffer created of size " + minBufSize);
 
                     DatagramPacket packet;
                     final InetAddress destination = InetAddress.getByName("218.000.000.000");
-                    System.out.println("Address retrieved");
+                    Log.v(TAG, "Address retrieved");
                     recorder = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, sampleRate, channelConfig, audioFormat, minBufSize);
-                    System.out.println("Recorder initialized");
+                    Log.v(TAG, "Recorder initialized");
                     recorder.startRecording();
 
                     while(status == true) {
@@ -101,13 +106,13 @@ public class MainActivity extends AppCompatActivity {
                         //putting buffer in the packet
                         packet = new DatagramPacket(buffer, buffer.length, destination, port);
                         //socket.send(packet);
-                        System.out.println("MinBufferSize: " + minBufSize);
+                        Log.v(TAG, "MinBufferSize: " + minBufSize);
                     }
                 } catch(UnknownHostException e) {
-                    System.out.println("UnknownHostException");
+                    Log.v(TAG, "UnknownHostException");
                 } catch (IOException e) {
                     e.printStackTrace();
-                    System.out.println("IOException");
+                    Log.v(TAG, "IOException");
                 }
             }
         });
