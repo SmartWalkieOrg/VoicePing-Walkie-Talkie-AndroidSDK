@@ -6,6 +6,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 
 import com.media2359.voiceping.codec.Opus;
+import com.smartwalkie.voiceping.constants.AudioParams;
 
 
 public class Recorder {

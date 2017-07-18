@@ -19,7 +19,7 @@ import de.greenrobot.event.EventBus;
 
 public class PingService extends Service {
 
-    public static final String TAG = Connection.class.getSimpleName();
+    public static final String TAG = PingService.class.getSimpleName();
 
     private IBinder binder;
     private class LocalBinder extends Binder { }

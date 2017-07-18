@@ -8,9 +8,9 @@ import com.smartwalkie.voiceping.models.Message;
 
 public interface ConnectionListener {
     void onMessage(Message message);
-    void onConnecting(int routerType);
-    void onConnect(int routerType);
-    void onError(int routerType, Exception e);
-    void onData(int routerType, byte[] data);
-    void onDisconnect(int routerType);
+    void onConnecting();
+    void onConnected();
+    void onFailed();
+    void onData(byte[] data);
+    void onDisconnected();
 }

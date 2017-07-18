@@ -6,6 +6,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
+import com.smartwalkie.voiceping.constants.AudioParams;
 import com.smartwalkie.voiceping.models.ChannelType;
 import com.smartwalkie.voiceping.models.MessageType;
 

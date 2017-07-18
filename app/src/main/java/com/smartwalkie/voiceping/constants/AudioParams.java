@@ -1,4 +1,4 @@
-package com.smartwalkie.voiceping;
+package com.smartwalkie.voiceping.constants;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;

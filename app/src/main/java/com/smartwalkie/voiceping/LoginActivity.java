@@ -7,8 +7,11 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,9 +21,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.smartwalkie.voiceping.callbacks.ConnectCallback;
+import com.smartwalkie.voiceping.exceptions.PingException;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 public class LoginActivity extends AppCompatActivity {
 
-    private ConnectTask connectTask = null;
+    public static final String TAG = LoginActivity.class.getSimpleName();
 
     private AutoCompleteTextView usernameText;
     private EditText serverAddressText;
@@ -63,10 +75,6 @@ public class LoginActivity extends AppCompatActivity {
      * If there are form errors, the errors are presented and no actual login attempt is made.
      */
     private void attemptToLogin() {
-        if (connectTask != null) {
-            return;
-        }
-
         // Reset errors.
         usernameText.setError(null);
         serverAddressText.setError(null);
@@ -100,8 +108,34 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user connect attempt.
             showProgress(true);
-            connectTask = new ConnectTask(username, serverAddress);
-            connectTask.execute((Void) null);
+
+            VoicePing.configure(VoicePingClient.getInstance(), "wss://2359staging-router.voiceoverping.net");
+            Map<String, String> props = new HashMap<>();
+            props.put("username", username);
+            props.put("VoicePingToken", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOTUwMzBmYjAtYmVhMy0xMWU0LWI4YWYtZTMwM2MwZTQ2NGM3IiwidWlkIjo1NiwidXNlcm5hbWUiOiJzaXJpdXMiLCJjaGFubmVsSWRzIjpbMSwyMTc1LDIxOTldfQ.1wq50IorIxIq2xydFQEG8TKFJ3xxra22ts26SR8Du3c");
+            props.put("DeviceId", Settings.Secure.getString(VoicePingClient.getInstance().getContentResolver(),
+                    Settings.Secure.ANDROID_ID));
+
+            VoicePing.connect(props, new ConnectCallback() {
+                @Override
+                public void onConnected() {
+                    Log.v(TAG, "onConnected");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent activityIntent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(activityIntent);
+                            showProgress(false);
+                            finish();
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailed(PingException exception) {
+                    Log.v(TAG, "onFailed");
+                }
+            });
         }
     }
 
@@ -138,56 +172,6 @@ public class LoginActivity extends AppCompatActivity {
             // and hide the relevant UI components.
             progressView.setVisibility(show ? View.VISIBLE : View.GONE);
             connectFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class ConnectTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String username;
-        private final String serverAddress;
-
-        ConnectTask(String username, String serverAddress) {
-            this.username = username;
-            this.serverAddress = serverAddress;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            connectTask = null;
-            showProgress(false);
-
-            if (success) {
-                Intent activityIntent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(activityIntent);
-                Intent serviceIntent = new Intent(LoginActivity.this, PingService.class);
-                startService(serviceIntent);
-                finish();
-            } else {
-                serverAddressText.setError(getString(R.string.error_invalid_server_address));
-                serverAddressText.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            connectTask = null;
-            showProgress(false);
         }
     }
 }

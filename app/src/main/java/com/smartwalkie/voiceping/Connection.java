@@ -26,6 +26,7 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -39,6 +40,8 @@ public class Connection {
 
     private WebSocketClient webSocketClient;
     private String serverUrl;
+    private String username;
+    private Map<String, String> props;
     private ConnectionListener connectionListener;
     private IncomingAudioListener incomingAudioListener;
 
@@ -72,6 +75,12 @@ public class Connection {
         connect();
     }
 
+    public void connect(Map<String, String> props) {
+        this.username = username;
+        this.props = props;
+        connect();
+    }
+
     public void connect() {
         if (webSocketClient != null && isConnected()) {
             return;
@@ -86,18 +95,6 @@ public class Connection {
 
         if (webSocketClient == null) {
             webSocketClient = getWebSocketClient(uri);
-        }
-
-        if (webSocketClient == null) {
-            for (int i = 0; i < 2; i++) {
-                webSocketClient = getWebSocketClient(uri);
-                if (webSocketClient != null) {
-                    break;
-                }
-            }
-            if (webSocketClient == null) {
-                return;
-            }
         }
 
         if (serverUrl.contains("wss")) {
@@ -190,14 +187,11 @@ public class Connection {
 
     private WebSocketClient getWebSocketClient(URI uri) {
         if (webSocketClient == null) {
-            HashMap<String, String> header = new HashMap<>();
-            header.put("VoicePingToken", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOTUwMzBmYjAtYmVhMy0xMWU0LWI4YWYtZTMwM2MwZTQ2NGM3IiwidWlkIjo1NiwidXNlcm5hbWUiOiJzaXJpdXMiLCJjaGFubmVsSWRzIjpbMSwyMTc1LDIxOTldfQ.1wq50IorIxIq2xydFQEG8TKFJ3xxra22ts26SR8Du3c");
-            header.put("DeviceId", Secure.getString(VoicePingClient.getInstance().getContentResolver(),
-                    Secure.ANDROID_ID));
-            webSocketClient = new WebSocketClient(uri, new Draft_17(), header, 0) {
+            webSocketClient = new WebSocketClient(uri, new Draft_17(), props, 0) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
                     Log.v(TAG, "onOpen");
+                    if (connectionListener != null) connectionListener.onConnected();
                 }
 
                 @Override
@@ -211,11 +205,13 @@ public class Connection {
                         disconnect();
                     } else {
                     }
+                    if (connectionListener != null) connectionListener.onDisconnected();
                 }
 
                 @Override
                 public void onError(Exception ex) {
                     Log.v(TAG, "onError");
+                    if (connectionListener != null) connectionListener.onFailed();
                 }
 
                 @Override

@@ -9,6 +9,7 @@ import android.os.HandlerThread;
 import android.util.Log;
 
 import com.media2359.voiceping.codec.Opus;
+import com.smartwalkie.voiceping.constants.AudioParams;
 import com.smartwalkie.voiceping.listeners.IncomingAudioListener;
 import com.smartwalkie.voiceping.models.Message;
 
