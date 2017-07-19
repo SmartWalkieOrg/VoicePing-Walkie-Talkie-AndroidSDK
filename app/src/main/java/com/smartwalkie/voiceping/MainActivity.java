@@ -120,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onEvent(DisconnectEvent event) {
-        Log.v(TAG, "onEvent");
-        finish();
+        Log.v(TAG, "onEvent");finish();
     }
 }

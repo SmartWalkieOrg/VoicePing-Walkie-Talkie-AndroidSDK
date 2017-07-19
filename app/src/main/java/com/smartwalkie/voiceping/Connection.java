@@ -1,7 +1,6 @@
 package com.smartwalkie.voiceping;
 
 import android.annotation.SuppressLint;
-import android.provider.Settings.Secure;
 import android.util.Log;
 
 import com.smartwalkie.voiceping.events.DisconnectEvent;
@@ -14,7 +13,6 @@ import com.smartwalkie.voiceping.models.MessageType;
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
-import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.framing.Framedata;
 import org.java_websocket.framing.FramedataImpl1;
 import org.java_websocket.handshake.ServerHandshake;
@@ -25,7 +23,6 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
@@ -70,13 +67,12 @@ public class Connection {
     // Constructor
 
     // Public Methods
-    public void reconnect(int code) {
+    public void reconnect() {
         disconnect();
         connect();
     }
 
     public void connect(Map<String, String> props) {
-        this.username = username;
         this.props = props;
         connect();
     }
@@ -154,7 +150,7 @@ public class Connection {
                         e.printStackTrace();
                     }
                 } else {
-                    reconnect(CloseFrame.BUGGYCLOSE);
+                    reconnect();
                     return;
                 }
             }
