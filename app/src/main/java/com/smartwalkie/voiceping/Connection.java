@@ -214,11 +214,11 @@ public class Connection {
                 public void onMessage(ByteBuffer bytes) {
                     Message message = MessageHelper.unpackMessage(bytes.array());
                     if (incomingAudioListener != null) {
-                        if (MessageType.intToMessageType(message.messageType) == MessageType.StartTalking) {
+                        if (message.messageType == MessageType.START_TALKING) {
                             incomingAudioListener.onStartTalkingMessage(message);
-                        } else if (MessageType.intToMessageType(message.messageType) == MessageType.Audio) {
+                        } else if (message.messageType == MessageType.AUDIO) {
                             incomingAudioListener.onAudioTalkingMessage(message);
-                        } else if (MessageType.intToMessageType(message.messageType) == MessageType.StopTalking) {
+                        } else if (message.messageType == MessageType.STOP_TALKING) {
                             incomingAudioListener.onStopTalkingMessage(message);
                         }
                     }

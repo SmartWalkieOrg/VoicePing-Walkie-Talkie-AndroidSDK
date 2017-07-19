@@ -122,11 +122,11 @@ public class Message {
 
     /**
      * Get target id to compare
-     * @return {@link Message#senderUserId} if {@link Message#channelType} == {@link ChannelType#GroupType} <p>
-     *     {@link Message#receiverChannelId} if {@link Message#channelType} == {@link ChannelType#PrivateType}
+     * @return {@link Message#senderUserId} if {@link Message#channelType} == {@link ChannelType#GROUP} <p>
+     *     {@link Message#receiverChannelId} if {@link Message#channelType} == {@link ChannelType#PRIVATE}
      */
     public int getTargetId() {
-        if (channelType == ChannelType.GroupType.getType()) {
+        if (channelType == ChannelType.GROUP) {
             return receiverChannelId;
         } else {
             return senderUserId;

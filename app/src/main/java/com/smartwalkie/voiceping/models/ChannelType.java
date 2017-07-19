@@ -1,15 +1,6 @@
 package com.smartwalkie.voiceping.models;
 
-public enum ChannelType {
-    GroupType(0),
-    PrivateType(1);
-    int type;
-
-    ChannelType(int type) {
-        this.type = type;
-    }
-
-    public int getType() {
-        return type;
-    }
+public final class ChannelType {
+    public static final int GROUP = 0;
+    public static final int PRIVATE = 1;
 }

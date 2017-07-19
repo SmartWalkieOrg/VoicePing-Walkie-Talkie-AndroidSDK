@@ -6,6 +6,7 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
@@ -60,6 +61,21 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View arg0) {
             Connection connection = Connection.getInstance();
             connection.disconnect();
+        }
+    };
+
+    private final View.OnTouchListener touchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    break;
+                case MotionEvent.ACTION_UP:
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                    break;
+            }
+            return false;
         }
     };
 
