@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private final View.OnClickListener talkButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            byte[] message = MessageHelper.getInstance().createStartRecordMessage(56, 1987, 1, 1);
+            byte[] message = MessageHelper.createStartRecordMessage(56, 1987, 1, 1);
 
             Connection.getInstance().send(message);
             /*
