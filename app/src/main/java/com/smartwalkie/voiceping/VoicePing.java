@@ -87,6 +87,7 @@ public class VoicePing implements
     }
 
     private void _stopTalking() {
+        recorder.stopTalking();
     }
 
     // ConnectionListener

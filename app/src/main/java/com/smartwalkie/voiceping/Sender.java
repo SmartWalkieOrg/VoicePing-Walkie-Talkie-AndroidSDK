@@ -144,9 +144,9 @@ public class Sender {
         saveLocalId =null;
         if(type == TYPE_AUDIO_CALL){
             if (recorder.isRecording()) {
-                recorder.stopRecording();
+                //recorder.stopRecording();
             }
-            recorder.startRecording();
+            //recorder.startRecording();
         }
         messageCount = 0;
         startTime = System.currentTimeMillis();
@@ -185,7 +185,7 @@ public class Sender {
         try {
             blockingQueue.put(END_COMMAND);
             if (type == TYPE_AUDIO_CALL) {
-                recorder.stopRecording();
+                //recorder.stopRecording();
             }
 
             if (step == WAITING_ACK_START) {
@@ -288,7 +288,7 @@ public class Sender {
             senderHandler.removeMessages(WHAT_WAITING_FOR_ACK_START);
             onSendFail("terminate not receive ackStart", false);
             if(recorder.isRecording()){
-                recorder.stopRecording();
+                //recorder.stopRecording();
             }
             sendStopMessage();
 
@@ -297,7 +297,7 @@ public class Sender {
             senderHandler.removeMessages(WHAT_WAITING_FOR_ACK_START);
             onSendFail("terminate at ON_ACK_START", false);
             if(recorder.isRecording()){
-                recorder.stopRecording();
+                //recorder.stopRecording();
             }
             sendStopMessage();
 
