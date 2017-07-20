@@ -49,7 +49,7 @@ public class PingService extends Service {
         recorder = new Recorder();
         recorder.startRecording();
         */
-        player = new Player();
+        player = Player.getInstance();
         connection.setIncomingAudioListener(player);
         player.start();
     }

@@ -4,27 +4,46 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.util.Log;
 
 import com.media2359.voiceping.codec.Opus;
-import com.smartwalkie.voiceping.constants.AudioParams;
+import com.smartwalkie.voiceping.constants.AudioParameters;
+import com.smartwalkie.voiceping.listeners.OutgoingAudioListener;
+import com.smartwalkie.voiceping.models.Message;
 
 
-public class Recorder {
+public class Recorder implements OutgoingAudioListener {
     private static final String TAG = Recorder.class.getSimpleName();
+
+    public static Recorder getInstance() {
+        if (instance == null) instance = new Recorder();
+        return instance;
+    }
+
+    private static Recorder instance;
 
     private Opus opus;
     boolean isRecording;
 
     private Thread recorderThread;
 
-    public Recorder() {
-        if(AudioParams.USE_CODEC) {
-            this.opus = Opus.getCodec(AudioParams.SAMPLE_RATE, AudioParams.CHANNEL);
+    private int senderId;
+    private int receiverId;
+    private int channelType;
+
+    private Recorder() {
+        if(AudioParameters.USE_CODEC) {
+            this.opus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
         }
     }
 
     private void sendMessage(byte[] payload, int offset, int length) {
 
+    }
+
+    public void startTalking(int receiverId, int channelType) {
+        byte[] message = MessageHelper.createStartRecordMessage(56, receiverId, channelType, 1);
+        Connection.getInstance().send(message);
     }
 
     public void startRecording() {
@@ -49,6 +68,33 @@ public class Recorder {
         return isRecording;
     }
 
+    // OutgoingAudioListener
+    @Override
+    public void onAckStartSucceed(Message message) {
+        Log.v(TAG, "onAckStartSucceed: " + message);
+    }
+
+    @Override
+    public void onAckStartFailed(Message message) {
+        Log.v(TAG, "onAckStartFailed: " + message);
+    }
+
+    @Override
+    public void onAckEndSucceed(Message message) {
+        Log.v(TAG, "onAckEndSucceed: " + message);
+    }
+
+    @Override
+    public void onMessageDelivered(Message message) {
+        Log.v(TAG, "onMessageDelivered: " + message);
+    }
+
+    @Override
+    public void onMessageRead(Message message) {
+        Log.v(TAG, "onMessageRead: " + message);
+    }
+    // OutgoingAudioListener
+
     class RecorderThread extends Thread {
         private AudioRecord audioRecord;
         private AudioManager am;
@@ -63,7 +109,7 @@ public class Recorder {
         public void run() {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 
-            this.audioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, AudioParams.SAMPLE_RATE, AudioParams.CHANNEL_CONFIG, AudioParams.AUDIO_FORMAT, AudioParams.RECORD_MIN_BUFFER_SIZE);
+            this.audioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL_CONFIG, AudioParameters.AUDIO_FORMAT, AudioParameters.RECORD_MIN_BUFFER_SIZE);
 
             try {
                 audioRecord.startRecording();
@@ -83,8 +129,8 @@ public class Recorder {
                     break;
                 }
 
-                byte[] pcmFrame = new byte[AudioParams.FRAME_SIZE * 2 * AudioParams.CHANNEL];
-                int numOfFrames = audioRecord.read(pcmFrame, 0, AudioParams.FRAME_SIZE * 2);
+                byte[] pcmFrame = new byte[AudioParameters.FRAME_SIZE * 2 * AudioParameters.CHANNEL];
+                int numOfFrames = audioRecord.read(pcmFrame, 0, AudioParameters.FRAME_SIZE * 2);
                 if (numOfFrames == AudioRecord.ERROR_INVALID_OPERATION) {
                     audioRecord.stop();
                     audioRecord.release();
@@ -94,9 +140,9 @@ public class Recorder {
                     return;
                 }
 
-                if (AudioParams.USE_CODEC) {
+                if (AudioParameters.USE_CODEC) {
                     byte[] readData = new byte[pcmFrame.length];
-                    int encodedSize = opus.encode(pcmFrame, 0, AudioParams.FRAME_SIZE, readData, 0, readData.length);
+                    int encodedSize = opus.encode(pcmFrame, 0, AudioParameters.FRAME_SIZE, readData, 0, readData.length);
                     totalFrame ++;
                     sendMessage(readData, 0, encodedSize);
                 } else {

@@ -7,6 +7,7 @@ import com.smartwalkie.voiceping.events.DisconnectEvent;
 import com.smartwalkie.voiceping.events.MessageEvent;
 import com.smartwalkie.voiceping.listeners.ConnectionListener;
 import com.smartwalkie.voiceping.listeners.IncomingAudioListener;
+import com.smartwalkie.voiceping.listeners.OutgoingAudioListener;
 import com.smartwalkie.voiceping.models.Message;
 import com.smartwalkie.voiceping.models.MessageType;
 
@@ -41,6 +42,7 @@ public class Connection {
     private Map<String, String> props;
     private ConnectionListener connectionListener;
     private IncomingAudioListener incomingAudioListener;
+    private OutgoingAudioListener outgoingAudioListener;
 
     // Singleton
     private static Connection instance;
@@ -56,6 +58,10 @@ public class Connection {
 
     public void setIncomingAudioListener(IncomingAudioListener incomingAudioListener) {
         this.incomingAudioListener = incomingAudioListener;
+    }
+
+    public void setOutgoingAudioListener(OutgoingAudioListener outgoingAudioListener) {
+        this.outgoingAudioListener = outgoingAudioListener;
     }
     // Public Setters
 
@@ -222,6 +228,26 @@ public class Connection {
                             incomingAudioListener.onStopTalkingMessage(message);
                         }
                     }
+
+                    if (outgoingAudioListener != null) {
+                        switch (message.messageType) {
+                            case MessageType.ACK_START:
+                                outgoingAudioListener.onAckStartSucceed(message);
+                                break;
+                            case MessageType.ACK_START_FAILED:
+                                outgoingAudioListener.onAckStartFailed(message);
+                                break;
+                            case MessageType.ACK_END:
+                                outgoingAudioListener.onAckEndSucceed(message);
+                                break;
+                            case MessageType.MESSAGE_DELIVERED:
+                                outgoingAudioListener.onMessageDelivered(message);
+                                break;
+                            case MessageType.MESSAGE_READ:
+                                outgoingAudioListener.onMessageRead(message);
+                        }
+                    }
+
                     Log.v(TAG, "message: " + message.messageType);
 
                     MessageEvent messageEvent = new MessageEvent(message);

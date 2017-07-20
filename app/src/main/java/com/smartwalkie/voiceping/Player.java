@@ -9,13 +9,20 @@ import android.os.HandlerThread;
 import android.util.Log;
 
 import com.media2359.voiceping.codec.Opus;
-import com.smartwalkie.voiceping.constants.AudioParams;
+import com.smartwalkie.voiceping.constants.AudioParameters;
 import com.smartwalkie.voiceping.listeners.IncomingAudioListener;
 import com.smartwalkie.voiceping.models.Message;
 
 
 public class Player implements IncomingAudioListener {
     public static final String TAG = Player.class.getSimpleName();
+
+    public static Player getInstance() {
+        if (instance == null) instance = new Player();
+        return instance;
+    }
+
+    private static Player instance;
 
     public AudioTrack audioTrack;
     Opus opus;
@@ -35,14 +42,14 @@ public class Player implements IncomingAudioListener {
     long mStartTalkingTime = 0;
     private byte[] mCurrentPlayingPlayload;
 
-    public Player() {
+    private Player() {
         init();
     }
 
 
     private void init() {
-        if (AudioParams.USE_CODEC) {
-            opus = Opus.getCodec(AudioParams.SAMPLE_RATE, AudioParams.CHANNEL);
+        if (AudioParameters.USE_CODEC) {
+            opus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
         }
 
         playerThread = new HandlerThread("Player", Thread.MAX_PRIORITY);
@@ -65,8 +72,8 @@ public class Player implements IncomingAudioListener {
                         byte[] payload = (byte[]) msg.obj;
                         mCurrentPlayingPlayload = payload;
                         byte[] pcmFrame = new byte[1920];
-                        if (AudioParams.USE_CODEC) {
-                            int decodeSize = opus.decode(payload, 0, payload.length, pcmFrame, 0, AudioParams.FRAME_SIZE, 0);
+                        if (AudioParameters.USE_CODEC) {
+                            int decodeSize = opus.decode(payload, 0, payload.length, pcmFrame, 0, AudioParameters.FRAME_SIZE, 0);
                             Log.v(TAG, "USE_CODEC");
                             if (decodeSize > 0) {
                                 audioTrack.write(pcmFrame, 0, pcmFrame.length);
@@ -129,17 +136,17 @@ public class Player implements IncomingAudioListener {
     }
 
     private AudioTrack initAudioTrack() {
-        int minBufferSize = AudioParams.PLAY_MIN_BUFFER_SIZE;
+        int minBufferSize = AudioParameters.PLAY_MIN_BUFFER_SIZE;
         Log.d("Player", "init minbuffer size=" + minBufferSize);
 
         int streamType = AudioManager.STREAM_MUSIC;
 
         return new AudioTrack(
                 streamType,
-                AudioParams.SAMPLE_RATE,
+                AudioParameters.SAMPLE_RATE,
                 AudioFormat.CHANNEL_OUT_MONO,
-                AudioParams.AUDIO_FORMAT,
-                Math.min(minBufferSize, AudioParams.FRAME_SIZE * AudioParams.BUFFER_SIZE_FACTOR),
+                AudioParameters.AUDIO_FORMAT,
+                Math.min(minBufferSize, AudioParameters.FRAME_SIZE * AudioParameters.BUFFER_SIZE_FACTOR),
                 AudioTrack.MODE_STREAM);
     }
 

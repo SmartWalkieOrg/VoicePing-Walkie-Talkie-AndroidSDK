@@ -6,7 +6,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
-import com.smartwalkie.voiceping.constants.AudioParams;
+import com.smartwalkie.voiceping.constants.AudioParameters;
 import com.smartwalkie.voiceping.models.ChannelType;
 import com.smartwalkie.voiceping.models.MessageType;
 
@@ -130,7 +130,7 @@ public class Sender {
                 }
             }
         };
-        recorder = new Recorder();
+        recorder = Recorder.getInstance();
         step = INITIAL;
     }
 
@@ -217,8 +217,8 @@ public class Sender {
         this.saveLocalId = id;
         ByteBuffer buf = ByteBuffer.wrap(payload);
         byte[] bytes;
-        while (buf.remaining() >= AudioParams.ENCODER_SIZE) {
-            bytes = new byte[AudioParams.ENCODER_SIZE];
+        while (buf.remaining() >= AudioParameters.ENCODER_SIZE) {
+            bytes = new byte[AudioParameters.ENCODER_SIZE];
             buf.get(bytes);
             try {
                 blockingQueue.put(bytes);

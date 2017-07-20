@@ -31,6 +31,7 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/text_button_disconnect"
             android:textStyle="bold"
+            android:backgroundTint="@color/colorAccent"
             style="?android:textAppearanceSmall"/>
 
     </LinearLayout>

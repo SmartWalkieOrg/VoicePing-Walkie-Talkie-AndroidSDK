@@ -1,5 +1,6 @@
 package com.smartwalkie.voiceping;
 
+import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.smartwalkie.voiceping.events.DisconnectEvent;
+import com.smartwalkie.voiceping.models.ChannelType;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -69,10 +71,19 @@ public class MainActivity extends AppCompatActivity {
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    talkButton.setText("RELEASE TO STOP");
+                    talkButton.setBackgroundColor(Color.YELLOW);
+                    VoicePing.startTalking(1987, ChannelType.PRIVATE);
                     break;
                 case MotionEvent.ACTION_UP:
+                    talkButton.setText("START TALKING");
+                    talkButton.setBackgroundColor(Color.GREEN);
+                    VoicePing.stopTalking();
                     break;
                 case MotionEvent.ACTION_CANCEL:
+                    talkButton.setText("START TALKING");
+                    talkButton.setBackgroundColor(Color.GREEN);
+                    VoicePing.stopTalking();
                     break;
             }
             return false;
@@ -87,7 +98,8 @@ public class MainActivity extends AppCompatActivity {
         EventBus.getDefault().register(this);
 
         talkButton = (Button) findViewById(R.id.talk_button);
-        talkButton.setOnClickListener(talkButtonListener);
+        // talkButton.setOnClickListener(talkButtonListener);
+        talkButton.setOnTouchListener(touchListener);
 
         disconnectButton = (Button) findViewById(R.id.disconnect_button);
         disconnectButton.setOnClickListener(disconnectListener);

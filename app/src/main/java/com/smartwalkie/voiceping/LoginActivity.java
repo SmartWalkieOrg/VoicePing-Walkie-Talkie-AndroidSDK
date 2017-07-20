@@ -4,11 +4,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -24,11 +22,8 @@ import android.widget.TextView;
 import com.smartwalkie.voiceping.callbacks.ConnectCallback;
 import com.smartwalkie.voiceping.exceptions.PingException;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -111,7 +106,7 @@ public class LoginActivity extends AppCompatActivity {
 
             VoicePing.configure(VoicePingClient.getInstance(), "wss://2359staging-router.voiceoverping.net");
             Map<String, String> props = new HashMap<>();
-            props.put("username", username);
+            props.put("user_id", username);
             props.put("VoicePingToken", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOTUwMzBmYjAtYmVhMy0xMWU0LWI4YWYtZTMwM2MwZTQ2NGM3IiwidWlkIjo1NiwidXNlcm5hbWUiOiJzaXJpdXMiLCJjaGFubmVsSWRzIjpbMSwyMTc1LDIxOTldfQ.1wq50IorIxIq2xydFQEG8TKFJ3xxra22ts26SR8Du3c");
             props.put("DeviceId", Settings.Secure.getString(VoicePingClient.getInstance().getContentResolver(),
                     Settings.Secure.ANDROID_ID));
