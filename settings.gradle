@@ -1,3 +1,2 @@
-include ':app', ':msgpack', ':Java-WebSocket'
+include ':app', ':msgpack'
 project(':msgpack').projectDir = new File('libraries/msgpack')
-project(':Java-WebSocket').projectDir = new File('libraries/Java-WebSocket')

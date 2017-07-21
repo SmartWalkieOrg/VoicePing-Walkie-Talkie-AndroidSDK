@@ -3,6 +3,12 @@ package com.smartwalkie.voiceping;
 import android.annotation.SuppressLint;
 import android.util.Log;
 
+import com.pusher.java_websocket.WebSocket;
+import com.pusher.java_websocket.client.WebSocketClient;
+import com.pusher.java_websocket.drafts.Draft_17;
+import com.pusher.java_websocket.framing.Framedata;
+import com.pusher.java_websocket.framing.FramedataImpl1;
+import com.pusher.java_websocket.handshake.ServerHandshake;
 import com.smartwalkie.voiceping.events.DisconnectEvent;
 import com.smartwalkie.voiceping.events.MessageEvent;
 import com.smartwalkie.voiceping.listeners.ConnectionListener;
@@ -10,13 +16,6 @@ import com.smartwalkie.voiceping.listeners.IncomingAudioListener;
 import com.smartwalkie.voiceping.listeners.OutgoingAudioListener;
 import com.smartwalkie.voiceping.models.Message;
 import com.smartwalkie.voiceping.models.MessageType;
-
-import org.java_websocket.WebSocket;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_17;
-import org.java_websocket.framing.Framedata;
-import org.java_websocket.framing.FramedataImpl1;
-import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
 import java.net.URISyntaxException;
