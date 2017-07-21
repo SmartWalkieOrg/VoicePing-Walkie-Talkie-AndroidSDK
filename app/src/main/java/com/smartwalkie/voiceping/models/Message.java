@@ -14,7 +14,7 @@ public class Message {
     public static final int ERROR_TYPE_MISSED_START_TALKING  = 1;
     public static final int ERROR_TYPE_MISSED_STOP_TALKING  = 2;
 
-    public int channelType, messageType, senderUserId, receiverChannelId, receiverUserId;
+    public int channelType, messageType, senderId, receiverId;
     public byte[] payload;
 
     public boolean finished;
@@ -77,8 +77,8 @@ public class Message {
                     && fileName.equals(message.fileName);
         }
         if (channelType != message.channelType)                 return false;
-        if (receiverChannelId != message.receiverChannelId)       return false;
-        if (senderUserId != message.senderUserId)               return false;
+        if (receiverId != message.receiverId)       return false;
+        if (senderId != message.senderId)               return false;
         if (contentType != message.contentType)                 return false;
 
         //if 2 ackIds are different in case of text message
@@ -96,8 +96,8 @@ public class Message {
     @Override
     public int hashCode() {
         int result = channelType;
-        result = 31 * result + senderUserId;
-        result = 31 * result + receiverChannelId;
+        result = 31 * result + senderId;
+        result = 31 * result + receiverId;
         return result;
     }
 
@@ -105,9 +105,8 @@ public class Message {
     public String toString() {
         return "{" +
                 "messageType=" + messageType +
-                ", senderUserId=" + senderUserId +
-                ", receiverChannelId=" + receiverChannelId +
-                ", receiverUserId=" + receiverUserId +
+                ", senderId=" + senderId +
+                ", receiverId=" + receiverId +
                 ", finished=" + finished +
                 ", fromHistory=" + fromHistory +
                 ", starttime=" + starttime/1000 +
@@ -122,14 +121,14 @@ public class Message {
 
     /**
      * Get target id to compare
-     * @return {@link Message#senderUserId} if {@link Message#channelType} == {@link ChannelType#GROUP} <p>
-     *     {@link Message#receiverChannelId} if {@link Message#channelType} == {@link ChannelType#PRIVATE}
+     * @return {@link Message#senderId} if {@link Message#channelType} == {@link ChannelType#GROUP} <p>
+     *     {@link Message#receiverId} if {@link Message#channelType} == {@link ChannelType#PRIVATE}
      */
     public int getTargetId() {
         if (channelType == ChannelType.GROUP) {
-            return receiverChannelId;
+            return receiverId;
         } else {
-            return senderUserId;
+            return senderId;
         }
     }
 

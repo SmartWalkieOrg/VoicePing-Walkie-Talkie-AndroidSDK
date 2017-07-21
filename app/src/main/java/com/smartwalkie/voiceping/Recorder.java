@@ -29,7 +29,7 @@ public class Recorder implements OutgoingAudioListener {
     private static Recorder instance;
 
     private Opus opus;
-    boolean isRecording;
+    private boolean isRecording;
 
     private Thread recorderThread;
 
@@ -59,6 +59,7 @@ public class Recorder implements OutgoingAudioListener {
     private static final int UPDATE_FOR_NOT_RECEIVED_ACK_END = 7000;
     private static final int UPDATE_FOR_RECEIVED_ACK_END = 8000;
     private static final int UPDATE_FOR_RECEIVED_STATUS_DELIVERED = 9000;
+    private static final int UPDATE_FOR_RECEIVED_STATUS_READ = 10000;
 
     private Recorder() {
         if(AudioParameters.USE_CODEC) {
@@ -103,6 +104,8 @@ public class Recorder implements OutgoingAudioListener {
                         break;
                     case UPDATE_FOR_RECEIVED_STATUS_DELIVERED:
                         break;
+                    case UPDATE_FOR_RECEIVED_STATUS_READ:
+                        break;
                 }
             }
         };
@@ -110,18 +113,22 @@ public class Recorder implements OutgoingAudioListener {
     }
 
     public void startTalking(int receiverId, int channelType) {
+        Log.v(TAG, "startTalking");
         this.receiverId = receiverId;
         this.channelType = channelType;
         senderHandler.sendEmptyMessage(START);
     }
 
     public void stopTalking() {
+        Log.v(TAG, "stopTalking");
+        senderHandler.removeMessages(CONTINUE_FOR_SENDING_AUDIO_DATA);
         senderHandler.sendEmptyMessage(STOP_NORMALLY);
     }
 
     private void sendAckStart() {
-        byte[] message = MessageHelper.createStartRecordMessage(Session.getInstance().userId, receiverId, channelType, System.currentTimeMillis());
-        Connection.getInstance().send(message);
+        Log.v(TAG, "sendAckStart");
+        Message message = MessageHelper.createAckStartMessage(Session.getInstance().userId, receiverId, channelType, System.currentTimeMillis());
+        Connection.getInstance().send(message.payload);
         state = STARTED;
         senderHandler.sendEmptyMessageDelayed(STOP_FOR_NOT_RECEIVED_ACK_START, ACK_TIMEOUT_IN_MILLIS);
     }
@@ -144,19 +151,21 @@ public class Recorder implements OutgoingAudioListener {
             e.printStackTrace();
         }
         if (data == null || data.length == 0) return;
-        byte[] message = MessageHelper.createAudioMessage(Session.getInstance().userId, receiverId, channelType, data, data.length);
-        Connection.getInstance().send(message);
+        Message message = MessageHelper.createAudioMessage(Session.getInstance().userId, receiverId, channelType, data, data.length);
+        Connection.getInstance().send(message.payload);
         state = SENDING;
     }
 
     private void sendAckStop() {
-        byte[] message = MessageHelper.createStopRecordMessage(Session.getInstance().userId, receiverId, channelType);
+        Log.v(TAG, "sendAckStop");
+        byte[] message = MessageHelper.createAckStopMessage(Session.getInstance().userId, receiverId, channelType);
         Connection.getInstance().send(message);
         state = WAITING_FOR_ACK_END;
         senderHandler.sendEmptyMessageDelayed(UPDATE_FOR_NOT_RECEIVED_ACK_END, ACK_TIMEOUT_IN_MILLIS);
     }
 
     private void startRecording() {
+        Log.v(TAG, "startRecording");
         isRecording = true;
         recorderThread = new RecorderThread();
         recorderThread.start();
@@ -164,6 +173,7 @@ public class Recorder implements OutgoingAudioListener {
     }
 
     private void stopRecording() {
+        Log.v(TAG, "stopRecording");
         isRecording = false;
         try {
             if (recorderThread != null) {
@@ -184,7 +194,7 @@ public class Recorder implements OutgoingAudioListener {
     @Override
     public void onAckStartSucceed(Message message) {
         Log.v(TAG, "onAckStartSucceed: " + message);
-        senderHandler.sendEmptyMessage(STOP_FOR_RECEIVED_ACK_START_FAILED);
+        senderHandler.sendEmptyMessage(CONTINUE_FOR_RECEIVED_ACK_START);
     }
 
     @Override
@@ -196,16 +206,19 @@ public class Recorder implements OutgoingAudioListener {
     @Override
     public void onAckEndSucceed(Message message) {
         Log.v(TAG, "onAckEndSucceed: " + message);
+        senderHandler.sendEmptyMessage(UPDATE_FOR_RECEIVED_ACK_END);
     }
 
     @Override
     public void onMessageDelivered(Message message) {
         Log.v(TAG, "onMessageDelivered: " + message);
+        senderHandler.sendEmptyMessage(UPDATE_FOR_RECEIVED_STATUS_DELIVERED);
     }
 
     @Override
     public void onMessageRead(Message message) {
         Log.v(TAG, "onMessageRead: " + message);
+        senderHandler.sendEmptyMessage(UPDATE_FOR_RECEIVED_STATUS_READ);
     }
     // OutgoingAudioListener
 
@@ -222,7 +235,7 @@ public class Recorder implements OutgoingAudioListener {
         @Override
         public void run() {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-            this.audioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL_CONFIG, AudioParameters.AUDIO_FORMAT, AudioParameters.RECORD_MIN_BUFFER_SIZE);
+            audioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL_CONFIG, AudioParameters.AUDIO_FORMAT, AudioParameters.RECORD_MIN_BUFFER_SIZE);
             try {
                 audioRecord.startRecording();
                 mStartRecordingTimestamp = System.currentTimeMillis();

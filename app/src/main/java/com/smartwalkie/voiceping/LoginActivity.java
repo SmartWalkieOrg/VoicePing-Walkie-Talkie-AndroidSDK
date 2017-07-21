@@ -104,10 +104,10 @@ public class LoginActivity extends AppCompatActivity {
             // perform the user connect attempt.
             showProgress(true);
 
-            VoicePing.configure(VoicePingClient.getInstance(), "wss://2359staging-router.voiceoverping.net");
+            VoicePing.configure(VoicePingClient.getInstance(), "wss://2359media-router.voiceoverping.net");
             Map<String, String> props = new HashMap<>();
-            props.put("user_id", username);
-            props.put("VoicePingToken", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOTUwMzBmYjAtYmVhMy0xMWU0LWI4YWYtZTMwM2MwZTQ2NGM3IiwidWlkIjo1NiwidXNlcm5hbWUiOiJzaXJpdXMiLCJjaGFubmVsSWRzIjpbMSwyMTc1LDIxOTldfQ.1wq50IorIxIq2xydFQEG8TKFJ3xxra22ts26SR8Du3c");
+            props.put("user_id", "7708");
+            props.put("VoicePingToken", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZTY2OThlMjAtZmJjMy0xMWU1LTk4M2QtMjEzNWVmMzMzZGQwIiwidWlkIjo3NzA4LCJ1c2VybmFtZSI6InNpcml1c21kZWx5QGdtYWlsLmNvbSIsImNoYW5uZWxJZHMiOlsyMTg4LDM4MDFdfQ.6Myf87sz8EN5NGkJBWVm_8erPcmBO36YJyCVzX9xMEw");
             props.put("DeviceId", Settings.Secure.getString(VoicePingClient.getInstance().getContentResolver(),
                     Settings.Secure.ANDROID_ID));
 

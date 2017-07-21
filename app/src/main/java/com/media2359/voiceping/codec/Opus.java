@@ -1,28 +1,11 @@
 package com.media2359.voiceping.codec;
 
 public class Opus {
-    private long encoder,decoder;
+    private long encoder, decoder;
 
     static {
         System.loadLibrary("myopus");
     }
-
-//    public long getDecoder() {
-//        return decoder;
-//    }
-//
-//    public void setDecoder(long decoder) {
-//        this.decoder = decoder;
-//    }
-//
-//    public long getEncoder() {
-//        return encoder;
-//    }
-//
-//    public void setEncoder(long encoder) {
-//        Log.d("Phu","encoder="+encoder);
-//        this.encoder = encoder;
-//    }
 
     /**
      * Opus fullband constant
@@ -77,8 +60,8 @@ public class Opus {
     private static Opus opus;
 
     public static Opus getCodec(int sampleRate, int channel) {
-        if(opus == null) {
-            opus = new Opus(sampleRate,channel);
+        if (opus == null) {
+            opus = new Opus(sampleRate, channel);
         }
         return opus;
     }
@@ -95,13 +78,13 @@ public class Opus {
             byte[] input, int inputOffset, int inputLength,
             byte[] output, int outputOffset, int outputFrameSize,
             int decodeFEC) {
-        return decode(decoder,input,inputOffset,inputLength,output,outputOffset,outputFrameSize,decodeFEC);
+        return decode(decoder, input, inputOffset, inputLength, output, outputOffset, outputFrameSize, decodeFEC);
     }
 
     public int encode(
             byte[] input, int inputOffset, int inputFrameSize,
             byte[] output, int outputOffset, int outputLength) {
-        return encode(encoder,input,inputOffset,inputFrameSize,output,outputOffset,outputLength);
+        return encode(encoder, input, inputOffset, inputFrameSize, output, outputOffset, outputLength);
     }
 
     public void destroy() {
@@ -119,7 +102,6 @@ public class Opus {
     public void assertOpusIsFunctional()
     {
         int channels = 1;
-
         decoder_get_size(channels);
         encoder_get_size(channels);
     }
