@@ -229,7 +229,7 @@ public class Recorder implements OutgoingAudioListener {
         private long mStartRecordingTimestamp;
 
         public RecorderThread() {
-            audioManager = (AudioManager) VoicePingClient.getInstance().getSystemService(Context.AUDIO_SERVICE);
+            audioManager = (AudioManager) VoicePing.getApplication().getSystemService(Context.AUDIO_SERVICE);
         }
 
         @Override

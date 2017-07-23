@@ -1,6 +1,7 @@
 package com.smartwalkie.voicepingsdk;
 
 
+import android.app.Application;
 import android.content.Context;
 
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
@@ -12,10 +13,10 @@ import com.smartwalkie.voicepingsdk.models.Session;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VoicePing implements
-        ConnectionListener
-{
-    private static final VoicePing instance = new VoicePing();
+public class VoicePing implements ConnectionListener {
+
+    private static Application mApplication;
+    private static VoicePing INSTANCE;
 
     private Connection connection;
     private ConnectCallback connectCallback;
@@ -23,14 +24,23 @@ public class VoicePing implements
     private Player player;
     private Recorder recorder;
 
+    public static void init(Application application) {
+        mApplication = application;
+    }
+
     public static VoicePing getInstance() {
-        return instance;
+        if (INSTANCE == null) INSTANCE = new VoicePing();
+        return INSTANCE;
     }
 
     private VoicePing() {
         player = Player.getInstance();
         player.start();
         recorder = Recorder.getInstance();
+    }
+
+    public static Application getApplication() {
+        return mApplication;
     }
 
     public static void configure(Context context, String serverUrl) {

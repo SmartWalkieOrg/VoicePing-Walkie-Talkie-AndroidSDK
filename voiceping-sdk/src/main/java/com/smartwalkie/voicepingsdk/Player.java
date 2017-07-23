@@ -110,7 +110,7 @@ public class Player implements IncomingAudioListener {
         if (currentState != STOP) {
             playerHandler.sendEmptyMessage(STOP);
         }
-        AudioManager am = (AudioManager) VoicePingClient.getInstance().getSystemService(Context.AUDIO_SERVICE);
+        AudioManager am = (AudioManager) VoicePing.getApplication().getSystemService(Context.AUDIO_SERVICE);
         int result = am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         mStartTalkingTime = System.currentTimeMillis();
         android.os.Message message = new android.os.Message();
