@@ -159,7 +159,7 @@ public class Player implements IncomingAudioListener {
     @Override
     public void onAudioTalkingMessage(Message message) {
         Log.v(TAG, "onAudioTalkingMessage: " + message.toString());
-        play(message.payload);
+        play(message.getPayload());
     }
 
     @Override

@@ -219,17 +219,17 @@ public class Connection {
                 public void onMessage(ByteBuffer bytes) {
                     Message message = MessageHelper.unpackMessage(bytes.array());
                     if (incomingAudioListener != null) {
-                        if (message.messageType == MessageType.START_TALKING) {
+                        if (message.getMessageType() == MessageType.START_TALKING) {
                             incomingAudioListener.onStartTalkingMessage(message);
-                        } else if (message.messageType == MessageType.AUDIO) {
+                        } else if (message.getMessageType() == MessageType.AUDIO) {
                             incomingAudioListener.onAudioTalkingMessage(message);
-                        } else if (message.messageType == MessageType.STOP_TALKING) {
+                        } else if (message.getMessageType() == MessageType.STOP_TALKING) {
                             incomingAudioListener.onStopTalkingMessage(message);
                         }
                     }
 
                     if (outgoingAudioListener != null) {
-                        switch (message.messageType) {
+                        switch (message.getMessageType()) {
                             case MessageType.ACK_START:
                                 outgoingAudioListener.onAckStartSucceed(message);
                                 break;
@@ -247,7 +247,7 @@ public class Connection {
                         }
                     }
 
-                    Log.v(TAG, "message: " + message.messageType);
+                    Log.v(TAG, "message: " + message.getMessageType());
 
                     MessageEvent messageEvent = new MessageEvent(message);
                     EventBus.getDefault().post(messageEvent);
