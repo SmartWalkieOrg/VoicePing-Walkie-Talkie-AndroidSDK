@@ -4,17 +4,40 @@ import android.content.Context;
 
 public class Session {
 
+    private static Session INSTANCE;
+    private int userId;
+    private String serverUrl;
+    private Context context;
+
     public static Session getInstance() {
-        if (instance == null) instance = new Session();
-        return instance;
+        if (INSTANCE == null) INSTANCE = new Session();
+        return INSTANCE;
     }
 
-    public int userId;
-    public String serverUrl;
-    public Context context;
+    private Session() {
+    }
 
-    private static Session instance;
+    public int getUserId() {
+        return userId;
+    }
 
-    private Session() {};
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
+    public void setServerUrl(String serverUrl) {
+        this.serverUrl = serverUrl;
+    }
+
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
 }

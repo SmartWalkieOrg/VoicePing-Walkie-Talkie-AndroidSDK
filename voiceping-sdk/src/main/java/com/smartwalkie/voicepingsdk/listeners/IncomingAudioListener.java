@@ -7,7 +7,10 @@ import com.smartwalkie.voicepingsdk.models.Message;
  */
 
 public interface IncomingAudioListener {
-    public void onStartTalkingMessage(Message message);
-    public void onAudioTalkingMessage(Message message);
-    public void onStopTalkingMessage(Message message);
+
+    void onStartTalkingMessage(Message message);
+
+    void onAudioTalkingMessage(Message message);
+
+    void onStopTalkingMessage(Message message);
 }

@@ -6,32 +6,34 @@ import java.util.List;
 
 public class Channel  {
 
-    String name;
-    int id;
-
-    List<User> users;
-
-    boolean isFavoritel;
-
-    public boolean isFavorite() {
-        return isFavoritel;
-    }
-
-    public void setFavorite(boolean isFavoritel) {
-        this.isFavoritel = isFavoritel;
-    }
+    private String name;
+    private int id;
+    private List<User> users;
+    private boolean isFavorite;
 
     public Channel() {
     }
 
-    public void setUsers(List<User> users) {
-        this.users = users;
+    public Channel(int id, String name) {
+        this.name = name;
+        this.id = id;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean isFavorite) {
+        this.isFavorite = isFavorite;
     }
 
     public List<User> getUsers() {
         return users;
     }
 
+    public void setUsers(List<User> users) {
+        this.users = users;
+    }
 
     public String getName() {
         return name;
@@ -44,13 +46,6 @@ public class Channel  {
     @Override
     public int hashCode() {
         return id;
-    }
-
-
-
-    public Channel(int id, String name) {
-        this.name = name;
-        this.id = id;
     }
 
     @Override

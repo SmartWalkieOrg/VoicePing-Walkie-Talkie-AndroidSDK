@@ -22,21 +22,21 @@ public class User {
     public static final String DB_SHOW_IN_CONTACT   = "_showcontact";
     public static final String DB_COMPANY           = "_company";
 
-    int id;
-    String username;
-    String email;
-    String uuid;
-    String socket_url;
-    String privilege;
-    String avatar_url;
-    boolean isFavoritel;
-    int statusValue;
+    private int id;
+    private String username;
+    private String email;
+    private String uuid;
+    private String socket_url;
+    private String privilege;
+    private String avatar_url;
+    private boolean isFavoritel;
+    private int statusValue;
 
-    String phone;
+    private String phone;
 
-    String fullname;
-    boolean showContact;
-    String company;
+    private String fullname;
+    private boolean showContact;
+    private String company;
 
 
     public String getPhone() {

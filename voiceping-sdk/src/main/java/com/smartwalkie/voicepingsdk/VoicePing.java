@@ -56,8 +56,8 @@ public class VoicePing implements ConnectionListener {
     }
 
     private void _configure(Context context, String serverUrl) {
-        Session.getInstance().context = context;
-        Session.getInstance().serverUrl = serverUrl;
+        Session.getInstance().setContext(context);
+        Session.getInstance().setServerUrl(serverUrl);
 
         connection = new Connection(serverUrl);
         connection.setConnectionListener(this);
@@ -75,7 +75,7 @@ public class VoicePing implements ConnectionListener {
         this.connectCallback = callback;
         if (props.containsKey("user_id")) {
             String userId = props.get("user_id");
-            Session.getInstance().userId = Integer.parseInt(userId);
+            Session.getInstance().setUserId(Integer.parseInt(userId));
         }
         connection.connect(props);
         /*

@@ -127,8 +127,8 @@ public class Recorder implements OutgoingAudioListener {
 
     private void sendAckStart() {
         Log.v(TAG, "sendAckStart");
-        Message message = MessageHelper.createAckStartMessage(Session.getInstance().userId, receiverId, channelType, System.currentTimeMillis());
-        Connection.getInstance().send(message.payload);
+        Message message = MessageHelper.createAckStartMessage(Session.getInstance().getUserId(), receiverId, channelType, System.currentTimeMillis());
+        Connection.getInstance().send(message.getPayload());
         state = STARTED;
         senderHandler.sendEmptyMessageDelayed(STOP_FOR_NOT_RECEIVED_ACK_START, ACK_TIMEOUT_IN_MILLIS);
     }
@@ -151,14 +151,14 @@ public class Recorder implements OutgoingAudioListener {
             e.printStackTrace();
         }
         if (data == null || data.length == 0) return;
-        Message message = MessageHelper.createAudioMessage(Session.getInstance().userId, receiverId, channelType, data, data.length);
-        Connection.getInstance().send(message.payload);
+        Message message = MessageHelper.createAudioMessage(Session.getInstance().getUserId(), receiverId, channelType, data, data.length);
+        Connection.getInstance().send(message.getPayload());
         state = SENDING;
     }
 
     private void sendAckStop() {
         Log.v(TAG, "sendAckStop");
-        byte[] message = MessageHelper.createAckStopMessage(Session.getInstance().userId, receiverId, channelType);
+        byte[] message = MessageHelper.createAckStopMessage(Session.getInstance().getUserId(), receiverId, channelType);
         Connection.getInstance().send(message);
         state = WAITING_FOR_ACK_END;
         senderHandler.sendEmptyMessageDelayed(UPDATE_FOR_NOT_RECEIVED_ACK_END, ACK_TIMEOUT_IN_MILLIS);

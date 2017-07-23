@@ -61,30 +61,30 @@ public class MessageHelper {
                     message = new Message();
                 }
 
-                message.channelType = channelType;
-                message.messageType = messageType;
-                message.senderId = senderId;
-                message.receiverId = receiverId;
+                message.setChannelType(channelType);
+                message.setMessageType(messageType);
+                message.setSenderId(senderId);
+                message.setReceiverId(receiverId);
 
-                if (message.messageType == MessageType.START_TALKING && unpacker.getCountRemain() > 0) {
-                    message.duration = unpacker.readLong();
-                } else if (message.messageType == MessageType.AUDIO) {
-                    message.payload = unpacker.readByteArray();
-                    message.addData(message.payload);
-                } else  if (message.messageType == MessageType.OFFLINE_MESSAGE) {
-                    message.offlineMessage = unpacker.readString();
-                } else if (message.messageType == MessageType.STOP_TALKING && unpacker.getCountRemain() > 0) {
-                    message.ackIds = unpacker.readString();
-                } else if (message.messageType == MessageType.MESSAGE_DELIVERED && unpacker.getCountRemain() > 0) {
-                    message.ackIds = unpacker.readString();
-                } else if( message.messageType == MessageType.ACK_END && unpacker.getCountRemain()>0){
-                    message.ackIds = unpacker.readString();
-                } else if(message.messageType == MessageType.MESSAGE_READ && unpacker.getCountRemain()>0){
-                    message.ackIds = unpacker.readString();
-                } else if(message.messageType == MessageType.STATUS && unpacker.getCountRemain() > 0) {
-                    message.status = unpacker.readInt();
-                    Log.d(TAG, "message from " + message.senderId + " user status " + message.status);
-                } else if (message.messageType == MessageType.TEXT && unpacker.getCountRemain() > 0) {
+                if (message.getMessageType() == MessageType.START_TALKING && unpacker.getCountRemain() > 0) {
+                    message.setDuration(unpacker.readLong());
+                } else if (message.getMessageType() == MessageType.AUDIO) {
+                    message.setPayload(unpacker.readByteArray());
+                    message.addData(message.getPayload());
+                } else  if (message.getMessageType() == MessageType.OFFLINE_MESSAGE) {
+                    message.setOfflineMessage(unpacker.readString());
+                } else if (message.getMessageType() == MessageType.STOP_TALKING && unpacker.getCountRemain() > 0) {
+                    message.setAckIds(unpacker.readString());
+                } else if (message.getMessageType() == MessageType.MESSAGE_DELIVERED && unpacker.getCountRemain() > 0) {
+                    message.setAckIds(unpacker.readString());
+                } else if( message.getMessageType() == MessageType.ACK_END && unpacker.getCountRemain()>0){
+                    message.setAckIds(unpacker.readString());
+                } else if(message.getMessageType() == MessageType.MESSAGE_READ && unpacker.getCountRemain()>0){
+                    message.setAckIds(unpacker.readString());
+                } else if(message.getMessageType() == MessageType.STATUS && unpacker.getCountRemain() > 0) {
+                    message.setAckIds(unpacker.readString());
+                    Log.d(TAG, "message from " + message.getSenderId() + " user status " + message.getStatus());
+                } else if (message.getMessageType() == MessageType.TEXT && unpacker.getCountRemain() > 0) {
 /*
                     String jsonTextMessageIdentification = unpacker.readString();
                     TextMessageIdentification tmi = new Gson().fromJson(jsonTextMessageIdentification, TextMessageIdentification.class);
@@ -93,11 +93,11 @@ public class MessageHelper {
                     message.contentType = RecordModel.CONTENT_TYPE_TEXT;
                     Log.d(TAG, "message from " + message.senderId + " text: " + message.content);
 */
-                    Log.d(TAG, "textMessage from " + message.senderId + " text: " + message.content);
-                } else if (message.messageType == MessageType.ACK_TEXT && unpacker.getCountRemain() > 0) {
-                    message.ackIds = unpacker.readString();
+                    Log.d(TAG, "textMessage from " + message.getSenderId() + " text: " + message.getContent());
+                } else if (message.getMessageType() == MessageType.ACK_TEXT && unpacker.getCountRemain() > 0) {
+                    message.setAckIds(unpacker.readString());
                     //message.contentType = RecordModel.CONTENT_TYPE_TEXT;
-                    Log.d(TAG, "textMessage from " + message.senderId + " ackIds: " + message.ackIds);
+                    Log.d(TAG, "textMessage from " + message.getSenderId() + " ackIds: " + message.getAckIds());
                 }
 
                 unpacker.readArrayEnd();
@@ -148,12 +148,12 @@ public class MessageHelper {
             }
 
             Message message = new Message();
-            message.channelType = channelType;
-            message.messageType = MessageType.START_TALKING;
-            message.senderId = senderId;
-            message.receiverId = receiverId;
-            message.duration = duration;
-            message.payload = out.toByteArray();
+            message.setChannelType(channelType);
+            message.setMessageType(MessageType.START_TALKING);
+            message.setSenderId(senderId);
+            message.setReceiverId(receiverId);
+            message.setDuration(duration);
+            message.setPayload(out.toByteArray());
 
             outgoingMessages.put(key, message);
 
@@ -181,18 +181,20 @@ public class MessageHelper {
             String key = String.format("%d_%d_%d", channelType, receiverId, senderId);
 
             Message message;
+
             if (!incomingMessages.containsKey(key)) {
                 message = new Message();    // let's just create a new one for now.
                 incomingMessages.put(key, message);
             } else {
                 message = incomingMessages.get(key);
             }
-            message.channelType = channelType;
-            message.messageType = MessageType.AUDIO;
-            message.senderId = senderId;
-            message.receiverId = receiverId;
+
+            message.setChannelType(channelType);
+            message.setMessageType(MessageType.AUDIO);
+            message.setSenderId(senderId);
+            message.setReceiverId(receiverId);
             message.addData(payload);
-            message.payload = out.toByteArray();
+            message.setPayload(out.toByteArray());
 
             return message;
         } catch (IOException e) {
@@ -215,17 +217,19 @@ public class MessageHelper {
 
             String key = String.format("%d_%d_%d", channelType, receiverId, senderId);
             Message message;
+
             if (!incomingMessages.containsKey(key)) {
                 message = new Message();    // let's just create a new one for now.
                 incomingMessages.put(key, message);
             } else {
                 message = incomingMessages.get(key);
             }
-            message.channelType = channelType;
-            message.messageType = MessageType.STOP_TALKING;
-            message.senderId = senderId;
-            message.receiverId = receiverId;
-            message.payload = out.toByteArray();
+
+            message.setChannelType(channelType);
+            message.setMessageType(MessageType.STOP_TALKING);
+            message.setSenderId(senderId);
+            message.setReceiverId(receiverId);
+            message.setPayload(out.toByteArray());
 
         } catch (IOException e) {
             e.printStackTrace();

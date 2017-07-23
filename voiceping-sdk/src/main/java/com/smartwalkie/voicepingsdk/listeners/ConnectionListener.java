@@ -7,10 +7,16 @@ import com.smartwalkie.voicepingsdk.models.Message;
  */
 
 public interface ConnectionListener {
+
     void onMessage(Message message);
+
     void onConnecting();
+
     void onConnected();
+
     void onFailed();
+
     void onData(byte[] data);
+
     void onDisconnected();
 }
