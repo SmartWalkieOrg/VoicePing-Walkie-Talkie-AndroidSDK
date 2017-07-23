@@ -9,12 +9,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.smartwalkie.voiceping.events.DisconnectEvent;
+import com.smartwalkie.voicepingsdk.Connection;
+import com.smartwalkie.voicepingsdk.Player;
+import com.smartwalkie.voicepingsdk.Recorder;
+import com.smartwalkie.voicepingsdk.events.DisconnectEvent;
 
 import de.greenrobot.event.EventBus;
 
 /**
- * Created by sirius on 7/3/17.
+ * Created by kukuhsain on 7/23/17.
  */
 
 public class PingService extends Service {

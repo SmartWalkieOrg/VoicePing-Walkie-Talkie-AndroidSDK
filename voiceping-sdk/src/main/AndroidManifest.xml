@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.smartwalkie.voiceping"
-    xmlns:tools="http://schemas.android.com/tools">
+
+    package="com.smartwalkie.voicepingsdk">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -23,44 +22,20 @@
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
+
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false"
-        />
+        android:required="false" />
     <uses-feature
         android:name="android.hardware.camera.autofocus"
-        android:required="false"
-        />
+        android:required="false" />
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
 
     <application
-        tools:replace="android:label"
-        android:name=".VoicePingClient"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:theme="@style/AppTheme">
-
-        <activity
-            android:name=".LoginActivity"
-            android:label="@string/title_activity_login">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/title_activity_main"></activity>
-
-        <service
-            android:name=".PingService"
-            android:exported="false" />
-
-    </application>
+        android:supportsRtl="false" />
 
 </manifest>

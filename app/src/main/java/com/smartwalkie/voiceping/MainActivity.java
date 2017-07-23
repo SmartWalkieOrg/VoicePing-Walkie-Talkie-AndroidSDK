@@ -8,8 +8,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
-import com.smartwalkie.voiceping.events.DisconnectEvent;
-import com.smartwalkie.voiceping.models.ChannelType;
+import com.smartwalkie.voicepingsdk.events.DisconnectEvent;
+import com.smartwalkie.voicepingsdk.models.ChannelType;
+import com.smartwalkie.voicepingsdk.Connection;
+import com.smartwalkie.voicepingsdk.VoicePing;
 
 import de.greenrobot.event.EventBus;
 

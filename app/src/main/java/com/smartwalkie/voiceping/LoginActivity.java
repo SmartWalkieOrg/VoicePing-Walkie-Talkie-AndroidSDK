@@ -19,8 +19,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.smartwalkie.voiceping.callbacks.ConnectCallback;
-import com.smartwalkie.voiceping.exceptions.PingException;
+import com.smartwalkie.voicepingsdk.VoicePing;
+import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
+import com.smartwalkie.voicepingsdk.exceptions.PingException;
 
 import java.util.HashMap;
 import java.util.Map;

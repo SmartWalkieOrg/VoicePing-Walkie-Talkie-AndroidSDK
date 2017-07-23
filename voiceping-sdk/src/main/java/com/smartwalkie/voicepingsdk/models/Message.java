@@ -1,0 +1,157 @@
+package com.smartwalkie.voicepingsdk.models;
+
+import android.util.Log;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+
+public class Message {
+
+    private ByteArrayOutputStream stream;
+
+    public static final int ERROR_TYPE_NO_ERROR  = 0;
+    public static final int ERROR_TYPE_MISSED_START_TALKING  = 1;
+    public static final int ERROR_TYPE_MISSED_STOP_TALKING  = 2;
+
+    public int channelType, messageType, senderId, receiverId;
+    public byte[] payload;
+
+    public boolean finished;
+    public boolean isRead;
+    public boolean fromHistory;
+    public boolean playNext;
+    public long starttime;
+    public long duration;
+    public String fileName;
+    public long timeStamp;
+    public long startPlayTime;
+    public long lastReceivingTime;
+    public String offlineMessage;
+    public String ackIds;
+    public int contentType;
+    public String content;
+    public String format;
+
+    public boolean needToPlaySubsequentMessage;
+    public boolean isLastItemInList;
+    public boolean isMutedText;
+
+    public int status;
+
+    /**
+     * Handle the partial message, when start talking or stop talking signal can be missed
+     * The value can be one of
+     * {@link Message#ERROR_TYPE_NO_ERROR},
+     * {@link Message#ERROR_TYPE_MISSED_START_TALKING} or
+     * {@link Message#ERROR_TYPE_MISSED_STOP_TALKING}
+     */
+    public int errorType;
+
+    public Message() {
+        stream = new ByteArrayOutputStream();
+        errorType = ERROR_TYPE_NO_ERROR;
+    }
+
+    public boolean addData(byte[] data) {
+        try {
+            stream.write(data);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Message message = (Message) o;
+        if (fromHistory != message.fromHistory) return false;
+        if (needToPlaySubsequentMessage != message.needToPlaySubsequentMessage) return false;
+        if(message.fromHistory){
+            return fileName != null
+                    && message.fileName != null
+                    && fileName.equals(message.fileName);
+        }
+        if (channelType != message.channelType)                 return false;
+        if (receiverId != message.receiverId)       return false;
+        if (senderId != message.senderId)               return false;
+        if (contentType != message.contentType)                 return false;
+
+        //if 2 ackIds are different in case of text message
+        if (ackIds != null
+                && !ackIds.isEmpty()
+                && message.ackIds != null
+                && !message.ackIds.isEmpty()
+                && !ackIds.equals(message.ackIds)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = channelType;
+        result = 31 * result + senderId;
+        result = 31 * result + receiverId;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "messageType=" + messageType +
+                ", senderId=" + senderId +
+                ", receiverId=" + receiverId +
+                ", finished=" + finished +
+                ", fromHistory=" + fromHistory +
+                ", starttime=" + starttime/1000 +
+                ", duration=" + duration +
+                ", contentType=" + contentType +
+                ", content=" + content +
+                ", channelType=" + channelType +
+                ", errorType=" + errorType +
+                ", length=" + stream.size() +
+                '}';
+    }
+
+    /**
+     * Get target id to compare
+     * @return {@link Message#senderId} if {@link Message#channelType} == {@link ChannelType#GROUP} <p>
+     *     {@link Message#receiverId} if {@link Message#channelType} == {@link ChannelType#PRIVATE}
+     */
+    public int getTargetId() {
+        if (channelType == ChannelType.GROUP) {
+            return receiverId;
+        } else {
+            return senderId;
+        }
+    }
+
+    public long getDelayTime() {
+        if(duration ==0){ //real time call
+            return startPlayTime- starttime;
+        } else {
+            long playingTime = System.currentTimeMillis() - startPlayTime;
+            long delayTime = duration - playingTime;
+            Log.d("Phu","delay time = "+delayTime);
+            if(delayTime>0){
+                return delayTime;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    public boolean isMutedText() {
+        return isMutedText;
+    }
+
+    public void setAsMutedText(boolean isMuted) {
+        isMutedText = isMuted;
+    }
+}
