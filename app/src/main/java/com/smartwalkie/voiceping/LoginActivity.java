@@ -1,5 +1,6 @@
 package com.smartwalkie.voiceping;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,17 +20,24 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.smartwalkie.voicepingsdk.VoicePing;
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class LoginActivity extends AppCompatActivity {
+import pub.devrel.easypermissions.EasyPermissions;
+
+public class LoginActivity extends AppCompatActivity implements
+        EasyPermissions.PermissionCallbacks {
 
     public static final String TAG = LoginActivity.class.getSimpleName();
+
+    private final int RC_RECORD_AUDIO = 1000;
 
     private AutoCompleteTextView usernameText;
     private EditText serverAddressText;
@@ -58,12 +67,31 @@ public class LoginActivity extends AppCompatActivity {
         connectButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptToLogin();
+                EasyPermissions.requestPermissions(LoginActivity.this,
+                        "This app needs your permission to allow recording audio",
+                        RC_RECORD_AUDIO,
+                        Manifest.permission.RECORD_AUDIO);
             }
         });
 
         connectFormView = findViewById(R.id.connect_form);
         progressView = findViewById(R.id.connect_progress);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @Override
+    public void onPermissionsGranted(int requestCode, List<String> perms) {
+        if (requestCode == RC_RECORD_AUDIO) attemptToLogin();
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, List<String> perms) {
+        Toast.makeText(this, "You need to allow the permission request!", Toast.LENGTH_SHORT).show();
     }
 
     /**
