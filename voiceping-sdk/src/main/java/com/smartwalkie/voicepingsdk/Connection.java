@@ -212,6 +212,7 @@ public class Connection {
                 @Override
                 public void onError(Exception ex) {
                     Log.v(TAG, "onError");
+                    ex.printStackTrace();
                     if (connectionListener != null) connectionListener.onFailed();
                 }
 

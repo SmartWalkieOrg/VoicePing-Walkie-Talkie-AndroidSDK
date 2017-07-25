@@ -3,6 +3,7 @@ package com.smartwalkie.voicepingsdk;
 
 import android.app.Application;
 import android.content.Context;
+import android.provider.Settings;
 
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
@@ -47,8 +48,8 @@ public class VoicePing implements ConnectionListener {
         getInstance()._configure(context, serverUrl);
     }
 
-    public static void connect(String username, ConnectCallback callback) {
-        getInstance()._connect(username, callback);
+    public static void connect(int userId, ConnectCallback callback) {
+        getInstance()._connect(userId, callback);
     }
 
     public static void connect(Map<String, String> props, ConnectCallback callback) {
@@ -65,9 +66,9 @@ public class VoicePing implements ConnectionListener {
         connection.setOutgoingAudioListener(recorder);
     }
 
-    private void _connect(String username, ConnectCallback callback) {
+    private void _connect(int userId, ConnectCallback callback) {
         Map<String, String> props = new HashMap<>();
-        props.put("username", username);
+        props.put("user_id", Integer.toString(userId));
         _connect(props, callback);
     }
 
@@ -77,6 +78,8 @@ public class VoicePing implements ConnectionListener {
             String userId = props.get("user_id");
             Session.getInstance().setUserId(Integer.parseInt(userId));
         }
+        props.put("DeviceId", Settings.Secure.getString(Session.getInstance().getContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID));
         connection.connect(props);
         /*
         Intent serviceIntent = new Intent(context, PingService.class);

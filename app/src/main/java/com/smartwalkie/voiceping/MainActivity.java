@@ -1,42 +1,57 @@
 package com.smartwalkie.voiceping;
 
+import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 
 import com.smartwalkie.voicepingsdk.events.DisconnectEvent;
 import com.smartwalkie.voicepingsdk.models.ChannelType;
 import com.smartwalkie.voicepingsdk.Connection;
 import com.smartwalkie.voicepingsdk.VoicePing;
+import com.smartwalkie.voicepingsdk.models.Session;
 
 import de.greenrobot.event.EventBus;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    private AutoCompleteTextView receiverIdText;
     private Button talkButton;
-    private Button disconnectButton;
-
-    private final View.OnClickListener disconnectListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View arg0) {
-            Connection connection = Connection.getInstance();
-            connection.disconnect();
-        }
-    };
 
     private final View.OnTouchListener touchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    int receiverId = 0;
+                    try {
+                        receiverId = Integer.parseInt(receiverIdText.getText().toString());
+                    } catch (NumberFormatException nfe) {
+                        nfe.printStackTrace();
+                    }
+
+                    if (receiverId <= 0) {
+                        receiverIdText.setError(getString(R.string.error_invalid_user_id));
+                        receiverIdText.requestFocus();
+                        break;
+                    }
+
                     talkButton.setText("RELEASE TO STOP");
                     talkButton.setBackgroundColor(Color.YELLOW);
-                    VoicePing.startTalking(8168, ChannelType.PRIVATE);
+                    //VoicePing.startTalking(64, ChannelType.PRIVATE);
+                    VoicePing.startTalking(receiverId, ChannelType.PRIVATE);
                     break;
                 case MotionEvent.ACTION_UP:
                     talkButton.setText("START TALKING");
@@ -60,11 +75,53 @@ public class MainActivity extends AppCompatActivity {
 
         EventBus.getDefault().register(this);
 
+        receiverIdText = (AutoCompleteTextView) findViewById(R.id.receiver_id_text);
+
         talkButton = (Button) findViewById(R.id.talk_button);
         talkButton.setOnTouchListener(touchListener);
 
-        disconnectButton = (Button) findViewById(R.id.disconnect_button);
-        disconnectButton.setOnClickListener(disconnectListener);
+        setTitle("User ID: " + Session.getInstance().getUserId());
+        talkButton.setText("START TALKING");
+        talkButton.setBackgroundColor(Color.GREEN);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_disconnect:
+                AlertDialog.Builder builder;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+                } else {
+                    builder = new AlertDialog.Builder(this);
+                }
+                builder.setTitle(R.string.text_button_disconnect)
+                        .setMessage("Are you sure you want to disconnect?")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Connection connection = Connection.getInstance();
+                                connection.disconnect();
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // do nothing
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
     public void onEvent(DisconnectEvent event) {

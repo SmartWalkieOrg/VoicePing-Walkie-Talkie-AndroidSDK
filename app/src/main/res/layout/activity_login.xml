@@ -25,7 +25,6 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/email_login_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -35,11 +34,11 @@
                 android:layout_height="wrap_content">
 
                 <AutoCompleteTextView
-                    android:id="@+id/username_text"
+                    android:id="@+id/user_id_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/prompt_username"
-                    android:text="username"
+                    android:hint="@string/prompt_user_id"
+                    android:text="999"
                     android:maxLines="1"
                     android:singleLine="true" />
 
@@ -54,7 +53,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_server_address"
-                    android:text="vpjsex-env.n2j22nmzkr.ap-southeast-1.elasticbeanstalk.com"
+                    android:text="ws://vpjsex.n2j22nmzkr.ap-southeast-1.elasticbeanstalk.com"
                     android:imeActionId="@+id/connect"
                     android:imeActionLabel="@string/action_connect"
                     android:imeOptions="actionUnspecified"

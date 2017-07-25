@@ -7,7 +7,6 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -26,9 +25,7 @@ import com.smartwalkie.voicepingsdk.VoicePing;
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -39,7 +36,7 @@ public class LoginActivity extends AppCompatActivity implements
 
     private final int RC_RECORD_AUDIO = 1000;
 
-    private AutoCompleteTextView usernameText;
+    private AutoCompleteTextView userIdText;
     private EditText serverAddressText;
     private View progressView;
     private View connectFormView;
@@ -49,7 +46,7 @@ public class LoginActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        usernameText = (AutoCompleteTextView) findViewById(R.id.username_text);
+        userIdText = (AutoCompleteTextView) findViewById(R.id.user_id_text);
 
         serverAddressText = (EditText) findViewById(R.id.server_address_text);
         serverAddressText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -100,11 +97,17 @@ public class LoginActivity extends AppCompatActivity implements
      */
     private void attemptToLogin() {
         // Reset errors.
-        usernameText.setError(null);
+        userIdText.setError(null);
         serverAddressText.setError(null);
 
         // Store values at the time of the connect attempt.
-        String username = usernameText.getText().toString();
+        int userId = 0;
+        try {
+            userId = Integer.parseInt(userIdText.getText().toString());
+        } catch (NumberFormatException nfe) {
+            nfe.printStackTrace();
+        }
+
         String serverAddress = serverAddressText.getText().toString();
 
         boolean cancel = false;
@@ -118,9 +121,9 @@ public class LoginActivity extends AppCompatActivity implements
         }
 
         // Check for a valid username.
-        if (TextUtils.isEmpty(username)) {
-            usernameText.setError(getString(R.string.error_field_required));
-            focusView = usernameText;
+        if (userId <= 0) {
+            userIdText.setError(getString(R.string.error_invalid_user_id));
+            focusView = userIdText;
             cancel = true;
         }
 
@@ -133,14 +136,15 @@ public class LoginActivity extends AppCompatActivity implements
             // perform the user connect attempt.
             showProgress(true);
 
-            VoicePing.configure(VoicePingClient.getInstance(), "wss://2359media-router.voiceoverping.net");
+            VoicePing.configure(VoicePingClient.getInstance(), serverAddress);
+            /*
             Map<String, String> props = new HashMap<>();
-            props.put("user_id", "7708");
-            props.put("VoicePingToken", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZTY2OThlMjAtZmJjMy0xMWU1LTk4M2QtMjEzNWVmMzMzZGQwIiwidWlkIjo3NzA4LCJ1c2VybmFtZSI6InNpcml1c21kZWx5QGdtYWlsLmNvbSIsImNoYW5uZWxJZHMiOlsyMTg4LDM4MDFdfQ.6Myf87sz8EN5NGkJBWVm_8erPcmBO36YJyCVzX9xMEw");
-            props.put("DeviceId", Settings.Secure.getString(VoicePingClient.getInstance().getContentResolver(),
-                    Settings.Secure.ANDROID_ID));
-
-            VoicePing.connect(props, new ConnectCallback() {
+            props.put("user_id", "63");
+            props.put("VoicePingToken", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOWQ1MmJhMDAtYzFkOC0xMWU2LWEwMGYtNmI2NTNhMTlkM2VlIiwidWlkIjo2MywidXNlcm5hbWUiOiJzaXJwaW5nIiwiY2hhbm5lbElkcyI6WzIsNF19.2ubViVWK-In_30TLUSEGlfxj773Vi4TgYRu4iRCNFQc");
+            props.put("user_id", "64");
+            props.put("VoicePingToken", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiN2E0N2UyNTAtZjhiMS0xMWU2LTlkM2MtZjlhODE4ZWEzNTI3IiwidWlkIjo2NCwidXNlcm5hbWUiOiJzaXJwaW5nMSIsImNoYW5uZWxJZHMiOlszXX0.WoibsCj-t0aC-ZfnyYENm4W4koa6VlEDDRqz5qNnx0E");
+            */
+            VoicePing.connect(userId, new ConnectCallback() {
                 @Override
                 public void onConnected() {
                     Log.v(TAG, "onConnected");
