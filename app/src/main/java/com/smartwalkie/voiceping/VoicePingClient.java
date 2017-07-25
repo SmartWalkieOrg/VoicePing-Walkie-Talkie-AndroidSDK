@@ -2,6 +2,8 @@ package com.smartwalkie.voiceping;
 
 import android.app.Application;
 
+import com.smartwalkie.voicepingsdk.VoicePing;
+
 /**
  * Created by sirius on 7/3/17.
  */
@@ -16,5 +18,6 @@ public class VoicePingClient extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
+        VoicePing.init(this);
     }
 }

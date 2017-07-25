@@ -1,2 +1,2 @@
-include ':app', ':msgpack'
+include ':app', ':msgpack', ':voiceping-sdk'
 project(':msgpack').projectDir = new File('libraries/msgpack')
