@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity
     private AutoCompleteTextView receiverIdText;
     private Button talkButton;
     private Spinner channelTypeSpinner;
+    private TextInputLayout channelInputLayout;
     private int channelType = ChannelType.PRIVATE;
 
     private final View.OnTouchListener touchListener = new View.OnTouchListener() {
@@ -83,14 +85,14 @@ public class MainActivity extends AppCompatActivity
 
         EventBus.getDefault().register(this);
 
-        channelTypeSpinner = (Spinner)findViewById(R.id.channel_type_spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
+        channelInputLayout = (TextInputLayout) findViewById(R.id.channel_input_layout);
+        channelTypeSpinner = (Spinner) findViewById(R.id.channel_type_spinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this,
                 android.R.layout.simple_spinner_item, CHANNEL_TYPES);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         channelTypeSpinner.setAdapter(adapter);
         channelTypeSpinner.setOnItemSelectedListener(this);
-
 
         receiverIdText = (AutoCompleteTextView) findViewById(R.id.receiver_id_text);
 
@@ -149,13 +151,15 @@ public class MainActivity extends AppCompatActivity
     // OnItemSelectedListener
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if (view != channelTypeSpinner) return;
+        if (parent != channelTypeSpinner) return;
         switch (position) {
             case 0:
+                channelInputLayout.setHint("Receiver ID");
                 receiverIdText.setHint("Receiver ID");
                 channelType = ChannelType.PRIVATE;
                 break;
             case 1:
+                channelInputLayout.setHint("Group ID");
                 receiverIdText.setHint("Group ID");
                 channelType = ChannelType.GROUP;
                 break;
