@@ -6,29 +6,37 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.Spinner;
 
-import com.smartwalkie.voicepingsdk.events.DisconnectEvent;
-import com.smartwalkie.voicepingsdk.models.ChannelType;
 import com.smartwalkie.voicepingsdk.Connection;
 import com.smartwalkie.voicepingsdk.VoicePing;
+import com.smartwalkie.voicepingsdk.events.DisconnectEvent;
+import com.smartwalkie.voicepingsdk.models.ChannelType;
 import com.smartwalkie.voicepingsdk.models.Session;
 
 import de.greenrobot.event.EventBus;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements AdapterView.OnItemSelectedListener {
+
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    private static final String[] CHANNEL_TYPES = { "PRIVATE", "GROUP" };
 
     private AutoCompleteTextView receiverIdText;
     private Button talkButton;
+    private Spinner channelTypeSpinner;
+    private int channelType = ChannelType.PRIVATE;
 
     private final View.OnTouchListener touchListener = new View.OnTouchListener() {
         @Override
@@ -51,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     talkButton.setText("RELEASE TO STOP");
                     talkButton.setBackgroundColor(Color.YELLOW);
                     //VoicePing.startTalking(64, ChannelType.PRIVATE);
-                    VoicePing.startTalking(receiverId, ChannelType.PRIVATE);
+                    VoicePing.startTalking(receiverId, channelType);
                     break;
                 case MotionEvent.ACTION_UP:
                     talkButton.setText("START TALKING");
@@ -74,6 +82,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         EventBus.getDefault().register(this);
+
+        channelTypeSpinner = (Spinner)findViewById(R.id.channel_type_spinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
+                android.R.layout.simple_spinner_item, CHANNEL_TYPES);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        channelTypeSpinner.setAdapter(adapter);
+        channelTypeSpinner.setOnItemSelectedListener(this);
+
 
         receiverIdText = (AutoCompleteTextView) findViewById(R.id.receiver_id_text);
 
@@ -128,4 +145,29 @@ public class MainActivity extends AppCompatActivity {
         Log.v(TAG, "onEvent");
         finish();
     }
+
+    // OnItemSelectedListener
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if (view != channelTypeSpinner) return;
+        switch (position) {
+            case 0:
+                receiverIdText.setHint("Receiver ID");
+                channelType = ChannelType.PRIVATE;
+                break;
+            case 1:
+                receiverIdText.setHint("Group ID");
+                channelType = ChannelType.GROUP;
+                break;
+            default:
+                break;
+
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+    // OnItemSelectedListener
 }

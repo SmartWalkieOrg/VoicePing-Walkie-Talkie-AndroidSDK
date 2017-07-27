@@ -114,14 +114,14 @@ public class MessageHelper {
         return null;
     }
 
-    public static byte[] createConnectionMessage(int sendId) {
+    public static byte[] createConnectionMessage(int senderId) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Packer packer = messagePack.createPacker(out);
         try {
             packer.writeArrayBegin(3);
             packer.write(ChannelType.GROUP);
             packer.write(MessageType.CONNECTION);
-            packer.write(sendId);
+            packer.write(senderId);
             packer.writeArrayEnd(true);
         } catch (IOException e) {
             e.printStackTrace();
