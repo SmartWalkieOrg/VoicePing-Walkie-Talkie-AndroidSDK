@@ -27,10 +27,6 @@ public class VoicePing implements ConnectionListener {
     private Player player;
     private Recorder recorder;
 
-    public static void init(Application application) {
-        mApplication = application;
-    }
-
     public static VoicePing getInstance() {
         if (INSTANCE == null) INSTANCE = new VoicePing();
         return INSTANCE;
@@ -42,12 +38,13 @@ public class VoicePing implements ConnectionListener {
         recorder = Recorder.getInstance();
     }
 
-    public static Application getApplication() {
+    protected static Application getApplication() {
         return mApplication;
     }
 
-    public static void configure(Context context, String serverUrl) {
-        getInstance()._configure(context, serverUrl);
+    public static void configure(Application application, String serverUrl) {
+        mApplication = application;
+        getInstance()._configure(application, serverUrl);
     }
 
     public static void connect(int userId, ConnectCallback callback) {
