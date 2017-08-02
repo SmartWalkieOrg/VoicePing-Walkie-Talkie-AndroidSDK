@@ -25,11 +25,7 @@
 
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_main"></activity>
-
-        <service
-            android:name=".PingService"
-            android:exported="false" />
+            android:label="@string/title_activity_main" />
 
     </application>
 
