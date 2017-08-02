@@ -20,11 +20,10 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import com.smartwalkie.voicepingsdk.VoicePing;
-import com.smartwalkie.voicepingsdk.events.DisconnectEvent;
+import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
+import com.smartwalkie.voicepingsdk.exceptions.PingException;
 import com.smartwalkie.voicepingsdk.models.ChannelType;
 import com.smartwalkie.voicepingsdk.models.Session;
-
-import de.greenrobot.event.EventBus;
 
 public class MainActivity extends AppCompatActivity
         implements AdapterView.OnItemSelectedListener {
@@ -82,8 +81,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        EventBus.getDefault().register(this);
-
         channelInputLayout = (TextInputLayout) findViewById(R.id.channel_input_layout);
         channelTypeSpinner = (Spinner) findViewById(R.id.channel_type_spinner);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this,
@@ -119,7 +116,22 @@ public class MainActivity extends AppCompatActivity
                         .setMessage("Are you sure you want to disconnect?")
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                VoicePing.disconnect();
+                                VoicePing.disconnect(new DisconnectCallback() {
+                                    @Override
+                                    public void onDisconnected() {
+                                        Log.v(TAG, "onDisconnected...");
+                                        if (!isFinishing()) {
+                                            startActivity(new Intent(MainActivity.this,
+                                                    LoginActivity.class));
+                                            finish();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailed(PingException exception) {
+                                        exception.printStackTrace();
+                                    }
+                                });
                             }
                         })
                         .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -134,14 +146,6 @@ public class MainActivity extends AppCompatActivity
                 break;
         }
         return true;
-    }
-
-    public void onEvent(DisconnectEvent event) {
-        Log.v(TAG, "onDisconnectEvent...");
-        if (!isFinishing()) {
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-        }
     }
 
     // OnItemSelectedListener

@@ -9,7 +9,6 @@ import com.pusher.java_websocket.drafts.Draft_17;
 import com.pusher.java_websocket.framing.Framedata;
 import com.pusher.java_websocket.framing.FramedataImpl1;
 import com.pusher.java_websocket.handshake.ServerHandshake;
-import com.smartwalkie.voicepingsdk.events.DisconnectEvent;
 import com.smartwalkie.voicepingsdk.events.MessageEvent;
 import com.smartwalkie.voicepingsdk.listeners.ConnectionListener;
 import com.smartwalkie.voicepingsdk.listeners.IncomingAudioListener;
@@ -143,7 +142,7 @@ public class Connection {
         if (webSocketClient != null) {
             webSocketClient = null;
         }
-        EventBus.getDefault().post(new DisconnectEvent());
+        if (connectionListener != null) connectionListener.onDisconnected();
     }
 
     public void send(byte[] data) {
@@ -206,9 +205,7 @@ public class Connection {
                 public void onClose(int code, String reason, boolean remote) {
                     if (shouldDisconnect(code)) {
                         disconnect();
-                    } else {
                     }
-                    if (connectionListener != null) connectionListener.onDisconnected();
                 }
 
                 @Override

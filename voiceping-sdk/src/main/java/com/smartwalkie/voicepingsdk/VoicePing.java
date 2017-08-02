@@ -6,6 +6,7 @@ import android.content.Context;
 import android.provider.Settings;
 
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
+import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
 import com.smartwalkie.voicepingsdk.listeners.ConnectionListener;
 import com.smartwalkie.voicepingsdk.models.Message;
@@ -21,6 +22,7 @@ public class VoicePing implements ConnectionListener {
 
     private Connection connection;
     private ConnectCallback connectCallback;
+    private DisconnectCallback disconnectCallback;
 
     private Player player;
     private Recorder recorder;
@@ -87,8 +89,13 @@ public class VoicePing implements ConnectionListener {
         */
     }
 
-    public static void disconnect() {
-        Connection.getInstance().disconnect();
+    public static void disconnect(DisconnectCallback callback) {
+        getInstance()._disconnect(callback);
+    }
+
+    private void _disconnect(DisconnectCallback callback) {
+        disconnectCallback = callback;
+        connection.disconnect();
     }
 
     public static void startTalking(int receiverId, int channelType) {
@@ -135,6 +142,6 @@ public class VoicePing implements ConnectionListener {
 
     @Override
     public void onDisconnected() {
-
+        if (disconnectCallback != null) disconnectCallback.onDisconnected();
     }
 }
