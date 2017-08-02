@@ -1,6 +1,7 @@
 package com.smartwalkie.voiceping;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -142,7 +143,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onEvent(DisconnectEvent event) {
-        Log.v(TAG, "onEvent");
+        Log.v(TAG, "onDisconnectEvent");
+        startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
 
