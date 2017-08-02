@@ -137,9 +137,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onEvent(DisconnectEvent event) {
-        Log.v(TAG, "onDisconnectEvent");
-        startActivity(new Intent(this, LoginActivity.class));
-        finish();
+        Log.v(TAG, "onDisconnectEvent...");
+        if (!isFinishing()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }
     }
 
     // OnItemSelectedListener
