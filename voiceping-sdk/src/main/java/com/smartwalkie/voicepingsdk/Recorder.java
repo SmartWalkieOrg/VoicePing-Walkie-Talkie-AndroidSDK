@@ -66,6 +66,7 @@ public class Recorder implements OutgoingAudioListener {
             this.opus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
         }
         initSenderThread();
+        recorderThread = new RecorderThread();
     }
 
     private void initSenderThread() {
@@ -167,8 +168,9 @@ public class Recorder implements OutgoingAudioListener {
     private void startRecording() {
         Log.v(TAG, "startRecording");
         isRecording = true;
-        recorderThread = new RecorderThread();
-        recorderThread.start();
+        if (recorderThread.getState() == Thread.State.NEW) {
+            recorderThread.start();
+        }
         state = RECORDING;
     }
 
