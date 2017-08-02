@@ -175,14 +175,6 @@ public class Recorder implements OutgoingAudioListener {
     private void stopRecording() {
         Log.v(TAG, "stopRecording");
         isRecording = false;
-        try {
-            if (recorderThread != null) {
-                recorderThread.interrupt();
-                recorderThread = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         blockingQueue.clear();
     }
 
@@ -246,6 +238,7 @@ public class Recorder implements OutgoingAudioListener {
 
             int numberOfFrames = 0;
             while (isRecording) {
+                Log.d(getClass().getSimpleName(), "isRecording...");
                 // check if message is too long
                 long currentTimestamp = System.currentTimeMillis();
                 long distance = currentTimestamp - mStartRecordingTimestamp;
@@ -277,6 +270,7 @@ public class Recorder implements OutgoingAudioListener {
             audioRecord.stop();
             audioRecord.release();
             audioRecord = null;
+            interrupt();
         }
     }
 
