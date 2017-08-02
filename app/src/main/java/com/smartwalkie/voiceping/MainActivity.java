@@ -19,7 +19,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import com.smartwalkie.voicepingsdk.Connection;
 import com.smartwalkie.voicepingsdk.VoicePing;
 import com.smartwalkie.voicepingsdk.events.DisconnectEvent;
 import com.smartwalkie.voicepingsdk.models.ChannelType;
@@ -125,8 +124,7 @@ public class MainActivity extends AppCompatActivity
                         .setMessage("Are you sure you want to disconnect?")
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                Connection connection = Connection.getInstance();
-                                connection.disconnect();
+                                VoicePing.disconnect();
                             }
                         })
                         .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {

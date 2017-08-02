@@ -87,6 +87,10 @@ public class VoicePing implements ConnectionListener {
         */
     }
 
+    public static void disconnect() {
+        Connection.getInstance().disconnect();
+    }
+
     public static void startTalking(int receiverId, int channelType) {
         getInstance()._startTalking(receiverId, channelType);
     }
