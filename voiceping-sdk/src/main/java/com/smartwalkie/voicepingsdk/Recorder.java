@@ -1,6 +1,7 @@
 package com.smartwalkie.voicepingsdk;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -13,6 +14,7 @@ import com.smartwalkie.voicepingsdk.constants.AudioParameters;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.Session;
+import com.smartwalkie.voicepingsdk.services.RecorderService;
 
 import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -115,6 +117,14 @@ public class Recorder implements OutgoingAudioListener {
         state = STOPPED;
     }
 
+    public boolean getRecordingStatus() {
+        return isRecording;
+    }
+
+    public void setRecordingStatus(boolean isRecording) {
+        this.isRecording = isRecording;
+    }
+
     public void startTalking(int receiverId, int channelType) {
         Log.v(TAG, "startTalking");
         this.receiverId = receiverId;
@@ -136,7 +146,7 @@ public class Recorder implements OutgoingAudioListener {
 //        senderHandler.sendEmptyMessageDelayed(STOP_FOR_NOT_RECEIVED_ACK_START, ACK_TIMEOUT_IN_MILLIS);
     }
 
-    private void send(byte[] payload, int offset, int length) {
+    public void send(byte[] payload, int offset, int length) {
         try {
             blockingQueue.put(Arrays.copyOfRange(payload, offset, length));
             senderHandler.sendEmptyMessage(CONTINUE_FOR_SENDING_AUDIO_DATA);
@@ -170,8 +180,10 @@ public class Recorder implements OutgoingAudioListener {
     private void startRecording() {
         Log.v(TAG, "startRecording");
         isRecording = true;
-        recorderThread = new RecorderThread();
-        recorderThread.start();
+//        recorderThread = new RecorderThread();
+//        recorderThread.start();
+        VoicePing.getApplication().startService(new Intent(VoicePing.getApplication(),
+                RecorderService.class));
         state = RECORDING;
     }
 
