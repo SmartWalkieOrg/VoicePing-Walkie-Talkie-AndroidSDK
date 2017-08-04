@@ -85,18 +85,21 @@ public class Player implements IncomingAudioListener {
                         }
                         return true;
                     case STOP:
+                        Log.d(TAG, "Stop...");
                         audioTrack.stop();
                         audioTrack.flush();
                         mCurrentPlayingPlayload = null;
                         mStartTalkingTime =0;
                         return true;
                     case DESTROY:
+                        Log.d(TAG, "Destroy...");
                         audioTrack.stop();
                         audioTrack.flush();
                         mCurrentPlayingPlayload = null;
                         audioTrack.release();
                         return true;
                     case STOP_PLAYING_AFTER_A_TIME:
+                        Log.d(TAG, "Stop playing after a time...");
                         forceStop();
                         return true;
                 }

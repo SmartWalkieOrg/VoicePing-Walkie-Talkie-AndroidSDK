@@ -81,10 +81,12 @@ public class Recorder implements OutgoingAudioListener {
                         sendAckStart();
                         break;
                     case STOP_FOR_NOT_RECEIVED_ACK_START:
+                        Log.d(TAG, "stop for not received ack start");
                         stopRecording();
                         state = STOPPED;
                         break;
                     case STOP_FOR_RECEIVED_ACK_START_FAILED:
+                        Log.d(TAG, "stop for received ack start failed");
                         stopRecording();
                         state = STOPPED;
                         break;
@@ -95,6 +97,7 @@ public class Recorder implements OutgoingAudioListener {
                         sendAudio();
                         break;
                     case STOP_NORMALLY:
+                        Log.d(TAG, "stop normally...");
                         stopRecording();
                         sendAckStop();
                         break;
@@ -130,7 +133,7 @@ public class Recorder implements OutgoingAudioListener {
         Message message = MessageHelper.createAckStartMessage(Session.getInstance().getUserId(), receiverId, channelType, System.currentTimeMillis());
         Connection.getInstance().send(message.getPayload());
         state = STARTED;
-        senderHandler.sendEmptyMessageDelayed(STOP_FOR_NOT_RECEIVED_ACK_START, ACK_TIMEOUT_IN_MILLIS);
+//        senderHandler.sendEmptyMessageDelayed(STOP_FOR_NOT_RECEIVED_ACK_START, ACK_TIMEOUT_IN_MILLIS);
     }
 
     private void send(byte[] payload, int offset, int length) {
@@ -238,7 +241,7 @@ public class Recorder implements OutgoingAudioListener {
 
             int numberOfFrames = 0;
             while (isRecording) {
-                Log.d(getClass().getSimpleName(), "isRecording...");
+                Log.d(getClass().getSimpleName(), "isRecording... number of frames: " + numberOfFrames);
                 // check if message is too long
                 long currentTimestamp = System.currentTimeMillis();
                 long distance = currentTimestamp - mStartRecordingTimestamp;
