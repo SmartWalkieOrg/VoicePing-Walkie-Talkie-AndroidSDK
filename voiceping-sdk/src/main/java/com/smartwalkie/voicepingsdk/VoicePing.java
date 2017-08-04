@@ -2,7 +2,6 @@ package com.smartwalkie.voicepingsdk;
 
 
 import android.app.Application;
-import android.content.Context;
 import android.provider.Settings;
 
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
@@ -10,7 +9,7 @@ import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
 import com.smartwalkie.voicepingsdk.listeners.ConnectionListener;
 import com.smartwalkie.voicepingsdk.models.Message;
-import com.smartwalkie.voicepingsdk.models.Session;
+import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,18 +43,16 @@ public class VoicePing implements ConnectionListener {
 
     public static void configure(Application application, String serverUrl) {
         mApplication = application;
-        getInstance()._configure(application, serverUrl);
+        getInstance()._configure(serverUrl);
     }
 
     public static void connect(int userId, ConnectCallback callback) {
         getInstance()._connect(userId, callback);
     }
 
-    private void _configure(Context context, String serverUrl) {
-        Session.getInstance().setContext(context);
-        Session.getInstance().setServerUrl(serverUrl);
-
+    private void _configure(String serverUrl) {
         mConnection = new Connection(serverUrl, this, mPlayer, mRecorder);
+        VoicePingPrefs.getInstance().putServerUrl(serverUrl);
     }
 
     private void _connect(int userId, ConnectCallback callback) {
@@ -68,11 +65,10 @@ public class VoicePing implements ConnectionListener {
         this.mConnectCallback = callback;
         if (props.containsKey("user_id")) {
             String userId = props.get("user_id");
-            Session.getInstance().setUserId(Integer.parseInt(userId));
+            VoicePingPrefs.getInstance().putUserId(Integer.parseInt(userId));
         }
         props.put("DeviceId", Settings.Secure.getString(
-                Session.getInstance().getContext().getContentResolver(),
-                Settings.Secure.ANDROID_ID));
+                mApplication.getContentResolver(), Settings.Secure.ANDROID_ID));
         mConnection.connect(props);
     }
 

@@ -7,7 +7,7 @@ import android.util.Log;
 
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
-import com.smartwalkie.voicepingsdk.models.Session;
+import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 import com.smartwalkie.voicepingsdk.services.RecorderService;
 
 import java.util.Arrays;
@@ -127,7 +127,9 @@ public class Recorder implements OutgoingAudioListener {
 
     private void sendAckStart() {
         Log.v(TAG, "sendAckStart");
-        Message message = MessageHelper.createAckStartMessage(Session.getInstance().getUserId(), receiverId, channelType, System.currentTimeMillis());
+        int userId = VoicePingPrefs.getInstance().getUserId();
+        Message message = MessageHelper.createAckStartMessage(
+                userId, receiverId, channelType, System.currentTimeMillis());
         Connection.getInstance().send(message.getPayload());
         state = STARTED;
     }
@@ -150,14 +152,17 @@ public class Recorder implements OutgoingAudioListener {
             e.printStackTrace();
         }
         if (data == null || data.length == 0) return;
-        Message message = MessageHelper.createAudioMessage(Session.getInstance().getUserId(), receiverId, channelType, data, data.length);
+        int userId = VoicePingPrefs.getInstance().getUserId();
+        Message message = MessageHelper.createAudioMessage(
+                userId, receiverId, channelType, data, data.length);
         Connection.getInstance().send(message.getPayload());
         state = SENDING;
     }
 
     private void sendAckStop() {
         Log.v(TAG, "sendAckStop");
-        byte[] message = MessageHelper.createAckStopMessage(Session.getInstance().getUserId(), receiverId, channelType);
+        int userId = VoicePingPrefs.getInstance().getUserId();
+        byte[] message = MessageHelper.createAckStopMessage(userId, receiverId, channelType);
         Connection.getInstance().send(message);
         state = WAITING_FOR_ACK_END;
         senderHandler.sendEmptyMessageDelayed(UPDATE_FOR_NOT_RECEIVED_ACK_END, ACK_TIMEOUT_IN_MILLIS);

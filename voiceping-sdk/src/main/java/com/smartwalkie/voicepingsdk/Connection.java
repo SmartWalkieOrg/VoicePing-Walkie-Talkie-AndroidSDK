@@ -15,7 +15,7 @@ import com.smartwalkie.voicepingsdk.listeners.IncomingAudioListener;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.MessageType;
-import com.smartwalkie.voicepingsdk.models.Session;
+import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -147,7 +147,8 @@ public class Connection {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
                     Log.d(TAG, "onOpen...");
-                    mWebSocketClient.send(MessageHelper.createConnectionMessage(Session.getInstance().getUserId()));
+                    int userId = VoicePingPrefs.getInstance().getUserId();
+                    mWebSocketClient.send(MessageHelper.createConnectionMessage(userId));
                     if (mConnectionListener != null) mConnectionListener.onConnected();
                 }
 

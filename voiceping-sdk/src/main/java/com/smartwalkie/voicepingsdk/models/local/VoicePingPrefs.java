@@ -9,19 +9,19 @@ import com.smartwalkie.voicepingsdk.VoicePing;
  * Created by kukuhsain on 8/4/17.
  */
 
-public class PreferencesHelper {
+public class VoicePingPrefs {
 
-    private static PreferencesHelper INSTANCE;
+    private static VoicePingPrefs INSTANCE;
     private SharedPreferences mSharedPreferences;
 
-    public PreferencesHelper() {
+    public VoicePingPrefs() {
         mSharedPreferences = VoicePing.getApplication()
                 .getSharedPreferences("voiceping_sdk.sp", Context.MODE_PRIVATE);
     }
 
-    public static PreferencesHelper getInstance() {
+    public static VoicePingPrefs getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new PreferencesHelper();
+            INSTANCE = new VoicePingPrefs();
         }
         return INSTANCE;
     }
@@ -34,11 +34,11 @@ public class PreferencesHelper {
         mSharedPreferences.edit().putString("server_url", serverUrl).apply();
     }
 
-    public String getUserId() {
-        return mSharedPreferences.getString("user_id", null);
+    public int getUserId() {
+        return mSharedPreferences.getInt("user_id", 0);
     }
 
-    public void putUserId(String userId) {
-        mSharedPreferences.edit().putString("user_id", userId).apply();
+    public void putUserId(int userId) {
+        mSharedPreferences.edit().putInt("user_id", userId).apply();
     }
 }

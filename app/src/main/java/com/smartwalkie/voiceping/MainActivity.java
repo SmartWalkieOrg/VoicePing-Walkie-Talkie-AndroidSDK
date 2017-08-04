@@ -23,7 +23,7 @@ import com.smartwalkie.voicepingsdk.VoicePing;
 import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
 import com.smartwalkie.voicepingsdk.models.ChannelType;
-import com.smartwalkie.voicepingsdk.models.Session;
+import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
 public class MainActivity extends AppCompatActivity
         implements AdapterView.OnItemSelectedListener {
@@ -95,7 +95,8 @@ public class MainActivity extends AppCompatActivity
         talkButton = (Button) findViewById(R.id.talk_button);
         talkButton.setOnTouchListener(touchListener);
 
-        setTitle("User ID: " + Session.getInstance().getUserId());
+        int userId = VoicePingPrefs.getInstance().getUserId();
+        setTitle("User ID: " + userId);
         talkButton.setText("START TALKING");
         talkButton.setBackgroundColor(Color.GREEN);
     }
