@@ -29,76 +29,64 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 
-import de.greenrobot.event.EventBus;
-
 
 public class Connection {
-    public static final String TAG = Connection.class.getSimpleName();
 
-    private WebSocketClient webSocketClient;
-    private String serverUrl;
-    private String username;
-    private Map<String, String> props;
-    private ConnectionListener connectionListener;
-    private IncomingAudioListener incomingAudioListener;
-    private OutgoingAudioListener outgoingAudioListener;
+    private static final String TAG = Connection.class.getSimpleName();
+
+    private WebSocketClient mWebSocketClient;
+    private String mServerUrl;
+    private Map<String, String> mHeaders;
+    private ConnectionListener mConnectionListener;
+    private IncomingAudioListener mIncomingAudioListener;
+    private OutgoingAudioListener mOutgoingAudioListener;
 
     // Singleton
-    private static Connection instance;
+    private static Connection INSTANCE;
     public static Connection getInstance() {
-        return instance;
+        return INSTANCE;
     }
-    // Singleton
-
-    // Public Setters
-    public void setConnectionListener(ConnectionListener connectionListener) {
-        this.connectionListener = connectionListener;
-    }
-
-    public void setIncomingAudioListener(IncomingAudioListener incomingAudioListener) {
-        this.incomingAudioListener = incomingAudioListener;
-    }
-
-    public void setOutgoingAudioListener(OutgoingAudioListener outgoingAudioListener) {
-        this.outgoingAudioListener = outgoingAudioListener;
-    }
-    // Public Setters
 
     // Constructor
-    public Connection(String serverUrl) {
-        this.serverUrl = serverUrl;
-        instance = this;
-    }
-    // Constructor
+    public Connection(String serverUrl,
+                      ConnectionListener connectionListener,
+                      IncomingAudioListener incomingAudioListener,
+                      OutgoingAudioListener outgoingAudioListener) {
 
-    // Public Methods
-    public void reconnect() {
-        disconnect();
-        connect();
-    }
-
-    public void connect(Map<String, String> props) {
-        this.props = props;
-        connect();
+        mServerUrl = serverUrl;
+        mConnectionListener = connectionListener;
+        mIncomingAudioListener = incomingAudioListener;
+        mOutgoingAudioListener = outgoingAudioListener;
+        INSTANCE = this;
     }
 
-    public void connect() {
-        if (webSocketClient != null && isConnected()) {
+    /*private void reconnect() {
+        try {
+            mWebSocketClient.closeBlocking();
+            mWebSocketClient.connectBlocking();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }*/
+
+    public void connect(Map<String, String> headers) {
+        mHeaders = headers;
+        if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
             return;
         }
 
         URI uri = null;
         try {
-            uri = new URI(serverUrl);
+            uri = new URI(mServerUrl);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
 
-        if (webSocketClient == null) {
-            webSocketClient = getWebSocketClient(uri);
+        if (mWebSocketClient == null) {
+            mWebSocketClient = getWebSocketClient(uri);
         }
 
-        if (serverUrl.contains("wss")) {
+        if (mServerUrl.contains("wss://")) {
             SSLContext sslContext;
             SSLSocketFactory factory;
             try {
@@ -121,17 +109,16 @@ public class Connection {
                 }}, new SecureRandom());
 
                 factory = sslContext.getSocketFactory();    // (SSLSocketFactory) SSLSocketFactory.getDefault();
-                webSocketClient.setSocket(factory.createSocket());
+                mWebSocketClient.setSocket(factory.createSocket());
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else {
         }
 
         try {
-            if (webSocketClient != null) {
-                webSocketClient.connect();
+            if (mWebSocketClient != null) {
+                mWebSocketClient.connect();
             }
         } catch (IllegalStateException e) {
             e.printStackTrace();
@@ -139,125 +126,136 @@ public class Connection {
     }
 
     public void disconnect() {
-        if (webSocketClient != null) {
-            webSocketClient = null;
+        if (mWebSocketClient != null) {
+            Log.d(TAG, "close WebSocket...");
+            mWebSocketClient.close();
+            if (mConnectionListener != null) mConnectionListener.onDisconnected();
         }
-        if (connectionListener != null) connectionListener.onDisconnected();
     }
 
-    public void send(byte[] data) {
-        if (webSocketClient != null) {
+    /*public void send(byte[] data) {
+        if (mWebSocketClient != null) {
             if (!isConnected()) {
-                if (webSocketClient.isConnecting()) {
+                Log.d(TAG, "not connected...");
+                if (mWebSocketClient.isConnecting()) {
+                    Log.d(TAG, "is connecting...");
                     try {
-                        webSocketClient.wait(5000);
+                        mWebSocketClient.wait(5000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 } else {
+                    Log.d(TAG, "reconnect...");
                     reconnect();
                     return;
                 }
             }
             try {
                 if (isConnected()) {
-                    webSocketClient.send(data);
+                    mWebSocketClient.send(data);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+    }*/
+
+    public void send(byte[] data) {
+        if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
+            mWebSocketClient.send(data);
+        } else {
+            Log.d(TAG, "WebSocket closed...");
+        }
     }
 
-    public boolean isConnected() {
-        return webSocketClient != null && webSocketClient.isOpen();
-    }
+    /*public boolean isConnected() {
+        return mWebSocketClient != null && mWebSocketClient.isOpen();
+    }*/
 
     @SuppressWarnings("SimplifiableIfStatement")
     /**
      * Do NOT simplified these if statements. Clearer this way
      */
-    private boolean shouldDisconnect(int code) {
+    /*private boolean shouldDisconnect(int code) {
         boolean result = true;
         if (code == -1 && isConnected()) {
             result = false;
         }
-        return result && webSocketClient != null && !webSocketClient.isClosed();
-    }
-    // Public Methods
+        return result && mWebSocketClient != null && !mWebSocketClient.isClosed();
+    }*/
 
     private WebSocketClient getWebSocketClient(URI uri) {
-        if (webSocketClient == null) {
-            webSocketClient = new WebSocketClient(uri, new Draft_17(), props, 0) {
+        if (mWebSocketClient == null) {
+            mWebSocketClient = new WebSocketClient(uri, new Draft_17(), mHeaders, 0) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
-                    Log.v(TAG, "onOpen");
-                    webSocketClient.send(MessageHelper.createConnectionMessage(Session.getInstance().getUserId()));
-                    if (connectionListener != null) connectionListener.onConnected();
+                    Log.d(TAG, "onOpen...");
+                    mWebSocketClient.send(MessageHelper.createConnectionMessage(Session.getInstance().getUserId()));
+                    if (mConnectionListener != null) mConnectionListener.onConnected();
                 }
 
                 @Override
                 public void onMessage(String message) {
-                    Log.v(TAG, "onMessage");
+                    Log.d(TAG, "onMessage...");
                 }
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    if (shouldDisconnect(code)) {
-                        disconnect();
-                    }
+                    Log.d(TAG, "onClose...");
+                    Log.d(TAG, "reason: " + reason);
+                    Log.d(TAG, "remote: " + remote);
+                    if (mConnectionListener != null) mConnectionListener.onDisconnected();
                 }
 
                 @Override
                 public void onError(Exception ex) {
-                    Log.v(TAG, "onError");
+                    Log.v(TAG, "onError...");
                     ex.printStackTrace();
-                    if (connectionListener != null) connectionListener.onFailed();
+                    if (mConnectionListener != null) mConnectionListener.onFailed();
                 }
 
                 @Override
                 public void onMessage(ByteBuffer bytes) {
                     Message message = MessageHelper.unpackMessage(bytes.array());
-                    if (incomingAudioListener != null) {
+                    if (mIncomingAudioListener != null) {
                         if (message.getMessageType() == MessageType.START_TALKING) {
-                            incomingAudioListener.onStartTalkingMessage(message);
+                            mIncomingAudioListener.onStartTalkingMessage(message);
                         } else if (message.getMessageType() == MessageType.AUDIO) {
-                            incomingAudioListener.onAudioTalkingMessage(message);
+                            mIncomingAudioListener.onAudioTalkingMessage(message);
                         } else if (message.getMessageType() == MessageType.STOP_TALKING) {
-                            incomingAudioListener.onStopTalkingMessage(message);
+                            mIncomingAudioListener.onStopTalkingMessage(message);
                         }
                     }
 
-                    if (outgoingAudioListener != null) {
+                    if (mOutgoingAudioListener != null) {
                         switch (message.getMessageType()) {
                             case MessageType.ACK_START:
-                                outgoingAudioListener.onAckStartSucceed(message);
+                                mOutgoingAudioListener.onAckStartSucceed(message);
                                 break;
                             case MessageType.ACK_START_FAILED:
-                                outgoingAudioListener.onAckStartFailed(message);
+                                mOutgoingAudioListener.onAckStartFailed(message);
                                 break;
                             case MessageType.ACK_END:
-                                outgoingAudioListener.onAckEndSucceed(message);
+                                mOutgoingAudioListener.onAckEndSucceed(message);
                                 break;
                             case MessageType.MESSAGE_DELIVERED:
-                                outgoingAudioListener.onMessageDelivered(message);
+                                mOutgoingAudioListener.onMessageDelivered(message);
                                 break;
                             case MessageType.MESSAGE_READ:
-                                outgoingAudioListener.onMessageRead(message);
+                                mOutgoingAudioListener.onMessageRead(message);
                         }
                     }
 
-                    Log.v(TAG, "message: " + message.getMessageType());
+                    Log.d(TAG, "message: " + message.getMessageType());
 
                     MessageEvent messageEvent = new MessageEvent(message);
-                    EventBus.getDefault().post(messageEvent);
 
-                    if (connectionListener != null) connectionListener.onMessage(message);
+                    if (mConnectionListener != null) mConnectionListener.onMessage(message);
                 }
 
                 @Override
                 public void onWebsocketPing(WebSocket conn, Framedata f) {
-                    Log.v(TAG, "onWebsocketPing");
+                    Log.v(TAG, "onWebsocketPing...");
                     FramedataImpl1 resp = new FramedataImpl1(f);
                     resp.setOptcode(Framedata.Opcode.PONG);
                     conn.sendFrame(resp);
@@ -265,10 +263,10 @@ public class Connection {
 
                 @Override
                 public void onWebsocketPong(WebSocket conn, Framedata f) {
-                    Log.v(TAG, "onWebsocketPong");
+                    Log.v(TAG, "onWebsocketPong...");
                 }
             };
         }
-        return webSocketClient;
+        return mWebSocketClient;
     }
 }

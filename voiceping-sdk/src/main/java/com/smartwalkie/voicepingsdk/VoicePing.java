@@ -51,18 +51,11 @@ public class VoicePing implements ConnectionListener {
         getInstance()._connect(userId, callback);
     }
 
-    public static void connect(Map<String, String> props, ConnectCallback callback) {
-        getInstance()._connect(props, callback);
-    }
-
     private void _configure(Context context, String serverUrl) {
         Session.getInstance().setContext(context);
         Session.getInstance().setServerUrl(serverUrl);
 
-        connection = new Connection(serverUrl);
-        connection.setConnectionListener(this);
-        connection.setIncomingAudioListener(player);
-        connection.setOutgoingAudioListener(recorder);
+        connection = new Connection(serverUrl, this, player, recorder);
     }
 
     private void _connect(int userId, ConnectCallback callback) {
@@ -80,10 +73,6 @@ public class VoicePing implements ConnectionListener {
         props.put("DeviceId", Settings.Secure.getString(Session.getInstance().getContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID));
         connection.connect(props);
-        /*
-        Intent serviceIntent = new Intent(context, PingService.class);
-        context.startService(serviceIntent);
-        */
     }
 
     public static void disconnect(DisconnectCallback callback) {
