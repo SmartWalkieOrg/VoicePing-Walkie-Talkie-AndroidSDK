@@ -20,12 +20,12 @@ public class VoicePing implements ConnectionListener {
     private static Application mApplication;
     private static VoicePing INSTANCE;
 
-    private Connection connection;
-    private ConnectCallback connectCallback;
-    private DisconnectCallback disconnectCallback;
+    private Connection mConnection;
+    private ConnectCallback mConnectCallback;
+    private DisconnectCallback mDisconnectCallback;
 
-    private Player player;
-    private Recorder recorder;
+    private Player mPlayer;
+    private Recorder mRecorder;
 
     public static VoicePing getInstance() {
         if (INSTANCE == null) INSTANCE = new VoicePing();
@@ -33,9 +33,9 @@ public class VoicePing implements ConnectionListener {
     }
 
     private VoicePing() {
-        player = Player.getInstance();
-        player.start();
-        recorder = Recorder.getInstance();
+        mPlayer = Player.getInstance();
+        mPlayer.start();
+        mRecorder = Recorder.getInstance();
     }
 
     protected static Application getApplication() {
@@ -55,7 +55,7 @@ public class VoicePing implements ConnectionListener {
         Session.getInstance().setContext(context);
         Session.getInstance().setServerUrl(serverUrl);
 
-        connection = new Connection(serverUrl, this, player, recorder);
+        mConnection = new Connection(serverUrl, this, mPlayer, mRecorder);
     }
 
     private void _connect(int userId, ConnectCallback callback) {
@@ -65,14 +65,15 @@ public class VoicePing implements ConnectionListener {
     }
 
     private void _connect(Map<String, String> props, ConnectCallback callback) {
-        this.connectCallback = callback;
+        this.mConnectCallback = callback;
         if (props.containsKey("user_id")) {
             String userId = props.get("user_id");
             Session.getInstance().setUserId(Integer.parseInt(userId));
         }
-        props.put("DeviceId", Settings.Secure.getString(Session.getInstance().getContext().getContentResolver(),
+        props.put("DeviceId", Settings.Secure.getString(
+                Session.getInstance().getContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID));
-        connection.connect(props);
+        mConnection.connect(props);
     }
 
     public static void disconnect(DisconnectCallback callback) {
@@ -80,8 +81,8 @@ public class VoicePing implements ConnectionListener {
     }
 
     private void _disconnect(DisconnectCallback callback) {
-        disconnectCallback = callback;
-        connection.disconnect();
+        mDisconnectCallback = callback;
+        mConnection.disconnect();
     }
 
     public static void startTalking(int receiverId, int channelType) {
@@ -93,11 +94,11 @@ public class VoicePing implements ConnectionListener {
     }
 
     private void _startTalking(int receiverId, int channelType) {
-        recorder.startTalking(receiverId, channelType);
+        mRecorder.startTalking(receiverId, channelType);
     }
 
     private void _stopTalking() {
-        recorder.stopTalking();
+        mRecorder.stopTalking();
     }
 
     // ConnectionListener
@@ -113,12 +114,12 @@ public class VoicePing implements ConnectionListener {
 
     @Override
     public void onConnected() {
-        if (connectCallback != null) connectCallback.onConnected();
+        if (mConnectCallback != null) mConnectCallback.onConnected();
     }
 
     @Override
     public void onFailed() {
-        if (connectCallback != null) connectCallback.onFailed(new PingException());
+        if (mConnectCallback != null) mConnectCallback.onFailed(new PingException());
     }
 
     @Override
@@ -128,6 +129,6 @@ public class VoicePing implements ConnectionListener {
 
     @Override
     public void onDisconnected() {
-        if (disconnectCallback != null) disconnectCallback.onDisconnected();
+        if (mDisconnectCallback != null) mDisconnectCallback.onDisconnected();
     }
 }

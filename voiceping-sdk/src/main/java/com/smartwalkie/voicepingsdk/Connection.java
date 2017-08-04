@@ -133,33 +133,6 @@ public class Connection {
         }
     }
 
-    /*public void send(byte[] data) {
-        if (mWebSocketClient != null) {
-            if (!isConnected()) {
-                Log.d(TAG, "not connected...");
-                if (mWebSocketClient.isConnecting()) {
-                    Log.d(TAG, "is connecting...");
-                    try {
-                        mWebSocketClient.wait(5000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Log.d(TAG, "reconnect...");
-                    reconnect();
-                    return;
-                }
-            }
-            try {
-                if (isConnected()) {
-                    mWebSocketClient.send(data);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }*/
-
     public void send(byte[] data) {
         if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
             mWebSocketClient.send(data);
@@ -167,22 +140,6 @@ public class Connection {
             Log.d(TAG, "WebSocket closed...");
         }
     }
-
-    /*public boolean isConnected() {
-        return mWebSocketClient != null && mWebSocketClient.isOpen();
-    }*/
-
-    @SuppressWarnings("SimplifiableIfStatement")
-    /**
-     * Do NOT simplified these if statements. Clearer this way
-     */
-    /*private boolean shouldDisconnect(int code) {
-        boolean result = true;
-        if (code == -1 && isConnected()) {
-            result = false;
-        }
-        return result && mWebSocketClient != null && !mWebSocketClient.isClosed();
-    }*/
 
     private WebSocketClient getWebSocketClient(URI uri) {
         if (mWebSocketClient == null) {
