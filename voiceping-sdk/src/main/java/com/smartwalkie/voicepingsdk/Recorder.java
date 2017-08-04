@@ -1,16 +1,10 @@
 package com.smartwalkie.voicepingsdk;
 
-import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.AudioRecord;
-import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
-import com.media2359.voiceping.codec.Opus;
-import com.smartwalkie.voicepingsdk.constants.AudioParameters;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.Session;
@@ -30,11 +24,7 @@ public class Recorder implements OutgoingAudioListener {
 
     private static Recorder instance;
 
-    private Opus opus;
     private boolean isRecording;
-
-    private Thread recorderThread;
-
     private int receiverId;
     private int channelType;
 
@@ -64,9 +54,6 @@ public class Recorder implements OutgoingAudioListener {
     private static final int UPDATE_FOR_RECEIVED_STATUS_READ = 10000;
 
     private Recorder() {
-        if(AudioParameters.USE_CODEC) {
-            this.opus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
-        }
         initSenderThread();
     }
 
@@ -143,7 +130,6 @@ public class Recorder implements OutgoingAudioListener {
         Message message = MessageHelper.createAckStartMessage(Session.getInstance().getUserId(), receiverId, channelType, System.currentTimeMillis());
         Connection.getInstance().send(message.getPayload());
         state = STARTED;
-//        senderHandler.sendEmptyMessageDelayed(STOP_FOR_NOT_RECEIVED_ACK_START, ACK_TIMEOUT_IN_MILLIS);
     }
 
     public void send(byte[] payload, int offset, int length) {
@@ -180,8 +166,6 @@ public class Recorder implements OutgoingAudioListener {
     private void startRecording() {
         Log.v(TAG, "startRecording");
         isRecording = true;
-//        recorderThread = new RecorderThread();
-//        recorderThread.start();
         VoicePing.getApplication().startService(new Intent(VoicePing.getApplication(),
                 RecorderService.class));
         state = RECORDING;
@@ -227,66 +211,4 @@ public class Recorder implements OutgoingAudioListener {
         Log.v(TAG, "onMessageRead: " + message);
         senderHandler.sendEmptyMessage(UPDATE_FOR_RECEIVED_STATUS_READ);
     }
-    // OutgoingAudioListener
-
-    class RecorderThread extends Thread {
-        private AudioRecord audioRecord;
-        private AudioManager audioManager;
-
-        private long mStartRecordingTimestamp;
-
-        public RecorderThread() {
-            audioManager = (AudioManager) VoicePing.getApplication().getSystemService(Context.AUDIO_SERVICE);
-        }
-
-        @Override
-        public void run() {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-            audioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL_CONFIG, AudioParameters.AUDIO_FORMAT, AudioParameters.RECORD_MIN_BUFFER_SIZE);
-            try {
-                audioRecord.startRecording();
-                mStartRecordingTimestamp = System.currentTimeMillis();
-            } catch (IllegalStateException ise) {
-                ise.printStackTrace();
-                return;
-            }
-
-            int numberOfFrames = 0;
-            while (isRecording) {
-                Log.d(getClass().getSimpleName(), "isRecording... number of frames: " + numberOfFrames);
-                // check if message is too long
-                long currentTimestamp = System.currentTimeMillis();
-                long distance = currentTimestamp - mStartRecordingTimestamp;
-                if (distance > 60 * 1000 + 5000) {
-                    break;
-                }
-
-                byte[] recordedBytes = new byte[AudioParameters.FRAME_SIZE * 2 * AudioParameters.CHANNEL];
-                int numOfFrames = audioRecord.read(recordedBytes, 0, AudioParameters.FRAME_SIZE * 2);
-                if (numOfFrames == AudioRecord.ERROR_INVALID_OPERATION) {
-                    audioRecord.stop();
-                    audioRecord.release();
-                    audioRecord = null;
-                    audioManager.stopBluetoothSco();
-                    isRecording = false;
-                    return;
-                }
-
-                if (AudioParameters.USE_CODEC) {
-                    byte[] encodedBytes = new byte[recordedBytes.length];
-                    int encodedSize = opus.encode(recordedBytes, 0, AudioParameters.FRAME_SIZE, encodedBytes, 0, encodedBytes.length);
-                    numberOfFrames++;
-                    send(encodedBytes, 0, encodedSize);
-                } else {
-                    send(recordedBytes, 0, numOfFrames);
-                }
-            }
-
-            audioRecord.stop();
-            audioRecord.release();
-            audioRecord = null;
-            interrupt();
-        }
-    }
-
 }

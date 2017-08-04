@@ -25,7 +25,6 @@ public class RecorderService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Opus opus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION,
                 AudioParameters.SAMPLE_RATE,
@@ -63,6 +62,7 @@ public class RecorderService extends IntentService {
             }
 
             if (AudioParameters.USE_CODEC) {
+                Opus opus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
                 byte[] encodedBytes = new byte[recordedBytes.length];
                 int encodedSize = opus.encode(recordedBytes, 0, AudioParameters.FRAME_SIZE, encodedBytes, 0, encodedBytes.length);
                 numberOfFrames++;
