@@ -38,7 +38,7 @@ public class VoicePing implements ConnectionListener {
         mRecorder = Recorder.getInstance();
     }
 
-    protected static Application getApplication() {
+    public static Application getApplication() {
         return mApplication;
     }
 
