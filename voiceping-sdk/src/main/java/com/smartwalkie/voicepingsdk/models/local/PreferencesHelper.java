@@ -26,6 +26,14 @@ public class PreferencesHelper {
         return INSTANCE;
     }
 
+    public String getServerUrl() {
+        return mSharedPreferences.getString("server_url", null);
+    }
+
+    public void putServerUrl(String serverUrl) {
+        mSharedPreferences.edit().putString("server_url", serverUrl).apply();
+    }
+
     public String getUserId() {
         return mSharedPreferences.getString("user_id", null);
     }
