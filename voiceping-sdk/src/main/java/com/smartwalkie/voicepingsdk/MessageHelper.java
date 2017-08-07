@@ -32,12 +32,12 @@ public class MessageHelper {
             unpacker.readArrayBegin();
             int channelType = unpacker.readInt();
             int messageType = unpacker.readInt();
-            int senderId = unpacker.readInt();
-            int receiverId = unpacker.readInt();
+            String senderId = unpacker.readString();
+            String receiverId = unpacker.readString();
 
             Message message = null;
             try {
-                String key = String.format("%d_%d_%d", channelType, receiverId, senderId);
+                String key = String.format("%d_%s_%s", channelType, receiverId, senderId);
                 if (messageType == MessageType.START_TALKING) {
                     if (incomingMessages.containsKey(key)) {
                         Message oldMessage = incomingMessages.remove(key); // lacks stop talking but a new one has been received
@@ -114,7 +114,7 @@ public class MessageHelper {
         return null;
     }
 
-    public static byte[] createConnectionMessage(int senderId) {
+    public static byte[] createConnectionMessage(String senderId) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Packer packer = messagePack.createPacker(out);
         try {
@@ -129,7 +129,7 @@ public class MessageHelper {
         return out.toByteArray();
     }
 
-    public static Message createAckStartMessage(int senderId, int receiverId, int channelType, long duration) {
+    public static Message createAckStartMessage(String senderId, String receiverId, int channelType, long duration) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Packer packer = messagePack.createPacker(out);
 
@@ -142,7 +142,7 @@ public class MessageHelper {
             packer.write(duration);
             packer.writeArrayEnd(true);
 
-            String key = String.format("%d_%d_%d", channelType, receiverId, senderId);
+            String key = String.format("%d_%s_%s", channelType, receiverId, senderId);
             if (incomingMessages.containsKey(key)) {
                 Message oldMessage = incomingMessages.remove(key); // there is an incomplete outgoing message to the same user/group
             }
@@ -164,7 +164,7 @@ public class MessageHelper {
         }
     }
 
-    public static Message createAudioMessage(int senderId, int receiverId, int channelType, byte[] payload, int length
+    public static Message createAudioMessage(String senderId, String receiverId, int channelType, byte[] payload, int length
                                      ) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Packer packer = messagePack.createPacker(out);
@@ -178,7 +178,7 @@ public class MessageHelper {
             packer.write(payload, 0, length);
             packer.writeArrayEnd(true);
 
-            String key = String.format("%d_%d_%d", channelType, receiverId, senderId);
+            String key = String.format("%d_%s_%s", channelType, receiverId, senderId);
 
             Message message;
 
@@ -203,7 +203,7 @@ public class MessageHelper {
         }
     }
 
-    public static byte[] createAckStopMessage(int senderId, int receiverId, int channelType) {
+    public static byte[] createAckStopMessage(String senderId, String receiverId, int channelType) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Packer packer = messagePack.createPacker(out);
 
@@ -215,7 +215,7 @@ public class MessageHelper {
             packer.write(receiverId);
             packer.writeArrayEnd(true);
 
-            String key = String.format("%d_%d_%d", channelType, receiverId, senderId);
+            String key = String.format("%d_%s_%s", channelType, receiverId, senderId);
             Message message;
 
             if (!incomingMessages.containsKey(key)) {

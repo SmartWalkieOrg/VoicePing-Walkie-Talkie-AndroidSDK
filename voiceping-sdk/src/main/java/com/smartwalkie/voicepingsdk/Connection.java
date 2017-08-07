@@ -146,7 +146,7 @@ public class Connection {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
                     Log.d(TAG, "onOpen...");
-                    int userId = VoicePingPrefs.getInstance().getUserId();
+                    String userId = VoicePingPrefs.getInstance().getUserId();
                     mWebSocketClient.send(MessageHelper.createConnectionMessage(userId));
                     if (mConnectionListener != null) mConnectionListener.onConnected();
                 }

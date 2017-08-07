@@ -43,14 +43,14 @@ public class MainActivity extends AppCompatActivity
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    int receiverId = 0;
+                    String receiverId = null;
                     try {
-                        receiverId = Integer.parseInt(receiverIdText.getText().toString());
+                        receiverId = receiverIdText.getText().toString().trim();
                     } catch (NumberFormatException nfe) {
                         nfe.printStackTrace();
                     }
 
-                    if (receiverId <= 0) {
+                    if (receiverId == null || receiverId.isEmpty()) {
                         receiverIdText.setError(getString(R.string.error_invalid_user_id));
                         receiverIdText.requestFocus();
                         break;
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity
         talkButton = (Button) findViewById(R.id.talk_button);
         talkButton.setOnTouchListener(touchListener);
 
-        int userId = VoicePingPrefs.getInstance().getUserId();
+        String userId = VoicePingPrefs.getInstance().getUserId();
         setTitle("User ID: " + userId);
         talkButton.setText("START TALKING");
         talkButton.setBackgroundColor(Color.GREEN);

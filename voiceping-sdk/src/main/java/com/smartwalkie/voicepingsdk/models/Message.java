@@ -16,8 +16,8 @@ public class Message {
 
     private int channelType;
     private int messageType;
-    private int senderId;
-    private int receiverId;
+    private String senderId;
+    private String receiverId;
     private byte[] payload;
 
     private boolean finished;
@@ -82,19 +82,19 @@ public class Message {
         this.messageType = messageType;
     }
 
-    public int getSenderId() {
+    public String getSenderId() {
         return senderId;
     }
 
-    public void setSenderId(int senderId) {
+    public void setSenderId(String senderId) {
         this.senderId = senderId;
     }
 
-    public int getReceiverId() {
+    public String getReceiverId() {
         return receiverId;
     }
 
-    public void setReceiverId(int receiverId) {
+    public void setReceiverId(String receiverId) {
         this.receiverId = receiverId;
     }
 
@@ -295,8 +295,8 @@ public class Message {
     @Override
     public int hashCode() {
         int result = channelType;
-        result = 31 * result + senderId;
-        result = 31 * result + receiverId;
+        result = 31 * result + senderId.length();
+        result = 31 * result + receiverId.length();
         return result;
     }
 
@@ -323,7 +323,7 @@ public class Message {
      * @return {@link Message#senderId} if {@link Message#channelType} == {@link ChannelType#GROUP} <p>
      *     {@link Message#receiverId} if {@link Message#channelType} == {@link ChannelType#PRIVATE}
      */
-    public int getTargetId() {
+    public String getTargetId() {
         if (channelType == ChannelType.GROUP) {
             return receiverId;
         } else {
