@@ -39,24 +39,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_user_id"
                     android:text="999"
-                    android:maxLines="1"
-                    android:singleLine="true" />
-
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <EditText
-                    android:id="@+id/server_address_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/prompt_server_address"
-                    android:text="ws://vpjsex.n2j22nmzkr.ap-southeast-1.elasticbeanstalk.com"
-                    android:imeActionId="@+id/connect"
-                    android:imeActionLabel="@string/action_connect"
-                    android:imeOptions="actionUnspecified"
+                    android:inputType="number"
                     android:maxLines="1"
                     android:singleLine="true" />
 
