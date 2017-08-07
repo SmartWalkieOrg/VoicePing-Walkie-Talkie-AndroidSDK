@@ -9,7 +9,6 @@ import com.pusher.java_websocket.drafts.Draft_17;
 import com.pusher.java_websocket.framing.Framedata;
 import com.pusher.java_websocket.framing.FramedataImpl1;
 import com.pusher.java_websocket.handshake.ServerHandshake;
-import com.smartwalkie.voicepingsdk.events.MessageEvent;
 import com.smartwalkie.voicepingsdk.listeners.ConnectionListener;
 import com.smartwalkie.voicepingsdk.listeners.IncomingAudioListener;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
@@ -205,8 +204,6 @@ public class Connection {
                     }
 
                     Log.d(TAG, "message: " + message.getMessageType());
-
-                    MessageEvent messageEvent = new MessageEvent(message);
 
                     if (mConnectionListener != null) mConnectionListener.onMessage(message);
                 }
