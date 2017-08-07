@@ -25,7 +25,7 @@ public class Recorder implements OutgoingAudioListener {
     private static Recorder instance;
 
     private boolean isRecording;
-    private int receiverId;
+    private String receiverId;
     private int channelType;
 
     private static final int STOPPED = 0;
@@ -112,7 +112,7 @@ public class Recorder implements OutgoingAudioListener {
         this.isRecording = isRecording;
     }
 
-    public void startTalking(int receiverId, int channelType) {
+    public void startTalking(String receiverId, int channelType) {
         Log.v(TAG, "startTalking");
         this.receiverId = receiverId;
         this.channelType = channelType;
@@ -127,7 +127,7 @@ public class Recorder implements OutgoingAudioListener {
 
     private void sendAckStart() {
         Log.v(TAG, "sendAckStart");
-        int userId = VoicePingPrefs.getInstance().getUserId();
+        String userId = VoicePingPrefs.getInstance().getUserId();
         Message message = MessageHelper.createAckStartMessage(
                 userId, receiverId, channelType, System.currentTimeMillis());
         Connection.getInstance().send(message.getPayload());
@@ -152,7 +152,7 @@ public class Recorder implements OutgoingAudioListener {
             e.printStackTrace();
         }
         if (data == null || data.length == 0) return;
-        int userId = VoicePingPrefs.getInstance().getUserId();
+        String userId = VoicePingPrefs.getInstance().getUserId();
         Message message = MessageHelper.createAudioMessage(
                 userId, receiverId, channelType, data, data.length);
         Connection.getInstance().send(message.getPayload());
@@ -161,7 +161,7 @@ public class Recorder implements OutgoingAudioListener {
 
     private void sendAckStop() {
         Log.v(TAG, "sendAckStop");
-        int userId = VoicePingPrefs.getInstance().getUserId();
+        String userId = VoicePingPrefs.getInstance().getUserId();
         byte[] message = MessageHelper.createAckStopMessage(userId, receiverId, channelType);
         Connection.getInstance().send(message);
         state = WAITING_FOR_ACK_END;

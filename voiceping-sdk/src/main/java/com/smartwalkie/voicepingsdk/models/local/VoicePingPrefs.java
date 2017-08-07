@@ -34,11 +34,11 @@ public class VoicePingPrefs {
         mSharedPreferences.edit().putString("server_url", serverUrl).apply();
     }
 
-    public int getUserId() {
-        return mSharedPreferences.getInt("user_id", 0);
+    public String getUserId() {
+        return mSharedPreferences.getString("user_id", null);
     }
 
-    public void putUserId(int userId) {
-        mSharedPreferences.edit().putInt("user_id", userId).apply();
+    public void putUserId(String userId) {
+        mSharedPreferences.edit().putString("user_id", userId).apply();
     }
 }

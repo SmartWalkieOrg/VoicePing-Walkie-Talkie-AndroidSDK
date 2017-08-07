@@ -77,9 +77,9 @@ public class LoginActivity extends AppCompatActivity implements
         userIdText.setError(null);
 
         // Store values at the time of the connect attempt.
-        int userId;
+        String userId = null;
         try {
-            userId = Integer.parseInt(userIdText.getText().toString());
+            userId = userIdText.getText().toString().trim();
         } catch (NumberFormatException nfe) {
             nfe.printStackTrace();
             userIdText.setError(getString(R.string.error_invalid_user_id));
@@ -88,7 +88,7 @@ public class LoginActivity extends AppCompatActivity implements
         }
 
         // Check for a valid username.
-        if (userId <= 0) {
+        if (userId == null || userId.isEmpty()) {
             userIdText.setError(getString(R.string.error_invalid_user_id));
             userIdText.requestFocus();
         } else {

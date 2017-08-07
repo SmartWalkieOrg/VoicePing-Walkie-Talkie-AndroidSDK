@@ -46,7 +46,7 @@ public class VoicePing implements ConnectionListener {
         getInstance()._configure(serverUrl);
     }
 
-    public static void connect(int userId, ConnectCallback callback) {
+    public static void connect(String userId, ConnectCallback callback) {
         getInstance()._connect(userId, callback);
     }
 
@@ -55,9 +55,9 @@ public class VoicePing implements ConnectionListener {
         VoicePingPrefs.getInstance().putServerUrl(serverUrl);
     }
 
-    private void _connect(int userId, ConnectCallback callback) {
+    private void _connect(String userId, ConnectCallback callback) {
         Map<String, String> props = new HashMap<>();
-        props.put("user_id", Integer.toString(userId));
+        props.put("user_id", userId);
         _connect(props, callback);
     }
 
@@ -65,7 +65,7 @@ public class VoicePing implements ConnectionListener {
         this.mConnectCallback = callback;
         if (props.containsKey("user_id")) {
             String userId = props.get("user_id");
-            VoicePingPrefs.getInstance().putUserId(Integer.parseInt(userId));
+            VoicePingPrefs.getInstance().putUserId(userId);
         }
         props.put("DeviceId", Settings.Secure.getString(
                 mApplication.getContentResolver(), Settings.Secure.ANDROID_ID));
@@ -81,7 +81,7 @@ public class VoicePing implements ConnectionListener {
         mConnection.disconnect();
     }
 
-    public static void startTalking(int receiverId, int channelType) {
+    public static void startTalking(String receiverId, int channelType) {
         getInstance()._startTalking(receiverId, channelType);
     }
 
@@ -89,7 +89,7 @@ public class VoicePing implements ConnectionListener {
         getInstance()._stopTalking();
     }
 
-    private void _startTalking(int receiverId, int channelType) {
+    private void _startTalking(String receiverId, int channelType) {
         mRecorder.startTalking(receiverId, channelType);
     }
 
