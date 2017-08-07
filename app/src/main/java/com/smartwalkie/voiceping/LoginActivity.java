@@ -8,8 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.smartwalkie.voicepingsdk.VoicePing;
@@ -27,7 +27,7 @@ public class LoginActivity extends AppCompatActivity implements
 
     private final int RC_RECORD_AUDIO = 1000;
 
-    private AutoCompleteTextView userIdText;
+    private EditText userIdText;
     private View progressView;
     private View connectFormView;
 
@@ -35,7 +35,7 @@ public class LoginActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        userIdText = (AutoCompleteTextView) findViewById(R.id.user_id_text);
+        userIdText = (EditText) findViewById(R.id.user_id_text);
 
         Button connectButton = (Button) findViewById(R.id.connect_button);
         connectButton.setOnClickListener(new OnClickListener() {

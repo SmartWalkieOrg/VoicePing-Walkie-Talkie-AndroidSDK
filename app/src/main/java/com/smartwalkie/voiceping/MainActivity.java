@@ -15,8 +15,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.smartwalkie.voicepingsdk.VoicePing;
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final String[] CHANNEL_TYPES = { "PRIVATE", "GROUP" };
 
-    private AutoCompleteTextView receiverIdText;
+    private EditText receiverIdText;
     private Button talkButton;
     private Spinner channelTypeSpinner;
     private TextInputLayout channelInputLayout;
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity
         channelTypeSpinner.setAdapter(adapter);
         channelTypeSpinner.setOnItemSelectedListener(this);
 
-        receiverIdText = (AutoCompleteTextView) findViewById(R.id.receiver_id_text);
+        receiverIdText = (EditText) findViewById(R.id.receiver_id_text);
 
         talkButton = (Button) findViewById(R.id.talk_button);
         talkButton.setOnTouchListener(touchListener);
@@ -155,12 +155,10 @@ public class MainActivity extends AppCompatActivity
         if (parent != channelTypeSpinner) return;
         switch (position) {
             case 0:
-                channelInputLayout.setHint("Receiver ID");
                 receiverIdText.setHint("Receiver ID");
                 channelType = ChannelType.PRIVATE;
                 break;
             case 1:
-                channelInputLayout.setHint("Group ID");
                 receiverIdText.setHint("Group ID");
                 channelType = ChannelType.GROUP;
                 break;
