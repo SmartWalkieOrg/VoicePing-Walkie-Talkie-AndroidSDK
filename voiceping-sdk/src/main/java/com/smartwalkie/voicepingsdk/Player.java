@@ -15,15 +15,9 @@ import com.smartwalkie.voicepingsdk.models.Message;
 
 
 public class Player implements IncomingAudioListener {
-    public static final String TAG = Player.class.getSimpleName();
+    public final String TAG = Player.class.getSimpleName();
 
-    public static Player getInstance() {
-        if (instance == null) instance = new Player();
-        return instance;
-    }
-
-    private static Player instance;
-
+    public Context mContext;
     public AudioTrack audioTrack;
     Opus opus;
     private HandlerThread playerThread;
@@ -42,10 +36,10 @@ public class Player implements IncomingAudioListener {
     long mStartTalkingTime = 0;
     private byte[] mCurrentPlayingPlayload;
 
-    private Player() {
+    public Player(Context context) {
+        mContext = context;
         init();
     }
-
 
     private void init() {
         if (AudioParameters.USE_CODEC) {
@@ -113,7 +107,7 @@ public class Player implements IncomingAudioListener {
         if (currentState != STOP) {
             playerHandler.sendEmptyMessage(STOP);
         }
-        AudioManager am = (AudioManager) VoicePing.getApplication().getSystemService(Context.AUDIO_SERVICE);
+        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         int result = am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         mStartTalkingTime = System.currentTimeMillis();
         android.os.Message message = new android.os.Message();

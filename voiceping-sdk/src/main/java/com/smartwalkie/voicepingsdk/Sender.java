@@ -130,7 +130,7 @@ public class Sender {
                 }
             }
         };
-        recorder = Recorder.getInstance();
+//        recorder = Recorder.getInstance();
         step = INITIAL;
     }
 

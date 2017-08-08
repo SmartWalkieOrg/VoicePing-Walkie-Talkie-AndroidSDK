@@ -10,8 +10,12 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.media2359.voiceping.codec.Opus;
-import com.smartwalkie.voicepingsdk.Recorder;
 import com.smartwalkie.voicepingsdk.constants.AudioParameters;
+import com.smartwalkie.voicepingsdk.events.AudioDataEvent;
+
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.Arrays;
 
 /**
  * Created by kukuhsain on 8/4/17.
@@ -42,7 +46,7 @@ public class RecorderService extends IntentService {
         }
 
         int numberOfFrames = 0;
-        while (Recorder.getInstance().getRecordingStatus()) {
+        while (true) {
             Log.d(getClass().getSimpleName(), "isRecording... number of frames: " + numberOfFrames);
             // check if message is too long
             long currentTimestamp = System.currentTimeMillis();
@@ -57,7 +61,7 @@ public class RecorderService extends IntentService {
                 audioRecord.stop();
                 audioRecord.release();
                 audioManager.stopBluetoothSco();
-                Recorder.getInstance().setRecordingStatus(false);
+                stopSelf();
                 return;
             }
 
@@ -66,9 +70,11 @@ public class RecorderService extends IntentService {
                 byte[] encodedBytes = new byte[recordedBytes.length];
                 int encodedSize = opus.encode(recordedBytes, 0, AudioParameters.FRAME_SIZE, encodedBytes, 0, encodedBytes.length);
                 numberOfFrames++;
-                Recorder.getInstance().send(encodedBytes, 0, encodedSize);
+                EventBus.getDefault().post(new AudioDataEvent(Arrays.copyOfRange(encodedBytes, 0, encodedSize)));
+//                Recorder.getInstance().send(encodedBytes, 0, encodedSize);
             } else {
-                Recorder.getInstance().send(recordedBytes, 0, numOfFrames);
+                EventBus.getDefault().post(new AudioDataEvent(Arrays.copyOfRange(recordedBytes, 0, numOfFrames)));
+//                Recorder.getInstance().send(recordedBytes, 0, numOfFrames);
             }
         }
 

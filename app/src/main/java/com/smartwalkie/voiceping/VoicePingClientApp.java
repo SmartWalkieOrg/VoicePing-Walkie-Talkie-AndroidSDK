@@ -10,9 +10,16 @@ import com.smartwalkie.voicepingsdk.VoicePing;
 
 public class VoicePingClientApp extends Application {
 
+    private static VoicePing mVoicePing;
+
     @Override
     public void onCreate() {
         super.onCreate();
-        VoicePing.configure(this, "ws://vpjsex.n2j22nmzkr.ap-southeast-1.elasticbeanstalk.com");
+        mVoicePing = VoicePing
+                .init(this, "ws://vpjsex.n2j22nmzkr.ap-southeast-1.elasticbeanstalk.com");
+    }
+
+    public static VoicePing getVoicePing() {
+        return mVoicePing;
     }
 }

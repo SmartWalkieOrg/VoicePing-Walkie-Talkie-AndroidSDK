@@ -3,8 +3,6 @@ package com.smartwalkie.voicepingsdk.models.local;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.smartwalkie.voicepingsdk.VoicePing;
-
 /**
  * Created by kukuhsain on 8/4/17.
  */
@@ -14,14 +12,13 @@ public class VoicePingPrefs {
     private static VoicePingPrefs INSTANCE;
     private SharedPreferences mSharedPreferences;
 
-    public VoicePingPrefs() {
-        mSharedPreferences = VoicePing.getApplication()
-                .getSharedPreferences("voiceping_sdk.sp", Context.MODE_PRIVATE);
+    private VoicePingPrefs(Context context) {
+        mSharedPreferences = context.getSharedPreferences("voiceping_sdk.sp", Context.MODE_PRIVATE);
     }
 
-    public static VoicePingPrefs getInstance() {
+    public static VoicePingPrefs getInstance(Context context) {
         if (INSTANCE == null) {
-            INSTANCE = new VoicePingPrefs();
+            INSTANCE = new VoicePingPrefs(context);
         }
         return INSTANCE;
     }

@@ -19,14 +19,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import com.smartwalkie.voicepingsdk.VoicePing;
 import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
+import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
 import com.smartwalkie.voicepingsdk.models.ChannelType;
-import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
-public class MainActivity extends AppCompatActivity
-        implements AdapterView.OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
+        ChannelListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -59,17 +58,17 @@ public class MainActivity extends AppCompatActivity
                     talkButton.setText("RELEASE TO STOP");
                     talkButton.setBackgroundColor(Color.YELLOW);
                     //VoicePing.startTalking(64, ChannelType.PRIVATE);
-                    VoicePing.startTalking(receiverId, channelType);
+                    VoicePingClientApp.getVoicePing().startTalking(receiverId, channelType);
                     break;
                 case MotionEvent.ACTION_UP:
                     talkButton.setText("START TALKING");
                     talkButton.setBackgroundColor(Color.GREEN);
-                    VoicePing.stopTalking();
+                    VoicePingClientApp.getVoicePing().stopTalking();
                     break;
                 case MotionEvent.ACTION_CANCEL:
                     talkButton.setText("START TALKING");
                     talkButton.setBackgroundColor(Color.GREEN);
-                    VoicePing.stopTalking();
+                    VoicePingClientApp.getVoicePing().stopTalking();
                     break;
             }
             return false;
@@ -95,8 +94,8 @@ public class MainActivity extends AppCompatActivity
         talkButton = (Button) findViewById(R.id.talk_button);
         talkButton.setOnTouchListener(touchListener);
 
-        String userId = VoicePingPrefs.getInstance().getUserId();
-        setTitle("User ID: " + userId);
+        String userId = getIntent().getStringExtra("user_id");
+        if (userId != null) setTitle("User ID: " + userId);
         talkButton.setText("START TALKING");
         talkButton.setBackgroundColor(Color.GREEN);
     }
@@ -109,6 +108,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_disconnect:
@@ -117,7 +121,8 @@ public class MainActivity extends AppCompatActivity
                         .setMessage("Are you sure you want to disconnect?")
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                VoicePing.disconnect(new DisconnectCallback() {
+                                VoicePingClientApp.getVoicePing()
+                                        .disconnect(new DisconnectCallback() {
                                     @Override
                                     public void onDisconnected() {
                                         Log.v(TAG, "onDisconnected...");
@@ -172,5 +177,30 @@ public class MainActivity extends AppCompatActivity
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
-    // OnItemSelectedListener
+
+    // ChannelListener
+    @Override
+    public void onSubscribed() {
+
+    }
+
+    @Override
+    public void onTalkStarted(byte[] data) {
+
+    }
+
+    @Override
+    public void onTalkReceived(byte[] data) {
+
+    }
+
+    @Override
+    public void onUnsubscribed() {
+
+    }
+
+    @Override
+    public void onError(PingException e) {
+
+    }
 }

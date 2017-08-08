@@ -1,6 +1,7 @@
 package com.smartwalkie.voicepingsdk;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.util.Log;
 
 import com.pusher.java_websocket.WebSocket;
@@ -39,6 +40,7 @@ public class Connection {
     private ConnectionListener mConnectionListener;
     private IncomingAudioListener mIncomingAudioListener;
     private OutgoingAudioListener mOutgoingAudioListener;
+    private Context mContext;
 
     // Singleton
     private static Connection INSTANCE;
@@ -50,13 +52,15 @@ public class Connection {
     public Connection(String serverUrl,
                       ConnectionListener connectionListener,
                       IncomingAudioListener incomingAudioListener,
-                      OutgoingAudioListener outgoingAudioListener) {
+                      OutgoingAudioListener outgoingAudioListener,
+                      Context context) {
 
         mServerUrl = serverUrl;
         mConnectionListener = connectionListener;
         mIncomingAudioListener = incomingAudioListener;
         mOutgoingAudioListener = outgoingAudioListener;
         INSTANCE = this;
+        mContext = context;
     }
 
     /*private void reconnect() {
@@ -128,6 +132,7 @@ public class Connection {
         if (mWebSocketClient != null) {
             Log.d(TAG, "close WebSocket...");
             mWebSocketClient.close();
+            mWebSocketClient = null;
             if (mConnectionListener != null) mConnectionListener.onDisconnected();
         }
     }
@@ -146,7 +151,7 @@ public class Connection {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
                     Log.d(TAG, "onOpen...");
-                    String userId = VoicePingPrefs.getInstance().getUserId();
+                    String userId = VoicePingPrefs.getInstance(mContext).getUserId();
                     mWebSocketClient.send(MessageHelper.createConnectionMessage(userId));
                     if (mConnectionListener != null) mConnectionListener.onConnected();
                 }

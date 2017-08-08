@@ -27,6 +27,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.pusher:java-websocket:1.4.1'
     compile group: 'com.google.code.gson', name: 'gson', version:'2.7'
-    compile 'de.greenrobot:eventbus:2.2.1'
+    compile 'org.greenrobot:eventbus:3.0.0'
     testCompile 'junit:junit:4.12'
 }

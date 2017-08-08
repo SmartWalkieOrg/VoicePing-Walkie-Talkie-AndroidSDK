@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.smartwalkie.voicepingsdk.VoicePing;
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
 
@@ -77,15 +76,7 @@ public class LoginActivity extends AppCompatActivity implements
         userIdText.setError(null);
 
         // Store values at the time of the connect attempt.
-        String userId = null;
-        try {
-            userId = userIdText.getText().toString().trim();
-        } catch (NumberFormatException nfe) {
-            nfe.printStackTrace();
-            userIdText.setError(getString(R.string.error_invalid_user_id));
-            userIdText.requestFocus();
-            return;
-        }
+        final String userId = userIdText.getText().toString().trim();
 
         // Check for a valid username.
         if (userId == null || userId.isEmpty()) {
@@ -95,7 +86,7 @@ public class LoginActivity extends AppCompatActivity implements
             // Show a progress spinner, and kick off a background task to
             // perform the user connect attempt.
             showProgress(true);
-            VoicePing.connect(userId, new ConnectCallback() {
+            VoicePingClientApp.getVoicePing().connect(userId, new ConnectCallback() {
                 @Override
                 public void onConnected() {
                     Log.v(TAG, "onConnected");
@@ -103,7 +94,9 @@ public class LoginActivity extends AppCompatActivity implements
                         @Override
                         public void run() {
                             showProgress(false);
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            intent.putExtra("user_id", userId);
+                            startActivity(intent);
                             finish();
                         }
                     });
