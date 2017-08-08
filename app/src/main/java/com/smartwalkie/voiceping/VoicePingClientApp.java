@@ -16,7 +16,7 @@ public class VoicePingClientApp extends Application {
     public void onCreate() {
         super.onCreate();
         mVoicePing = VoicePing
-                .init(this, "ws://vpjsex.n2j22nmzkr.ap-southeast-1.elasticbeanstalk.com");
+                .init(this, "ws://vpjsex.southeastasia.cloudapp.azure.com");
     }
 
     public static VoicePing getVoicePing() {
