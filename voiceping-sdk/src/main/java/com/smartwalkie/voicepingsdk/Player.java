@@ -10,18 +10,21 @@ import android.util.Log;
 
 import com.media2359.voiceping.codec.Opus;
 import com.smartwalkie.voicepingsdk.constants.AudioParameters;
+import com.smartwalkie.voicepingsdk.listeners.AudioInterceptor;
+import com.smartwalkie.voicepingsdk.listeners.AudioPlayer;
+import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
 import com.smartwalkie.voicepingsdk.listeners.IncomingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
 
 
-public class Player implements IncomingAudioListener {
+public class Player implements IncomingAudioListener, AudioPlayer {
     public final String TAG = Player.class.getSimpleName();
 
     public Context mContext;
     public AudioTrack audioTrack;
-    Opus opus;
-    private HandlerThread playerThread;
-    private Handler playerHandler;
+    private Handler mPlayerHandler;
+    private ChannelListener mChannelListener;
+    private AudioInterceptor mAudioInterceptor;
 
     public static final int INIT = 0;
     public static final int START = 1;
@@ -42,14 +45,11 @@ public class Player implements IncomingAudioListener {
     }
 
     private void init() {
-        if (AudioParameters.USE_CODEC) {
-            opus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
-        }
-
-        playerThread = new HandlerThread("Player", Thread.MAX_PRIORITY);
+        final Opus opus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
+        HandlerThread playerThread = new HandlerThread("PlayerThread", Thread.MAX_PRIORITY);
         playerThread.start();
 
-        playerHandler = new Handler(playerThread.getLooper(), new Handler.Callback() {
+        mPlayerHandler = new Handler(playerThread.getLooper(), new Handler.Callback() {
 
             @Override
             public boolean handleMessage(android.os.Message msg) {
@@ -70,10 +70,22 @@ public class Player implements IncomingAudioListener {
                             int decodeSize = opus.decode(payload, 0, payload.length, pcmFrame, 0, AudioParameters.FRAME_SIZE, 0);
                             Log.v(TAG, "USE_CODEC");
                             if (decodeSize > 0) {
+                                if (mChannelListener != null) {
+                                    mChannelListener.onTalkReceived(Player.this);
+                                }
+                                if (mAudioInterceptor != null) {
+                                    pcmFrame = mAudioInterceptor.proceed(pcmFrame);
+                                }
                                 audioTrack.write(pcmFrame, 0, pcmFrame.length);
                                 Log.v(TAG, "decodeSize: "+decodeSize);
                             }
                         } else {
+                            if (mChannelListener != null) {
+                                mChannelListener.onTalkReceived(Player.this);
+                            }
+                            if (mAudioInterceptor != null) {
+                                payload = mAudioInterceptor.proceed(payload);
+                            }
                             audioTrack.write(payload, 0, payload.length);
                             Log.v(TAG, "!USE_CODEC");
                         }
@@ -100,28 +112,32 @@ public class Player implements IncomingAudioListener {
                 return false;
             }
         });
-        playerHandler.sendEmptyMessage(INIT);
+        mPlayerHandler.sendEmptyMessage(INIT);
     }
 
     public void start() {
         if (currentState != STOP) {
-            playerHandler.sendEmptyMessage(STOP);
+            mPlayerHandler.sendEmptyMessage(STOP);
         }
         AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         int result = am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         mStartTalkingTime = System.currentTimeMillis();
         android.os.Message message = new android.os.Message();
         message.what = START;
-        playerHandler.sendMessage(message);
+        mPlayerHandler.sendMessage(message);
+    }
+
+    public void setChannelListener(ChannelListener channelListener) {
+        mChannelListener = channelListener;
     }
 
     private void stop() {
-        playerHandler.sendEmptyMessage(STOP);
+        mPlayerHandler.sendEmptyMessage(STOP);
     }
 
     public void forceStop(){
-        playerHandler.removeMessages(PLAY);
-        playerHandler.removeMessages(STOP_PLAYING_AFTER_A_TIME);
+        mPlayerHandler.removeMessages(PLAY);
+        mPlayerHandler.removeMessages(STOP_PLAYING_AFTER_A_TIME);
         stop();
     }
 
@@ -129,7 +145,7 @@ public class Player implements IncomingAudioListener {
         android.os.Message message = new android.os.Message();
         message.what = PLAY;
         message.obj = bytes;
-        playerHandler.sendMessage(message);
+        mPlayerHandler.sendMessage(message);
     }
 
     private AudioTrack initAudioTrack() {
@@ -163,5 +179,10 @@ public class Player implements IncomingAudioListener {
     public void onStopTalkingMessage(Message message) {
         Log.v(TAG, "onStopTalkingMessage: " + message.toString());
     }
-    // IncomingAudioListener
+
+    // AudioPlayer
+    @Override
+    public void addAudioInterceptor(AudioInterceptor audioInterceptor) {
+        mAudioInterceptor = audioInterceptor;
+    }
 }

@@ -21,10 +21,14 @@ import android.widget.Spinner;
 
 import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
+import com.smartwalkie.voicepingsdk.listeners.AudioInterceptor;
 import com.smartwalkie.voicepingsdk.listeners.AudioPlayer;
 import com.smartwalkie.voicepingsdk.listeners.AudioRecorder;
 import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
 import com.smartwalkie.voicepingsdk.models.ChannelType;
+
+import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
         ChannelListener {
@@ -186,7 +190,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onTalkStarted(AudioRecorder audioRecorder) {
-
+        audioRecorder.addAudioInterceptor(new AudioInterceptor() {
+            @Override
+            public byte[] proceed(byte[] data) {
+                ShortBuffer sb = ByteBuffer.wrap(data).asShortBuffer();
+                short[] dataShortArray = new short[sb.limit()];
+                sb.get(dataShortArray);
+                if (dataShortArray.length > 0) Log.d(TAG, "amplitude: " + dataShortArray[0]);
+                return data;
+            }
+        });
     }
 
     @Override

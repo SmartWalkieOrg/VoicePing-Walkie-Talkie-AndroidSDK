@@ -6,7 +6,12 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import com.media2359.voiceping.codec.Opus;
+import com.smartwalkie.voicepingsdk.constants.AudioParameters;
 import com.smartwalkie.voicepingsdk.events.AudioDataEvent;
+import com.smartwalkie.voicepingsdk.listeners.AudioInterceptor;
+import com.smartwalkie.voicepingsdk.listeners.AudioRecorder;
+import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
@@ -15,10 +20,11 @@ import com.smartwalkie.voicepingsdk.services.RecorderService;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
-public class Recorder implements OutgoingAudioListener {
+public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     private static final String TAG = Recorder.class.getSimpleName();
 
@@ -28,6 +34,9 @@ public class Recorder implements OutgoingAudioListener {
     private boolean isRecording;
     private String receiverId;
     private int channelType;
+    private Opus mOpus;
+    private ChannelListener mChannelListener;
+    private AudioInterceptor mAudioInterceptor;
 
     private static final int STOPPED = 0;
     private static final int STARTED = 10;
@@ -60,6 +69,7 @@ public class Recorder implements OutgoingAudioListener {
         state = STOPPED;
         EventBus.getDefault().register(this);
         initSenderThread();
+        mOpus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
     }
 
     private void initSenderThread() {
@@ -109,6 +119,10 @@ public class Recorder implements OutgoingAudioListener {
         state = STOPPED;
     }
 
+    public void setChannelListener(ChannelListener channelListener) {
+        mChannelListener = channelListener;
+    }
+
     public void startTalking(String receiverId, int channelType) {
         Log.v(TAG, "startTalking");
         this.receiverId = receiverId;
@@ -150,6 +164,16 @@ public class Recorder implements OutgoingAudioListener {
             e.printStackTrace();
         }
         if (data == null || data.length == 0) return;
+
+        if (mChannelListener != null) mChannelListener.onTalkStarted(this);
+        if (mAudioInterceptor != null) data = mAudioInterceptor.proceed(data);
+
+        if (AudioParameters.USE_CODEC) {
+            byte[] encodedBytes = new byte[data.length];
+            int encodedSize = mOpus.encode(data, 0, AudioParameters.FRAME_SIZE, encodedBytes, 0, encodedBytes.length);
+            data = Arrays.copyOfRange(encodedBytes, 0, encodedSize);
+        }
+
         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
         Message message = MessageHelper.createAudioMessage(
                 userId, receiverId, channelType, data, data.length);
@@ -212,5 +236,11 @@ public class Recorder implements OutgoingAudioListener {
     public void onMessageRead(Message message) {
         Log.v(TAG, "onMessageRead: " + message);
         mSenderHandler.sendEmptyMessage(UPDATE_FOR_RECEIVED_STATUS_READ);
+    }
+
+    // AudioRecorder
+    @Override
+    public void addAudioInterceptor(AudioInterceptor audioInterceptor) {
+        mAudioInterceptor = audioInterceptor;
     }
 }

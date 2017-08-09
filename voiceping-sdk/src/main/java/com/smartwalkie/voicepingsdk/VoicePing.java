@@ -1,6 +1,5 @@
 package com.smartwalkie.voicepingsdk;
 
-
 import android.content.Context;
 import android.provider.Settings;
 
@@ -21,15 +20,15 @@ public class VoicePing implements ConnectionListener {
     private Connection mConnection;
     private ConnectCallback mConnectCallback;
     private DisconnectCallback mDisconnectCallback;
-    private ChannelListener mChannelListener;
 
+    private Player mPlayer;
     private Recorder mRecorder;
 
     private VoicePing(Context context, String serverUrl) {
         mContext = context;
-        Player player = new Player(context);
-        player.start();
-        mConnection = new Connection(context, serverUrl, this, player);
+        mPlayer = new Player(context);
+        mPlayer.start();
+        mConnection = new Connection(context, serverUrl, this, mPlayer);
         mRecorder = new Recorder(context, mConnection);
         mConnection.setOutgoingAudioListener(mRecorder);
         VoicePingPrefs.getInstance(context).putServerUrl(serverUrl);
@@ -55,7 +54,8 @@ public class VoicePing implements ConnectionListener {
     }
 
     public void setChannelListener(ChannelListener channelListener) {
-        mChannelListener = channelListener;
+        mPlayer.setChannelListener(channelListener);
+        mRecorder.setChannelListener(channelListener);
     }
 
     public void subscribe(String channelId, int channelType) {
