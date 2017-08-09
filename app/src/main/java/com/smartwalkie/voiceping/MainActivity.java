@@ -21,6 +21,8 @@ import android.widget.Spinner;
 
 import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
+import com.smartwalkie.voicepingsdk.listeners.AudioPlayer;
+import com.smartwalkie.voicepingsdk.listeners.AudioRecorder;
 import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
 import com.smartwalkie.voicepingsdk.models.ChannelType;
 
@@ -42,12 +44,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    String receiverId = null;
-                    try {
-                        receiverId = receiverIdText.getText().toString().trim();
-                    } catch (NumberFormatException nfe) {
-                        nfe.printStackTrace();
-                    }
+                    String receiverId = receiverIdText.getText().toString().trim();
 
                     if (receiverId == null || receiverId.isEmpty()) {
                         receiverIdText.setError(getString(R.string.error_invalid_user_id));
@@ -98,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if (userId != null) setTitle("User ID: " + userId);
         talkButton.setText("START TALKING");
         talkButton.setBackgroundColor(Color.GREEN);
+
+        VoicePingClientApp.getVoicePing().setChannelListener(this);
     }
 
     @Override
@@ -166,10 +165,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             case 1:
                 receiverIdText.setHint("Group ID");
                 channelType = ChannelType.GROUP;
+                String receiverId = receiverIdText.getText().toString().trim();
+                VoicePingClientApp.getVoicePing().subscribe(receiverId, ChannelType.GROUP);
                 break;
             default:
                 break;
-
         }
     }
 
@@ -180,22 +180,22 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     // ChannelListener
     @Override
-    public void onSubscribed() {
+    public void onSubscribed(String channelId, int channelType) {
 
     }
 
     @Override
-    public void onTalkStarted(byte[] data) {
+    public void onTalkStarted(AudioRecorder audioRecorder) {
 
     }
 
     @Override
-    public void onTalkReceived(byte[] data) {
+    public void onTalkReceived(AudioPlayer audioPlayer) {
 
     }
 
     @Override
-    public void onUnsubscribed() {
+    public void onUnsubscribed(String channelId, int channelType) {
 
     }
 

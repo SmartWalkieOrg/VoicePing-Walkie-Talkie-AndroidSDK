@@ -23,15 +23,15 @@ public class VoicePing implements ConnectionListener {
     private DisconnectCallback mDisconnectCallback;
     private ChannelListener mChannelListener;
 
-    private Player mPlayer;
     private Recorder mRecorder;
 
     private VoicePing(Application application, String serverUrl) {
         mApplication = application;
-        mPlayer = new Player(application);
-        mPlayer.start();
-        mRecorder = new Recorder(application);
-        mConnection = new Connection(serverUrl, this, mPlayer, mRecorder, application);
+        Player player = new Player(application);
+        player.start();
+        mConnection = new Connection(application, serverUrl, this, player);
+        mRecorder = new Recorder(application, mConnection);
+        mConnection.setOutgoingAudioListener(mRecorder);
         VoicePingPrefs.getInstance(application).putServerUrl(serverUrl);
     }
 
@@ -58,11 +58,11 @@ public class VoicePing implements ConnectionListener {
         mChannelListener = channelListener;
     }
 
-    public void subscribe(int channelId, int channelType) {
+    public void subscribe(String channelId, int channelType) {
 
     }
 
-    public void unsubscribe(int channelId) {
+    public void unsubscribe(String channelId) {
 
     }
 

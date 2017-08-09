@@ -42,35 +42,21 @@ public class Connection {
     private OutgoingAudioListener mOutgoingAudioListener;
     private Context mContext;
 
-    // Singleton
-    private static Connection INSTANCE;
-    public static Connection getInstance() {
-        return INSTANCE;
-    }
-
     // Constructor
-    public Connection(String serverUrl,
+    public Connection(Context context,
+                      String serverUrl,
                       ConnectionListener connectionListener,
-                      IncomingAudioListener incomingAudioListener,
-                      OutgoingAudioListener outgoingAudioListener,
-                      Context context) {
+                      IncomingAudioListener incomingAudioListener) {
 
+        mContext = context;
         mServerUrl = serverUrl;
         mConnectionListener = connectionListener;
         mIncomingAudioListener = incomingAudioListener;
-        mOutgoingAudioListener = outgoingAudioListener;
-        INSTANCE = this;
-        mContext = context;
     }
 
-    /*private void reconnect() {
-        try {
-            mWebSocketClient.closeBlocking();
-            mWebSocketClient.connectBlocking();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }*/
+    public void setOutgoingAudioListener(OutgoingAudioListener listener) {
+        mOutgoingAudioListener = listener;
+    }
 
     public void connect(Map<String, String> headers) {
         mHeaders = headers;

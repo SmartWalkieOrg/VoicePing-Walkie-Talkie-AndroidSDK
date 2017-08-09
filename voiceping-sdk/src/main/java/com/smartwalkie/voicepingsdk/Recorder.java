@@ -19,16 +19,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class Recorder implements OutgoingAudioListener {
+
     private static final String TAG = Recorder.class.getSimpleName();
 
-    /*public static Recorder getInstance() {
-        if (instance == null) instance = new Recorder();
-        return instance;
-    }*/
-
-//    private static Recorder instance;
-
     private Context mContext;
+    private Connection mConnection;
     public static boolean IS_RECORDING;
     private boolean isRecording;
     private String receiverId;
@@ -59,8 +54,9 @@ public class Recorder implements OutgoingAudioListener {
     private static final int UPDATE_FOR_RECEIVED_STATUS_DELIVERED = 9000;
     private static final int UPDATE_FOR_RECEIVED_STATUS_READ = 10000;
 
-    public Recorder(Context context) {
+    public Recorder(Context context, Connection connection) {
         mContext = context;
+        mConnection = connection;
         mBlockingQueue = new LinkedBlockingQueue<>();
         state = STOPPED;
         EventBus.getDefault().register(this);
@@ -135,7 +131,7 @@ public class Recorder implements OutgoingAudioListener {
         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
         Message message = MessageHelper.createAckStartMessage(
                 userId, receiverId, channelType, System.currentTimeMillis());
-        Connection.getInstance().send(message.getPayload());
+        mConnection.send(message.getPayload());
         state = STARTED;
     }
 
@@ -166,7 +162,7 @@ public class Recorder implements OutgoingAudioListener {
         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
         Message message = MessageHelper.createAudioMessage(
                 userId, receiverId, channelType, data, data.length);
-        Connection.getInstance().send(message.getPayload());
+        mConnection.send(message.getPayload());
         state = SENDING;
     }
 
@@ -174,7 +170,7 @@ public class Recorder implements OutgoingAudioListener {
         Log.v(TAG, "sendAckStop");
         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
         byte[] message = MessageHelper.createAckStopMessage(userId, receiverId, channelType);
-        Connection.getInstance().send(message);
+        mConnection.send(message);
         state = WAITING_FOR_ACK_END;
         senderHandler.sendEmptyMessageDelayed(UPDATE_FOR_NOT_RECEIVED_ACK_END, ACK_TIMEOUT_IN_MILLIS);
     }

@@ -8,13 +8,13 @@ import com.smartwalkie.voicepingsdk.exceptions.PingException;
 
 public interface ChannelListener {
 
-    void onSubscribed();
+    void onSubscribed(String channelId, int channelType);
 
-    void onTalkStarted(byte[] data);
+    void onTalkStarted(AudioRecorder audioRecorder);
 
-    void onTalkReceived(byte[] data);
+    void onTalkReceived(AudioPlayer audioPlayer);
 
-    void onUnsubscribed();
+    void onUnsubscribed(String channelId, int channelType);
 
     void onError(PingException e);
 }
