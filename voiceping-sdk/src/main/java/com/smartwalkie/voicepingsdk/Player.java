@@ -75,6 +75,7 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                                 }
                                 if (mAudioInterceptor != null) {
                                     pcmFrame = mAudioInterceptor.proceed(pcmFrame);
+                                    if (pcmFrame == null || pcmFrame.length == 0) return false;
                                 }
                                 audioTrack.write(pcmFrame, 0, pcmFrame.length);
                                 Log.v(TAG, "decodeSize: "+decodeSize);
@@ -85,6 +86,7 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                             }
                             if (mAudioInterceptor != null) {
                                 payload = mAudioInterceptor.proceed(payload);
+                                if (payload == null || payload.length == 0) return false;
                             }
                             audioTrack.write(payload, 0, payload.length);
                             Log.v(TAG, "!USE_CODEC");

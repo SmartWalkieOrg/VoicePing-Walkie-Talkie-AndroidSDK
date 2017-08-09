@@ -163,10 +163,11 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if (data == null || data.length == 0) return;
 
         if (mChannelListener != null) mChannelListener.onTalkStarted(this);
         if (mAudioInterceptor != null) data = mAudioInterceptor.proceed(data);
+
+        if (data == null || data.length == 0) return;
 
         if (AudioParameters.USE_CODEC) {
             byte[] encodedBytes = new byte[data.length];
