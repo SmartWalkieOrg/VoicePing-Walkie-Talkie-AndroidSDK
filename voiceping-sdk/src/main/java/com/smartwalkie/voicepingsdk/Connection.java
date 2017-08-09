@@ -10,7 +10,9 @@ import com.pusher.java_websocket.drafts.Draft_17;
 import com.pusher.java_websocket.framing.Framedata;
 import com.pusher.java_websocket.framing.FramedataImpl1;
 import com.pusher.java_websocket.handshake.ServerHandshake;
-import com.smartwalkie.voicepingsdk.listeners.ConnectionListener;
+import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
+import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
+import com.smartwalkie.voicepingsdk.exceptions.PingException;
 import com.smartwalkie.voicepingsdk.listeners.IncomingAudioListener;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
@@ -37,7 +39,8 @@ public class Connection {
     private WebSocketClient mWebSocketClient;
     private String mServerUrl;
     private Map<String, String> mHeaders;
-    private ConnectionListener mConnectionListener;
+    private ConnectCallback mConnectCallback;
+    private DisconnectCallback mDisconnectCallback;
     private IncomingAudioListener mIncomingAudioListener;
     private OutgoingAudioListener mOutgoingAudioListener;
     private Context mContext;
@@ -45,12 +48,10 @@ public class Connection {
     // Constructor
     public Connection(Context context,
                       String serverUrl,
-                      ConnectionListener connectionListener,
                       IncomingAudioListener incomingAudioListener) {
 
         mContext = context;
         mServerUrl = serverUrl;
-        mConnectionListener = connectionListener;
         mIncomingAudioListener = incomingAudioListener;
     }
 
@@ -58,11 +59,13 @@ public class Connection {
         mOutgoingAudioListener = listener;
     }
 
-    public void connect(Map<String, String> headers) {
-        mHeaders = headers;
+    public void connect(Map<String, String> headers, ConnectCallback callback) {
         if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
             return;
         }
+
+        mHeaders = headers;
+        mConnectCallback = callback;
 
         URI uri = null;
         try {
@@ -114,12 +117,16 @@ public class Connection {
         }
     }
 
-    public void disconnect() {
+    public void disconnect(DisconnectCallback callback) {
+        mDisconnectCallback = callback;
         if (mWebSocketClient != null) {
             Log.d(TAG, "close WebSocket...");
             mWebSocketClient.close();
             mWebSocketClient = null;
-            if (mConnectionListener != null) mConnectionListener.onDisconnected();
+            if (mDisconnectCallback != null) mDisconnectCallback.onDisconnected();
+        } else {
+            if (mDisconnectCallback != null) mDisconnectCallback
+                    .onFailed(new PingException("Failed to disconnect!"));
         }
     }
 
@@ -139,7 +146,7 @@ public class Connection {
                     Log.d(TAG, "onOpen...");
                     String userId = VoicePingPrefs.getInstance(mContext).getUserId();
                     mWebSocketClient.send(MessageHelper.createConnectionMessage(userId));
-                    if (mConnectionListener != null) mConnectionListener.onConnected();
+                    if (mConnectCallback != null) mConnectCallback.onConnected();
                 }
 
                 @Override
@@ -152,14 +159,15 @@ public class Connection {
                     Log.d(TAG, "onClose...");
                     Log.d(TAG, "reason: " + reason);
                     Log.d(TAG, "remote: " + remote);
-                    if (mConnectionListener != null) mConnectionListener.onDisconnected();
+                    if (mDisconnectCallback != null) mDisconnectCallback.onDisconnected();
                 }
 
                 @Override
                 public void onError(Exception ex) {
                     Log.v(TAG, "onError...");
                     ex.printStackTrace();
-                    if (mConnectionListener != null) mConnectionListener.onFailed();
+                    if (mConnectCallback != null) mConnectCallback
+                            .onFailed(new PingException("Failed to connect!"));
                 }
 
                 @Override
@@ -195,8 +203,6 @@ public class Connection {
                     }
 
                     Log.d(TAG, "message: " + message.getMessageType());
-
-                    if (mConnectionListener != null) mConnectionListener.onMessage(message);
                 }
 
                 @Override
