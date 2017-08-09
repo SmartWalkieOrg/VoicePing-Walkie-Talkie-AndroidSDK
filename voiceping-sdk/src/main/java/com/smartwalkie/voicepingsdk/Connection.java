@@ -34,8 +34,9 @@ import javax.net.ssl.X509TrustManager;
 
 public class Connection {
 
-    private static final String TAG = Connection.class.getSimpleName();
+    private final String TAG = Connection.class.getSimpleName();
 
+    private Context mContext;
     private WebSocketClient mWebSocketClient;
     private String mServerUrl;
     private Map<String, String> mHeaders;
@@ -43,16 +44,11 @@ public class Connection {
     private DisconnectCallback mDisconnectCallback;
     private IncomingAudioListener mIncomingAudioListener;
     private OutgoingAudioListener mOutgoingAudioListener;
-    private Context mContext;
 
-    // Constructor
-    public Connection(Context context,
-                      String serverUrl,
-                      IncomingAudioListener incomingAudioListener) {
-
+    public Connection(Context context, String serverUrl, IncomingAudioListener listener) {
         mContext = context;
         mServerUrl = serverUrl;
-        mIncomingAudioListener = incomingAudioListener;
+        mIncomingAudioListener = listener;
     }
 
     public void setOutgoingAudioListener(OutgoingAudioListener listener) {

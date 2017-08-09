@@ -18,56 +18,57 @@ import com.smartwalkie.voicepingsdk.models.Message;
 
 
 public class Player implements IncomingAudioListener, AudioPlayer {
-    public final String TAG = Player.class.getSimpleName();
 
-    public Context mContext;
-    public AudioTrack audioTrack;
+    private final String TAG = Player.class.getSimpleName();
+
+    private Context mContext;
+    private Opus mOpus;
+    private AudioTrack mAudioTrack;
     private Handler mPlayerHandler;
     private ChannelListener mChannelListener;
     private AudioInterceptor mAudioInterceptor;
 
-    public static final int INIT = 0;
-    public static final int START = 1;
-    public static final int PLAY = 2;
-    public static final int STOP = 3;
-    public static final int DESTROY = 4;
-    public static final int END = 5;
-    public static final int STOP_PLAYING_AFTER_A_TIME = 6;
-    public static final int SPEAKER_MODE_CHANGE = 7;
+    private final int INIT = 0;
+    private final int START = 1;
+    private final int PLAY = 2;
+    private final int STOP = 3;
+    private final int DESTROY = 4;
+    private final int END = 5;
+    private final int STOP_PLAYING_AFTER_A_TIME = 6;
+    private final int SPEAKER_MODE_CHANGE = 7;
 
-    int currentState;
-    long mStartTalkingTime = 0;
+    private int mCurrentState;
+    private long mStartTalkingTime = 0;
     private byte[] mCurrentPlayingPlayload;
 
     public Player(Context context) {
         mContext = context;
-        init();
+        mOpus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
+        initPlayerThread();
     }
 
-    private void init() {
-        final Opus opus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
+    private void initPlayerThread() {
         HandlerThread playerThread = new HandlerThread("PlayerThread", Thread.MAX_PRIORITY);
         playerThread.start();
-
         mPlayerHandler = new Handler(playerThread.getLooper(), new Handler.Callback() {
 
             @Override
             public boolean handleMessage(android.os.Message msg) {
-                currentState = msg.what;
+                mCurrentState = msg.what;
 
                 switch (msg.what) {
                     case INIT:
-                        audioTrack = initAudioTrack();
+                        mAudioTrack = initAudioTrack();
                         return true;
                     case START:
-                        audioTrack.play();
+                        mAudioTrack.play();
                         return true;
                     case PLAY:
                         byte[] payload = (byte[]) msg.obj;
                         mCurrentPlayingPlayload = payload;
                         byte[] pcmFrame = new byte[1920];
                         if (AudioParameters.USE_CODEC) {
-                            int decodeSize = opus.decode(payload, 0, payload.length, pcmFrame, 0, AudioParameters.FRAME_SIZE, 0);
+                            int decodeSize = mOpus.decode(payload, 0, payload.length, pcmFrame, 0, AudioParameters.FRAME_SIZE, 0);
                             Log.v(TAG, "USE_CODEC");
                             if (decodeSize > 0) {
                                 if (mChannelListener != null) {
@@ -77,7 +78,7 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                                     pcmFrame = mAudioInterceptor.proceed(pcmFrame);
                                     if (pcmFrame == null || pcmFrame.length == 0) return false;
                                 }
-                                audioTrack.write(pcmFrame, 0, pcmFrame.length);
+                                mAudioTrack.write(pcmFrame, 0, pcmFrame.length);
                                 Log.v(TAG, "decodeSize: "+decodeSize);
                             }
                         } else {
@@ -88,23 +89,23 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                                 payload = mAudioInterceptor.proceed(payload);
                                 if (payload == null || payload.length == 0) return false;
                             }
-                            audioTrack.write(payload, 0, payload.length);
+                            mAudioTrack.write(payload, 0, payload.length);
                             Log.v(TAG, "!USE_CODEC");
                         }
                         return true;
                     case STOP:
                         Log.d(TAG, "Stop...");
-                        audioTrack.stop();
-                        audioTrack.flush();
+                        mAudioTrack.stop();
+                        mAudioTrack.flush();
                         mCurrentPlayingPlayload = null;
                         mStartTalkingTime =0;
                         return true;
                     case DESTROY:
                         Log.d(TAG, "Destroy...");
-                        audioTrack.stop();
-                        audioTrack.flush();
+                        mAudioTrack.stop();
+                        mAudioTrack.flush();
                         mCurrentPlayingPlayload = null;
-                        audioTrack.release();
+                        mAudioTrack.release();
                         return true;
                     case STOP_PLAYING_AFTER_A_TIME:
                         Log.d(TAG, "Stop playing after a time...");
@@ -118,7 +119,7 @@ public class Player implements IncomingAudioListener, AudioPlayer {
     }
 
     public void start() {
-        if (currentState != STOP) {
+        if (mCurrentState != STOP) {
             mPlayerHandler.sendEmptyMessage(STOP);
         }
         AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
@@ -137,13 +138,13 @@ public class Player implements IncomingAudioListener, AudioPlayer {
         mPlayerHandler.sendEmptyMessage(STOP);
     }
 
-    public void forceStop(){
+    private void forceStop(){
         mPlayerHandler.removeMessages(PLAY);
         mPlayerHandler.removeMessages(STOP_PLAYING_AFTER_A_TIME);
         stop();
     }
 
-    public void play(byte[] bytes) {
+    private void play(byte[] bytes) {
         android.os.Message message = new android.os.Message();
         message.what = PLAY;
         message.obj = bytes;

@@ -62,21 +62,12 @@ public class RecorderService extends IntentService {
                 audioRecord.release();
                 audioManager.stopBluetoothSco();
                 stopSelf();
+                Recorder.IS_RECORDING = false;
                 return;
             }
 
             numberOfFrames++;
             EventBus.getDefault().post(new AudioDataEvent(Arrays.copyOfRange(recordedBytes, 0, numOfFrames)));
-
-            /*if (AudioParameters.USE_CODEC) {
-                Opus opus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
-                byte[] encodedBytes = new byte[recordedBytes.length];
-                int encodedSize = opus.encode(recordedBytes, 0, AudioParameters.FRAME_SIZE, encodedBytes, 0, encodedBytes.length);
-                numberOfFrames++;
-                EventBus.getDefault().post(new AudioDataEvent(Arrays.copyOfRange(encodedBytes, 0, encodedSize)));
-            } else {
-                EventBus.getDefault().post(new AudioDataEvent(Arrays.copyOfRange(recordedBytes, 0, numOfFrames)));
-            }*/
         }
 
         audioRecord.stop();

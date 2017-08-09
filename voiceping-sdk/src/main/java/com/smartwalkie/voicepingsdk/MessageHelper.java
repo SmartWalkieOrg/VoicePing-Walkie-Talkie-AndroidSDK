@@ -19,14 +19,14 @@ import java.util.Map;
 
 public class MessageHelper {
 
-    public static final String TAG = MessageHelper.class.getSimpleName();
-    private static final MessagePack messagePack = new MessagePack();
-    private static final Map<String, Message> incomingMessages = new HashMap<>();
-    private static final Map<String, Message> outgoingMessages = new HashMap<>();
+    private static final String TAG = MessageHelper.class.getSimpleName();
+    private static final MessagePack mMessagePack = new MessagePack();
+    private static final Map<String, Message> mIncomingMessages = new HashMap<>();
+    private static final Map<String, Message> mOutgoingMessages = new HashMap<>();
 
     public static Message unpackMessage(byte[] payload) {
         ByteArrayInputStream stream = new ByteArrayInputStream(payload);
-        MessagePackUnpacker unpacker = (MessagePackUnpacker) messagePack.createUnpacker(stream);
+        MessagePackUnpacker unpacker = (MessagePackUnpacker) mMessagePack.createUnpacker(stream);
 
         try {
             unpacker.readArrayBegin();
@@ -39,23 +39,23 @@ public class MessageHelper {
             try {
                 String key = String.format("%d_%s_%s", channelType, receiverId, senderId);
                 if (messageType == MessageType.START_TALKING) {
-                    if (incomingMessages.containsKey(key)) {
-                        Message oldMessage = incomingMessages.remove(key); // lacks stop talking but a new one has been received
+                    if (mIncomingMessages.containsKey(key)) {
+                        Message oldMessage = mIncomingMessages.remove(key); // lacks stop talking but a new one has been received
                     }
                     message = new Message();
-                    incomingMessages.put(key, message);
+                    mIncomingMessages.put(key, message);
                 } else if (messageType == MessageType.AUDIO) {
-                    if (!incomingMessages.containsKey(key)) {
+                    if (!mIncomingMessages.containsKey(key)) {
                         message = new Message();
-                        incomingMessages.put(key, message); // lacks start talking, let's just proceed
+                        mIncomingMessages.put(key, message); // lacks start talking, let's just proceed
                     } else {
-                        message = incomingMessages.get(key);
+                        message = mIncomingMessages.get(key);
                     }
                 } else if (messageType == MessageType.STOP_TALKING) {
-                    if (!incomingMessages.containsKey(key)) {
+                    if (!mIncomingMessages.containsKey(key)) {
                         // lacks start talking, can we just ignore it?
                     } else {
-                        message = incomingMessages.remove(key); // remove from list to be processed for last time
+                        message = mIncomingMessages.remove(key); // remove from list to be processed for last time
                     }
                 } else {
                     message = new Message();
@@ -116,7 +116,7 @@ public class MessageHelper {
 
     public static byte[] createConnectionMessage(String senderId) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Packer packer = messagePack.createPacker(out);
+        Packer packer = mMessagePack.createPacker(out);
         try {
             packer.writeArrayBegin(3);
             packer.write(ChannelType.GROUP);
@@ -131,7 +131,7 @@ public class MessageHelper {
 
     public static Message createAckStartMessage(String senderId, String receiverId, int channelType, long duration) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Packer packer = messagePack.createPacker(out);
+        Packer packer = mMessagePack.createPacker(out);
 
         try {
             packer.writeArrayBegin(5);
@@ -143,8 +143,8 @@ public class MessageHelper {
             packer.writeArrayEnd(true);
 
             String key = String.format("%d_%s_%s", channelType, receiverId, senderId);
-            if (incomingMessages.containsKey(key)) {
-                Message oldMessage = incomingMessages.remove(key); // there is an incomplete outgoing message to the same user/group
+            if (mIncomingMessages.containsKey(key)) {
+                Message oldMessage = mIncomingMessages.remove(key); // there is an incomplete outgoing message to the same user/group
             }
 
             Message message = new Message();
@@ -155,7 +155,7 @@ public class MessageHelper {
             message.setDuration(duration);
             message.setPayload(out.toByteArray());
 
-            outgoingMessages.put(key, message);
+            mOutgoingMessages.put(key, message);
 
             return message;
         } catch (IOException e) {
@@ -167,7 +167,7 @@ public class MessageHelper {
     public static Message createAudioMessage(String senderId, String receiverId, int channelType, byte[] payload, int length
                                      ) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Packer packer = messagePack.createPacker(out);
+        Packer packer = mMessagePack.createPacker(out);
         try {
 
             packer.writeArrayBegin(5);
@@ -182,11 +182,11 @@ public class MessageHelper {
 
             Message message;
 
-            if (!incomingMessages.containsKey(key)) {
+            if (!mIncomingMessages.containsKey(key)) {
                 message = new Message();    // let's just create a new one for now.
-                incomingMessages.put(key, message);
+                mIncomingMessages.put(key, message);
             } else {
-                message = incomingMessages.get(key);
+                message = mIncomingMessages.get(key);
             }
 
             message.setChannelType(channelType);
@@ -205,7 +205,7 @@ public class MessageHelper {
 
     public static byte[] createAckStopMessage(String senderId, String receiverId, int channelType) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Packer packer = messagePack.createPacker(out);
+        Packer packer = mMessagePack.createPacker(out);
 
         try {
             packer.writeArrayBegin(4);
@@ -218,11 +218,11 @@ public class MessageHelper {
             String key = String.format("%d_%s_%s", channelType, receiverId, senderId);
             Message message;
 
-            if (!incomingMessages.containsKey(key)) {
+            if (!mIncomingMessages.containsKey(key)) {
                 message = new Message();    // let's just create a new one for now.
-                incomingMessages.put(key, message);
+                mIncomingMessages.put(key, message);
             } else {
-                message = incomingMessages.get(key);
+                message = mIncomingMessages.get(key);
             }
 
             message.setChannelType(channelType);
@@ -239,7 +239,7 @@ public class MessageHelper {
 
     public static byte[] createAckReceiveMessage(int senderId, int receiverId, int channelType, String ackIds) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Packer packer = messagePack.createPacker(out);
+        Packer packer = mMessagePack.createPacker(out);
 
         try {
             packer.writeArrayBegin(5);
@@ -258,7 +258,7 @@ public class MessageHelper {
 
     public static byte[] createAckReadMessage(int sendTo, int type, String id) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Packer packer = messagePack.createPacker(out);
+        Packer packer = mMessagePack.createPacker(out);
 
         try {
             packer.writeArrayBegin(5);
@@ -279,7 +279,7 @@ public class MessageHelper {
 
     public static byte[] createTextMessage(int channelType, int fromID, int toID, String message) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Packer packer = messagePack.createPacker(out);
+        Packer packer = mMessagePack.createPacker(out);
 
         try {
             packer.writeArrayBegin(5);
@@ -300,7 +300,7 @@ public class MessageHelper {
 
     public static byte[] createStatusMessage(int senderId, int status) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Packer packer = messagePack.createPacker(out);
+        Packer packer = mMessagePack.createPacker(out);
 
         try {
             packer.writeArrayBegin(5);
