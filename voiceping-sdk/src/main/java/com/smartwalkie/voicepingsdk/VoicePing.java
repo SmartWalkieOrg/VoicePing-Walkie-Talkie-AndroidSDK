@@ -1,7 +1,7 @@
 package com.smartwalkie.voicepingsdk;
 
 
-import android.app.Application;
+import android.content.Context;
 import android.provider.Settings;
 
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class VoicePing implements ConnectionListener {
 
-    private Application mApplication;
+    private Context mContext;
     private Connection mConnection;
     private ConnectCallback mConnectCallback;
     private DisconnectCallback mDisconnectCallback;
@@ -25,26 +25,26 @@ public class VoicePing implements ConnectionListener {
 
     private Recorder mRecorder;
 
-    private VoicePing(Application application, String serverUrl) {
-        mApplication = application;
-        Player player = new Player(application);
+    private VoicePing(Context context, String serverUrl) {
+        mContext = context;
+        Player player = new Player(context);
         player.start();
-        mConnection = new Connection(application, serverUrl, this, player);
-        mRecorder = new Recorder(application, mConnection);
+        mConnection = new Connection(context, serverUrl, this, player);
+        mRecorder = new Recorder(context, mConnection);
         mConnection.setOutgoingAudioListener(mRecorder);
-        VoicePingPrefs.getInstance(application).putServerUrl(serverUrl);
+        VoicePingPrefs.getInstance(context).putServerUrl(serverUrl);
     }
 
-    public static VoicePing init(Application application, String serverUrl) {
-        return new VoicePing(application, serverUrl);
+    public static VoicePing init(Context context, String serverUrl) {
+        return new VoicePing(context, serverUrl);
     }
 
     public void connect(String userId, ConnectCallback callback) {
         Map<String, String> props = new HashMap<>();
         props.put("user_id", userId);
-        VoicePingPrefs.getInstance(mApplication).putUserId(userId);
-        props.put("DeviceId", Settings.Secure.getString(
-                mApplication.getContentResolver(), Settings.Secure.ANDROID_ID));
+        VoicePingPrefs.getInstance(mContext).putUserId(userId);
+        props.put("DeviceId", Settings.Secure
+                .getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
         mConnection.connect(props);
         mConnectCallback = callback;
     }
