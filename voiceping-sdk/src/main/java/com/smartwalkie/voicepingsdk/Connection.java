@@ -44,6 +44,7 @@ public class Connection extends WebSocketListener {
     private OutgoingAudioListener mOutgoingAudioListener;
     private Message mLastMessage;
     private boolean mIsReconnecting;
+    private boolean mIsOpened;
     private boolean mIsDisconnected;
 
     public Connection(Context context, String serverUrl, IncomingAudioListener listener) {
@@ -74,6 +75,7 @@ public class Connection extends WebSocketListener {
         if (mHeaders.containsKey("DeviceId")) builder.addHeader("DeviceId", mHeaders.get("DeviceId"));
         Request request = builder.build();
 
+        Log.d(TAG, "connecting...");
         mWebSocket = mOkHttpClient.newWebSocket(request, this);
 //        mOkHttpClient.dispatcher().executorService().shutdown();
     }
@@ -172,9 +174,11 @@ public class Connection extends WebSocketListener {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    mWebSocket = null;
                     mIsReconnecting = false;
-                    connect();
+                    if (!mIsOpened) {
+                        mWebSocket = null;
+                        connect();
+                    }
                 }
             }, 5000);
         }
@@ -297,6 +301,7 @@ public class Connection extends WebSocketListener {
         if (response != null) Log.d(TAG, response.toString());
         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
         send(MessageHelper.createConnectionMessage(userId));
+        mIsOpened = true;
         if (mConnectCallback != null) {
             mConnectCallback.onConnected();
             mConnectCallback = null;
@@ -350,6 +355,7 @@ public class Connection extends WebSocketListener {
         Log.d(TAG, "WebSocket onClosed...");
         Log.d(TAG, "reason: " + reason);
         mIsDisconnected = true;
+        mIsOpened = false;
         if (mDisconnectCallback != null) {
             mDisconnectCallback.onDisconnected();
             mDisconnectCallback = null;
@@ -361,6 +367,7 @@ public class Connection extends WebSocketListener {
         Log.d(TAG, "WebSocket onFailure...");
         t.printStackTrace();
         if (response != null) Log.d(TAG, response.toString());
+        mIsOpened = false;
         if (mConnectCallback != null) {
             mConnectCallback.onFailed(new PingException("Failed to connect!"));
             mConnectCallback = null;
