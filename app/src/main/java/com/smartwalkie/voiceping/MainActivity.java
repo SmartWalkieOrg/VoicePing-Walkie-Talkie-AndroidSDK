@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
@@ -137,8 +138,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                     }
 
                                     @Override
-                                    public void onFailed(PingException exception) {
+                                    public void onFailed(final PingException exception) {
                                         exception.printStackTrace();
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(MainActivity.this, exception.getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
                                     }
                                 });
                             }

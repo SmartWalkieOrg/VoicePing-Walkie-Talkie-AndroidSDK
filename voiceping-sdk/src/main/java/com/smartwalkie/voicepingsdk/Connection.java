@@ -1,15 +1,8 @@
 package com.smartwalkie.voicepingsdk;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 
-import com.pusher.java_websocket.WebSocket;
-import com.pusher.java_websocket.client.WebSocketClient;
-import com.pusher.java_websocket.drafts.Draft_17;
-import com.pusher.java_websocket.framing.Framedata;
-import com.pusher.java_websocket.framing.FramedataImpl1;
-import com.pusher.java_websocket.handshake.ServerHandshake;
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
 import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
@@ -19,25 +12,24 @@ import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.MessageType;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okio.ByteString;
 
 
-public class Connection {
+public class Connection extends WebSocketListener {
 
     private final String TAG = Connection.class.getSimpleName();
 
     private Context mContext;
-    private WebSocketClient mWebSocketClient;
+    private WebSocket mWebSocket;
+//    private WebSocketClient mWebSocketClient;
     private String mServerUrl;
     private Map<String, String> mHeaders;
     private ConnectCallback mConnectCallback;
@@ -56,6 +48,27 @@ public class Connection {
     }
 
     public void connect(Map<String, String> headers, ConnectCallback callback) {
+        mHeaders = headers;
+        mConnectCallback = callback;
+        connect();
+    }
+
+    private void connect() {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .readTimeout(0, TimeUnit.MILLISECONDS)
+                .build();
+
+        Request.Builder builder = new Request.Builder()
+                .url(mServerUrl);
+        if (mHeaders.containsKey("user_id")) builder.addHeader("user_id", mHeaders.get("user_id"));
+        if (mHeaders.containsKey("DeviceId")) builder.addHeader("DeviceId", mHeaders.get("DeviceId"));
+        Request request = builder.build();
+
+        mWebSocket = client.newWebSocket(request, this);
+        client.dispatcher().executorService().shutdown();
+    }
+
+    /*public void connect(Map<String, String> headers, ConnectCallback callback) {
         if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
             return;
         }
@@ -111,9 +124,21 @@ public class Connection {
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public void disconnect(DisconnectCallback callback) {
+        mDisconnectCallback = callback;
+        if (mWebSocket != null) {
+            Log.d(TAG, "close WebSocket...");
+            mWebSocket.close(1000, "User wants to disconnect!");
+            if (mDisconnectCallback != null) mDisconnectCallback.onDisconnected();
+        } else {
+            if (mDisconnectCallback != null) mDisconnectCallback
+                    .onFailed(new PingException("Failed to disconnect!"));
+        }
+    }
+
+    /*public void disconnect(DisconnectCallback callback) {
         mDisconnectCallback = callback;
         if (mWebSocketClient != null) {
             Log.d(TAG, "close WebSocket...");
@@ -124,17 +149,25 @@ public class Connection {
             if (mDisconnectCallback != null) mDisconnectCallback
                     .onFailed(new PingException("Failed to disconnect!"));
         }
-    }
+    }*/
 
     public void send(byte[] data) {
-        if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
-            mWebSocketClient.send(data);
+        if (mWebSocket != null) {
+            mWebSocket.send(ByteString.of(data));
         } else {
             Log.d(TAG, "WebSocket closed...");
         }
     }
 
-    private WebSocketClient getWebSocketClient(URI uri) {
+    /*public void send(byte[] data) {
+        if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
+            mWebSocketClient.send(data);
+        } else {
+            Log.d(TAG, "WebSocket closed...");
+        }
+    }*/
+
+    /*private WebSocketClient getWebSocketClient(URI uri) {
         if (mWebSocketClient == null) {
             mWebSocketClient = new WebSocketClient(uri, new Draft_17(), mHeaders, 0) {
                 @Override
@@ -216,5 +249,78 @@ public class Connection {
             };
         }
         return mWebSocketClient;
+    }*/
+
+    @Override
+    public void onOpen(okhttp3.WebSocket webSocket, Response response) {
+        Log.d(TAG, "WebSocket onOpen...");
+        if (response != null) Log.d(TAG, response.toString());
+        String userId = VoicePingPrefs.getInstance(mContext).getUserId();
+        send(MessageHelper.createConnectionMessage(userId));
+        if (mConnectCallback != null) mConnectCallback.onConnected();
+    }
+
+    @Override
+    public void onMessage(okhttp3.WebSocket webSocket, String text) {
+        Log.d(TAG, "WebSocket onMessage String...");
+    }
+
+    @Override
+    public void onMessage(okhttp3.WebSocket webSocket, ByteString bytes) {
+        Log.d(TAG, "WebSocket onMessage ByteString...");
+
+        Message message = MessageHelper.unpackMessage(bytes.toByteArray());
+        if (mIncomingAudioListener != null) {
+            if (message.getMessageType() == MessageType.START_TALKING) {
+                mIncomingAudioListener.onStartTalkingMessage(message);
+            } else if (message.getMessageType() == MessageType.AUDIO) {
+                mIncomingAudioListener.onAudioTalkingMessage(message);
+            } else if (message.getMessageType() == MessageType.STOP_TALKING) {
+                mIncomingAudioListener.onStopTalkingMessage(message);
+            }
+        }
+
+        if (mOutgoingAudioListener != null) {
+            switch (message.getMessageType()) {
+                case MessageType.ACK_START:
+                    mOutgoingAudioListener.onAckStartSucceed(message);
+                    break;
+                case MessageType.ACK_START_FAILED:
+                    mOutgoingAudioListener.onAckStartFailed(message);
+                    break;
+                case MessageType.ACK_END:
+                    mOutgoingAudioListener.onAckEndSucceed(message);
+                    break;
+                case MessageType.MESSAGE_DELIVERED:
+                    mOutgoingAudioListener.onMessageDelivered(message);
+                    break;
+                case MessageType.MESSAGE_READ:
+                    mOutgoingAudioListener.onMessageRead(message);
+            }
+        }
+
+        Log.d(TAG, "message: " + message.getMessageType());
+    }
+
+    @Override
+    public void onClosing(okhttp3.WebSocket webSocket, int code, String reason) {
+        Log.d(TAG, "WebSocket onClosing...");
+        Log.d(TAG, "reason: " + reason);
+    }
+
+    @Override
+    public void onClosed(okhttp3.WebSocket webSocket, int code, String reason) {
+        Log.d(TAG, "WebSocket onClosed...");
+        Log.d(TAG, "reason: " + reason);
+        if (mDisconnectCallback != null) mDisconnectCallback.onDisconnected();
+    }
+
+    @Override
+    public void onFailure(okhttp3.WebSocket webSocket, Throwable t, Response response) {
+        Log.d(TAG, "WebSocket onFailure...");
+        t.printStackTrace();
+        if (response != null) Log.d(TAG, response.toString());
+        if (mConnectCallback != null) mConnectCallback
+                .onFailed(new PingException("Failed to connect!"));
     }
 }

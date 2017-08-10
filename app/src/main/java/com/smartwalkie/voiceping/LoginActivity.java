@@ -103,8 +103,14 @@ public class LoginActivity extends AppCompatActivity implements
                 }
 
                 @Override
-                public void onFailed(PingException exception) {
+                public void onFailed(final PingException exception) {
                     Log.v(TAG, "onFailed");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(LoginActivity.this, exception.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
             });
         }

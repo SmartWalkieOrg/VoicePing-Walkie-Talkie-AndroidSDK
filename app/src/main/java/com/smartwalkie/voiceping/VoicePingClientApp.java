@@ -15,8 +15,7 @@ public class VoicePingClientApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        mVoicePing = VoicePing
-                .init(this, "ws://vpjsex.southeastasia.cloudapp.azure.com");
+        mVoicePing = VoicePing.init(this, "ws://vpjsex.southeastasia.cloudapp.azure.com");
     }
 
     public static VoicePing getVoicePing() {
