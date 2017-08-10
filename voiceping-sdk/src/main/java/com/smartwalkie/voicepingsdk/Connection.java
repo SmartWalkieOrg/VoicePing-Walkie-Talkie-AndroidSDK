@@ -12,7 +12,12 @@ import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.MessageType;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -37,6 +42,9 @@ public class Connection extends WebSocketListener {
     private DisconnectCallback mDisconnectCallback;
     private IncomingAudioListener mIncomingAudioListener;
     private OutgoingAudioListener mOutgoingAudioListener;
+    private Message mLastMessage;
+    private boolean mIsReconnecting;
+    private boolean mIsDisconnected;
 
     public Connection(Context context, String serverUrl, IncomingAudioListener listener) {
         mContext = context;
@@ -44,7 +52,8 @@ public class Connection extends WebSocketListener {
         mIncomingAudioListener = listener;
 
         mOkHttpClient = new OkHttpClient.Builder()
-                .readTimeout(3000, TimeUnit.MILLISECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .pingInterval(30, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
     }
@@ -157,12 +166,36 @@ public class Connection extends WebSocketListener {
         }
     }*/
 
+    private void reconnectWithDelay() {
+        if (!mIsReconnecting) {
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    mWebSocket = null;
+                    mIsReconnecting = false;
+                    connect();
+                }
+            }, 5000);
+        }
+        mIsReconnecting = true;
+    }
+
+    public void sendMessage(Message message) {
+        mLastMessage = message;
+        if (mWebSocket != null) {
+            mWebSocket.send(ByteString.of(message.getPayload()));
+        } else {
+            Log.d(TAG, "WebSocket closed...");
+        }
+    }
+
     public void send(byte[] data) {
         if (mWebSocket != null) {
             mWebSocket.send(ByteString.of(data));
         } else {
             Log.d(TAG, "WebSocket closed...");
-            connect();
+//            reconnect();
         }
     }
 
@@ -313,15 +346,10 @@ public class Connection extends WebSocketListener {
     }
 
     @Override
-    public void onClosing(okhttp3.WebSocket webSocket, int code, String reason) {
-        Log.d(TAG, "WebSocket onClosing...");
-        Log.d(TAG, "reason: " + reason);
-    }
-
-    @Override
     public void onClosed(okhttp3.WebSocket webSocket, int code, String reason) {
         Log.d(TAG, "WebSocket onClosed...");
         Log.d(TAG, "reason: " + reason);
+        mIsDisconnected = true;
         if (mDisconnectCallback != null) {
             mDisconnectCallback.onDisconnected();
             mDisconnectCallback = null;
@@ -337,6 +365,11 @@ public class Connection extends WebSocketListener {
             mConnectCallback.onFailed(new PingException("Failed to connect!"));
             mConnectCallback = null;
         }
-        mWebSocket = null;
+        if (t instanceof UnknownHostException ||
+                t instanceof SocketException ||
+                t instanceof SocketTimeoutException) {
+            reconnectWithDelay();
+        }
+//        mWebSocket = null;
     }
 }
