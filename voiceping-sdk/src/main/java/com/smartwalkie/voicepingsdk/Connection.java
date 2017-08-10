@@ -28,6 +28,7 @@ public class Connection extends WebSocketListener {
     private final String TAG = Connection.class.getSimpleName();
 
     private Context mContext;
+    private OkHttpClient mOkHttpClient;
     private WebSocket mWebSocket;
 //    private WebSocketClient mWebSocketClient;
     private String mServerUrl;
@@ -41,6 +42,11 @@ public class Connection extends WebSocketListener {
         mContext = context;
         mServerUrl = serverUrl;
         mIncomingAudioListener = listener;
+
+        mOkHttpClient = new OkHttpClient.Builder()
+                .readTimeout(3000, TimeUnit.MILLISECONDS)
+                .retryOnConnectionFailure(true)
+                .build();
     }
 
     public void setOutgoingAudioListener(OutgoingAudioListener listener) {
@@ -54,18 +60,13 @@ public class Connection extends WebSocketListener {
     }
 
     private void connect() {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .readTimeout(0, TimeUnit.MILLISECONDS)
-                .build();
-
-        Request.Builder builder = new Request.Builder()
-                .url(mServerUrl);
+        Request.Builder builder = new Request.Builder().url(mServerUrl);
         if (mHeaders.containsKey("user_id")) builder.addHeader("user_id", mHeaders.get("user_id"));
         if (mHeaders.containsKey("DeviceId")) builder.addHeader("DeviceId", mHeaders.get("DeviceId"));
         Request request = builder.build();
 
-        mWebSocket = client.newWebSocket(request, this);
-        client.dispatcher().executorService().shutdown();
+        mWebSocket = mOkHttpClient.newWebSocket(request, this);
+//        mOkHttpClient.dispatcher().executorService().shutdown();
     }
 
     /*public void connect(Map<String, String> headers, ConnectCallback callback) {
@@ -131,10 +132,15 @@ public class Connection extends WebSocketListener {
         if (mWebSocket != null) {
             Log.d(TAG, "close WebSocket...");
             mWebSocket.close(1000, "User wants to disconnect!");
-            if (mDisconnectCallback != null) mDisconnectCallback.onDisconnected();
+            if (mDisconnectCallback != null) {
+                mDisconnectCallback.onDisconnected();
+                mDisconnectCallback = null;
+            }
         } else {
-            if (mDisconnectCallback != null) mDisconnectCallback
-                    .onFailed(new PingException("Failed to disconnect!"));
+            if (mDisconnectCallback != null) {
+                mDisconnectCallback.onFailed(new PingException("Failed to disconnect!"));
+                mDisconnectCallback = null;
+            }
         }
     }
 
@@ -156,6 +162,7 @@ public class Connection extends WebSocketListener {
             mWebSocket.send(ByteString.of(data));
         } else {
             Log.d(TAG, "WebSocket closed...");
+            connect();
         }
     }
 
@@ -257,7 +264,10 @@ public class Connection extends WebSocketListener {
         if (response != null) Log.d(TAG, response.toString());
         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
         send(MessageHelper.createConnectionMessage(userId));
-        if (mConnectCallback != null) mConnectCallback.onConnected();
+        if (mConnectCallback != null) {
+            mConnectCallback.onConnected();
+            mConnectCallback = null;
+        }
     }
 
     @Override
@@ -312,7 +322,10 @@ public class Connection extends WebSocketListener {
     public void onClosed(okhttp3.WebSocket webSocket, int code, String reason) {
         Log.d(TAG, "WebSocket onClosed...");
         Log.d(TAG, "reason: " + reason);
-        if (mDisconnectCallback != null) mDisconnectCallback.onDisconnected();
+        if (mDisconnectCallback != null) {
+            mDisconnectCallback.onDisconnected();
+            mDisconnectCallback = null;
+        }
     }
 
     @Override
@@ -320,7 +333,10 @@ public class Connection extends WebSocketListener {
         Log.d(TAG, "WebSocket onFailure...");
         t.printStackTrace();
         if (response != null) Log.d(TAG, response.toString());
-        if (mConnectCallback != null) mConnectCallback
-                .onFailed(new PingException("Failed to connect!"));
+        if (mConnectCallback != null) {
+            mConnectCallback.onFailed(new PingException("Failed to connect!"));
+            mConnectCallback = null;
+        }
+        mWebSocket = null;
     }
 }

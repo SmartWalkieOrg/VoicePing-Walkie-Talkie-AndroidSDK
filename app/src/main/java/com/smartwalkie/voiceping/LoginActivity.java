@@ -108,6 +108,7 @@ public class LoginActivity extends AppCompatActivity implements
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            showProgress(false);
                             Toast.makeText(LoginActivity.this, exception.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
