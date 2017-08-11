@@ -64,6 +64,10 @@ public class Connection extends WebSocketListener {
     }
 
     public void connect(Map<String, String> headers, ConnectCallback callback) {
+        if (!NetworkUtil.isNetworkConnected(mContext)) {
+            callback.onFailed(new PingException("Please check your internet connection!"));
+            return;
+        }
         mHeaders = headers;
         mConnectCallback = callback;
         connect();
@@ -142,7 +146,7 @@ public class Connection extends WebSocketListener {
         mDisconnectCallback = callback;
         if (mWebSocket != null) {
             Log.d(TAG, "close WebSocket...");
-            mWebSocket.close(1000, "User wants to disconnect!");
+            mWebSocket.cancel();
             if (mDisconnectCallback != null) {
                 mDisconnectCallback.onDisconnected();
                 mDisconnectCallback = null;
@@ -300,8 +304,8 @@ public class Connection extends WebSocketListener {
         Log.d(TAG, "WebSocket onOpen...");
         if (response != null) Log.d(TAG, response.toString());
         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
-        send(MessageHelper.createConnectionMessage(userId));
         mIsOpened = true;
+        send(MessageHelper.createConnectionMessage(userId));
         if (mConnectCallback != null) {
             mConnectCallback.onConnected();
             mConnectCallback = null;

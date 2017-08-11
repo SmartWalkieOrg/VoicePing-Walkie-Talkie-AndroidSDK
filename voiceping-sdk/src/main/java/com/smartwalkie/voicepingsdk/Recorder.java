@@ -9,6 +9,7 @@ import android.util.Log;
 import com.media2359.voiceping.codec.Opus;
 import com.smartwalkie.voicepingsdk.constants.AudioParameters;
 import com.smartwalkie.voicepingsdk.events.AudioDataEvent;
+import com.smartwalkie.voicepingsdk.exceptions.PingException;
 import com.smartwalkie.voicepingsdk.listeners.AudioInterceptor;
 import com.smartwalkie.voicepingsdk.listeners.AudioRecorder;
 import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
@@ -123,6 +124,10 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
     }
 
     public void startTalking(String receiverId, int channelType) {
+        if (!NetworkUtil.isNetworkConnected(mContext) && mChannelListener != null) {
+            mChannelListener.onError(new PingException("Please check your internet connection!"));
+            return;
+        }
         Log.v(TAG, "startTalking");
         this.mReceiverId = receiverId;
         this.mChannelType = channelType;

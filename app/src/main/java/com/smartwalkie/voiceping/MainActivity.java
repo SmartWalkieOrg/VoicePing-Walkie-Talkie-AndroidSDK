@@ -221,6 +221,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onError(PingException e) {
-
+        e.printStackTrace();
+        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
     }
 }
