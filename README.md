@@ -113,3 +113,11 @@ VoicePingClientApp.getVoicePing().disconnect(new DisconnectCallback() {
             }
         });
 ```
+
+### TO DO
+
+1. Add Subscribe - Unsubscribe. User can subscribes to a group channel to enable listening for 
+incoming PTT message in that channel.
+2. Add documentation inside the code (Javadoc).
+3. Improve sample app, add some advanced customizations.
+4. Unit tests.
