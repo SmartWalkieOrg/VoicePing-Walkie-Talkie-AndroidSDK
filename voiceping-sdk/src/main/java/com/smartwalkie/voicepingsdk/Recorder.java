@@ -52,16 +52,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     private static int mState;
 
-    private static final int START = 1000;
-    private static final int STOP_FOR_RECEIVED_ACK_START_FAILED = 2000;
-    private static final int STOP_FOR_NOT_RECEIVED_ACK_START = 3000;
-    private static final int CONTINUE_FOR_RECEIVED_ACK_START = 4000;
-    private static final int CONTINUE_FOR_SENDING_AUDIO_DATA = 5000;
-    private static final int STOP_NORMALLY = 6000;
-    private static final int UPDATE_FOR_NOT_RECEIVED_ACK_END = 7000;
-    private static final int UPDATE_FOR_RECEIVED_ACK_END = 8000;
-    private static final int UPDATE_FOR_RECEIVED_STATUS_DELIVERED = 9000;
-    private static final int UPDATE_FOR_RECEIVED_STATUS_READ = 10000;
+    private static final int CONTINUE_FOR_SENDING_AUDIO_DATA = 1000;
 
     public Recorder(Context context, Connection connection) {
         mContext = context;
@@ -81,37 +72,8 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
             @Override
             public void handleMessage(android.os.Message msg) {
                 switch (msg.what) {
-                    case START:
-                        sendAckStart();
-                        break;
-                    case STOP_FOR_NOT_RECEIVED_ACK_START:
-                        Log.d(TAG, "stop for not received ack start");
-                        stopRecording();
-                        mState = STOPPED;
-                        break;
-                    case STOP_FOR_RECEIVED_ACK_START_FAILED:
-                        Log.d(TAG, "stop for received ack start failed");
-                        stopRecording();
-                        mState = STOPPED;
-                        break;
-                    case CONTINUE_FOR_RECEIVED_ACK_START:
-                        startRecording();
-                        break;
                     case CONTINUE_FOR_SENDING_AUDIO_DATA:
                         sendAudio();
-                        break;
-                    case STOP_NORMALLY:
-                        Log.d(TAG, "stop normally...");
-                        stopRecording();
-                        sendAckStop();
-                        break;
-                    case UPDATE_FOR_NOT_RECEIVED_ACK_END:
-                        break;
-                    case UPDATE_FOR_RECEIVED_ACK_END:
-                        break;
-                    case UPDATE_FOR_RECEIVED_STATUS_DELIVERED:
-                        break;
-                    case UPDATE_FOR_RECEIVED_STATUS_READ:
                         break;
                 }
             }
@@ -131,13 +93,14 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         Log.v(TAG, "startTalking");
         this.mReceiverId = receiverId;
         this.mChannelType = channelType;
-        mSenderHandler.sendEmptyMessage(START);
+        sendAckStart();
     }
 
     public void stopTalking() {
         Log.v(TAG, "stopTalking");
         mSenderHandler.removeMessages(CONTINUE_FOR_SENDING_AUDIO_DATA);
-        mSenderHandler.sendEmptyMessage(STOP_NORMALLY);
+        stopRecording();
+        sendAckStop();
     }
 
     private void sendAckStart() {
@@ -192,7 +155,6 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         byte[] message = MessageHelper.createAckStopMessage(userId, mReceiverId, mChannelType);
         mConnection.send(message);
         mState = WAITING_FOR_ACK_END;
-        mSenderHandler.sendEmptyMessageDelayed(UPDATE_FOR_NOT_RECEIVED_ACK_END, ACK_TIMEOUT_IN_MILLIS);
     }
 
     private void startRecording() {
@@ -216,31 +178,29 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
     @Override
     public void onAckStartSucceed(Message message) {
         Log.v(TAG, "onAckStartSucceed: " + message);
-        mSenderHandler.sendEmptyMessage(CONTINUE_FOR_RECEIVED_ACK_START);
+        startRecording();
     }
 
     @Override
     public void onAckStartFailed(Message message) {
         Log.v(TAG, "onAckStartFailed: " + message);
-        mSenderHandler.sendEmptyMessage(STOP_FOR_RECEIVED_ACK_START_FAILED);
+        stopRecording();
+        mState = STOPPED;
     }
 
     @Override
     public void onAckEndSucceed(Message message) {
         Log.v(TAG, "onAckEndSucceed: " + message);
-        mSenderHandler.sendEmptyMessage(UPDATE_FOR_RECEIVED_ACK_END);
     }
 
     @Override
     public void onMessageDelivered(Message message) {
         Log.v(TAG, "onMessageDelivered: " + message);
-        mSenderHandler.sendEmptyMessage(UPDATE_FOR_RECEIVED_STATUS_DELIVERED);
     }
 
     @Override
     public void onMessageRead(Message message) {
         Log.v(TAG, "onMessageRead: " + message);
-        mSenderHandler.sendEmptyMessage(UPDATE_FOR_RECEIVED_STATUS_READ);
     }
 
     // AudioRecorder
