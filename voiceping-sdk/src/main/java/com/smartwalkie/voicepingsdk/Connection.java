@@ -35,14 +35,12 @@ public class Connection extends WebSocketListener {
     private Context mContext;
     private OkHttpClient mOkHttpClient;
     private WebSocket mWebSocket;
-//    private WebSocketClient mWebSocketClient;
     private String mServerUrl;
     private Map<String, String> mHeaders;
     private ConnectCallback mConnectCallback;
     private DisconnectCallback mDisconnectCallback;
     private IncomingAudioListener mIncomingAudioListener;
     private OutgoingAudioListener mOutgoingAudioListener;
-    private Message mLastMessage;
     private boolean mIsReconnecting;
     private boolean mIsOpened;
     private boolean mIsDisconnected;
@@ -84,63 +82,22 @@ public class Connection extends WebSocketListener {
 //        mOkHttpClient.dispatcher().executorService().shutdown();
     }
 
-    /*public void connect(Map<String, String> headers, ConnectCallback callback) {
-        if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
-            return;
-        }
-
-        mHeaders = headers;
-        mConnectCallback = callback;
-
-        URI uri = null;
-        try {
-            uri = new URI(mServerUrl);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        if (mWebSocketClient == null) {
-            mWebSocketClient = getWebSocketClient(uri);
-        }
-
-        if (mServerUrl.contains("wss://")) {
-            SSLContext sslContext;
-            SSLSocketFactory factory;
-            try {
-                sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(null, new X509TrustManager[]{new X509TrustManager() {
-                    @SuppressLint("TrustAllX509TrustManager")
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+    private void reconnectWithDelay() {
+        if (!mIsReconnecting) {
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    mIsReconnecting = false;
+                    if (!mIsOpened && !mIsDisconnected) {
+                        mWebSocket = null;
+                        connect();
                     }
-
-                    @SuppressLint("TrustAllX509TrustManager")
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                    }
-
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
-                }}, new SecureRandom());
-
-                factory = sslContext.getSocketFactory();    // (SSLSocketFactory) SSLSocketFactory.getDefault();
-                mWebSocketClient.setSocket(factory.createSocket());
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+                }
+            }, 5000);
         }
-
-        try {
-            if (mWebSocketClient != null) {
-                mWebSocketClient.connect();
-            }
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        }
-    }*/
+        mIsReconnecting = true;
+    }
 
     public void disconnect(DisconnectCallback callback) {
         mDisconnectCallback = callback;
@@ -160,148 +117,16 @@ public class Connection extends WebSocketListener {
         }
     }
 
-    /*public void disconnect(DisconnectCallback callback) {
-        mDisconnectCallback = callback;
-        if (mWebSocketClient != null) {
-            Log.d(TAG, "close WebSocket...");
-            mWebSocketClient.close();
-            mWebSocketClient = null;
-            if (mDisconnectCallback != null) mDisconnectCallback.onDisconnected();
-        } else {
-            if (mDisconnectCallback != null) mDisconnectCallback
-                    .onFailed(new PingException("Failed to disconnect!"));
-        }
-    }*/
-
-    private void reconnectWithDelay() {
-        if (!mIsReconnecting) {
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    mIsReconnecting = false;
-                    if (!mIsOpened && !mIsDisconnected) {
-                        mWebSocket = null;
-                        connect();
-                    }
-                }
-            }, 5000);
-        }
-        mIsReconnecting = true;
-    }
-
-    public void sendMessage(Message message) {
-        mLastMessage = message;
-        if (mWebSocket != null) {
-            mWebSocket.send(ByteString.of(message.getPayload()));
-        } else {
-            Log.d(TAG, "WebSocket closed...");
-        }
-    }
-
     public void send(byte[] data) {
         if (mWebSocket != null) {
             mWebSocket.send(ByteString.of(data));
         } else {
             Log.d(TAG, "WebSocket closed...");
-//            reconnect();
         }
     }
 
-    /*public void send(byte[] data) {
-        if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
-            mWebSocketClient.send(data);
-        } else {
-            Log.d(TAG, "WebSocket closed...");
-        }
-    }*/
-
-    /*private WebSocketClient getWebSocketClient(URI uri) {
-        if (mWebSocketClient == null) {
-            mWebSocketClient = new WebSocketClient(uri, new Draft_17(), mHeaders, 0) {
-                @Override
-                public void onOpen(ServerHandshake handshakedata) {
-                    Log.d(TAG, "onOpen...");
-                    String userId = VoicePingPrefs.getInstance(mContext).getUserId();
-                    mWebSocketClient.send(MessageHelper.createConnectionMessage(userId));
-                    if (mConnectCallback != null) mConnectCallback.onConnected();
-                }
-
-                @Override
-                public void onMessage(String message) {
-                    Log.d(TAG, "onMessage...");
-                }
-
-                @Override
-                public void onClose(int code, String reason, boolean remote) {
-                    Log.d(TAG, "onClose...");
-                    Log.d(TAG, "reason: " + reason);
-                    Log.d(TAG, "remote: " + remote);
-                    if (mDisconnectCallback != null) mDisconnectCallback.onDisconnected();
-                }
-
-                @Override
-                public void onError(Exception ex) {
-                    Log.v(TAG, "onError...");
-                    ex.printStackTrace();
-                    if (mConnectCallback != null) mConnectCallback
-                            .onFailed(new PingException("Failed to connect!"));
-                }
-
-                @Override
-                public void onMessage(ByteBuffer bytes) {
-                    Message message = MessageHelper.unpackMessage(bytes.array());
-                    if (mIncomingAudioListener != null) {
-                        if (message.getMessageType() == MessageType.START_TALKING) {
-                            mIncomingAudioListener.onStartTalkingMessage(message);
-                        } else if (message.getMessageType() == MessageType.AUDIO) {
-                            mIncomingAudioListener.onAudioTalkingMessage(message);
-                        } else if (message.getMessageType() == MessageType.STOP_TALKING) {
-                            mIncomingAudioListener.onStopTalkingMessage(message);
-                        }
-                    }
-
-                    if (mOutgoingAudioListener != null) {
-                        switch (message.getMessageType()) {
-                            case MessageType.ACK_START:
-                                mOutgoingAudioListener.onAckStartSucceed(message);
-                                break;
-                            case MessageType.ACK_START_FAILED:
-                                mOutgoingAudioListener.onAckStartFailed(message);
-                                break;
-                            case MessageType.ACK_END:
-                                mOutgoingAudioListener.onAckEndSucceed(message);
-                                break;
-                            case MessageType.MESSAGE_DELIVERED:
-                                mOutgoingAudioListener.onMessageDelivered(message);
-                                break;
-                            case MessageType.MESSAGE_READ:
-                                mOutgoingAudioListener.onMessageRead(message);
-                        }
-                    }
-
-                    Log.d(TAG, "message: " + message.getMessageType());
-                }
-
-                @Override
-                public void onWebsocketPing(WebSocket conn, Framedata f) {
-                    Log.v(TAG, "onWebsocketPing...");
-                    FramedataImpl1 resp = new FramedataImpl1(f);
-                    resp.setOptcode(Framedata.Opcode.PONG);
-                    conn.sendFrame(resp);
-                }
-
-                @Override
-                public void onWebsocketPong(WebSocket conn, Framedata f) {
-                    Log.v(TAG, "onWebsocketPong...");
-                }
-            };
-        }
-        return mWebSocketClient;
-    }*/
-
     @Override
-    public void onOpen(okhttp3.WebSocket webSocket, Response response) {
+    public void onOpen(WebSocket webSocket, Response response) {
         Log.d(TAG, "WebSocket onOpen...");
         if (response != null) Log.d(TAG, response.toString());
         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
@@ -315,12 +140,12 @@ public class Connection extends WebSocketListener {
     }
 
     @Override
-    public void onMessage(okhttp3.WebSocket webSocket, String text) {
+    public void onMessage(WebSocket webSocket, String text) {
         Log.d(TAG, "WebSocket onMessage String...");
     }
 
     @Override
-    public void onMessage(okhttp3.WebSocket webSocket, ByteString bytes) {
+    public void onMessage(WebSocket webSocket, ByteString bytes) {
         Log.d(TAG, "WebSocket onMessage ByteString...");
 
         Message message = MessageHelper.unpackMessage(bytes.toByteArray());
@@ -357,7 +182,7 @@ public class Connection extends WebSocketListener {
     }
 
     @Override
-    public void onClosed(okhttp3.WebSocket webSocket, int code, String reason) {
+    public void onClosed(WebSocket webSocket, int code, String reason) {
         Log.d(TAG, "WebSocket onClosed...");
         Log.d(TAG, "reason: " + reason);
         mIsDisconnected = true;
@@ -369,7 +194,7 @@ public class Connection extends WebSocketListener {
     }
 
     @Override
-    public void onFailure(okhttp3.WebSocket webSocket, Throwable t, Response response) {
+    public void onFailure(WebSocket webSocket, Throwable t, Response response) {
         Log.d(TAG, "WebSocket onFailure...");
         t.printStackTrace();
         if (response != null) Log.d(TAG, response.toString());
@@ -383,6 +208,5 @@ public class Connection extends WebSocketListener {
                 t instanceof SocketTimeoutException) {
             reconnectWithDelay();
         }
-//        mWebSocket = null;
     }
 }
