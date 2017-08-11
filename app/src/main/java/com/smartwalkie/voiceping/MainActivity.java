@@ -17,7 +17,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
@@ -42,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private Button talkButton;
     private Spinner channelTypeSpinner;
     private TextInputLayout channelInputLayout;
+    private LinearLayout llAmplitude;
+    private ProgressBar pbAmplitude;
+    private TextView tvAmplitude;
     private int channelType = ChannelType.PRIVATE;
 
     private final View.OnTouchListener touchListener = new View.OnTouchListener() {
@@ -95,6 +101,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         talkButton = (Button) findViewById(R.id.talk_button);
         talkButton.setOnTouchListener(touchListener);
+
+        llAmplitude = (LinearLayout) findViewById(R.id.ll_amplitude);
+        pbAmplitude = (ProgressBar) findViewById(R.id.pb_amplitude);
+        tvAmplitude = (TextView) findViewById(R.id.tv_amplitude);
+
+        llAmplitude.setVisibility(View.GONE);
 
         String userId = getIntent().getStringExtra("user_id");
         if (userId != null) setTitle("User ID: " + userId);
@@ -203,7 +215,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 ShortBuffer sb = ByteBuffer.wrap(data).asShortBuffer();
                 short[] dataShortArray = new short[sb.limit()];
                 sb.get(dataShortArray);
-                if (dataShortArray.length > 0) Log.d(TAG, "amplitude: " + dataShortArray[0]);
+                int max = Math.abs(dataShortArray[0]);
+                for (short singleShort : dataShortArray) {
+                    if (max < singleShort) max = Math.abs(singleShort);
+                }
+                final int amplitude = max;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        llAmplitude.setVisibility(View.VISIBLE);
+                        pbAmplitude.setProgress(amplitude);
+                        tvAmplitude.setText("" + amplitude);
+                    }
+                });
                 return data;
             }
         });

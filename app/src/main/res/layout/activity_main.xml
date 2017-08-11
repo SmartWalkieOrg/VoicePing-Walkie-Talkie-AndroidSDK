@@ -64,6 +64,30 @@
                 android:textStyle="bold"
                 style="?android:textAppearanceSmall"/>
 
+            <LinearLayout
+                android:id="@+id/ll_amplitude"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="32dp">
+
+                <android.support.v4.widget.ContentLoadingProgressBar
+                    android:id="@+id/pb_amplitude"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                    android:max="32767"/>
+
+                <TextView
+                    android:id="@+id/tv_amplitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="0"
+                    android:textSize="24sp"/>
+
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
