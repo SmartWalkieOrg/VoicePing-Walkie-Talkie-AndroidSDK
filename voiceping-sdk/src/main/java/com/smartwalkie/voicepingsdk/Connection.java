@@ -147,6 +147,7 @@ public class Connection extends WebSocketListener {
         if (mWebSocket != null) {
             Log.d(TAG, "close WebSocket...");
             mWebSocket.cancel();
+            mIsDisconnected = true;
             if (mDisconnectCallback != null) {
                 mDisconnectCallback.onDisconnected();
                 mDisconnectCallback = null;
@@ -179,7 +180,7 @@ public class Connection extends WebSocketListener {
                 @Override
                 public void run() {
                     mIsReconnecting = false;
-                    if (!mIsOpened) {
+                    if (!mIsOpened && !mIsDisconnected) {
                         mWebSocket = null;
                         connect();
                     }
@@ -304,6 +305,7 @@ public class Connection extends WebSocketListener {
         Log.d(TAG, "WebSocket onOpen...");
         if (response != null) Log.d(TAG, response.toString());
         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
+        mIsDisconnected = false;
         mIsOpened = true;
         send(MessageHelper.createConnectionMessage(userId));
         if (mConnectCallback != null) {
