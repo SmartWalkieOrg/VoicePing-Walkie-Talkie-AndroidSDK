@@ -169,21 +169,6 @@ public class Player implements IncomingAudioListener, AudioPlayer {
 
     // IncomingAudioListener
     @Override
-    public void onStartTalkingMessage(Message message) {
-
-    }
-
-    @Override
-    public void onAudioTalkingMessage(Message message) {
-
-    }
-
-    @Override
-    public void onStopTalkingMessage(Message message) {
-
-    }
-
-    @Override
     public void onMessageReceived(Message message) {
         switch (message.getMessageType()) {
             case MessageType.START_TALKING:

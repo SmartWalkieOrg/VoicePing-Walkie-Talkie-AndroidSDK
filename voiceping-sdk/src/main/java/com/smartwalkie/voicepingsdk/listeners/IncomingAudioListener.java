@@ -8,11 +8,5 @@ import com.smartwalkie.voicepingsdk.models.Message;
 
 public interface IncomingAudioListener {
 
-    void onStartTalkingMessage(Message message);
-
-    void onAudioTalkingMessage(Message message);
-
-    void onStopTalkingMessage(Message message);
-
     void onMessageReceived(Message message);
 }
