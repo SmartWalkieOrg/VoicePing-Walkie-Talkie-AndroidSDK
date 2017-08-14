@@ -1,10 +1,14 @@
 package com.smartwalkie.voicepingsdk.listeners;
 
 /**
- * Created by kukuhsain on 8/8/17.
+ * Interface for Recorder.
  */
-
 public interface AudioRecorder {
 
+    /**
+     * Add interceptor that will be processed before sending the recorded audio data to server.
+     *
+     * @param audioInterceptor
+     */
     void addAudioInterceptor(AudioInterceptor audioInterceptor);
 }

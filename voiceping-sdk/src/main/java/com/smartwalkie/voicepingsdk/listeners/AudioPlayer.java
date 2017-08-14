@@ -1,10 +1,14 @@
 package com.smartwalkie.voicepingsdk.listeners;
 
 /**
- * Created by kukuhsain on 8/8/17.
+ * Interface for Player.
  */
-
 public interface AudioPlayer {
 
+    /**
+     * Add interceptor that will be processed before playing the received audio data from server.
+     *
+     * @param audioInterceptor
+     */
     void addAudioInterceptor(AudioInterceptor audioInterceptor);
 }

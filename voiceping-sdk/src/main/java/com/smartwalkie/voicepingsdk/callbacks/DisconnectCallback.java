@@ -1,10 +1,12 @@
 package com.smartwalkie.voicepingsdk.callbacks;
 
 /**
- * Created by kukuhsain on 8/2/17.
+ * Interface to provide callback to disconnecting action.
  */
-
 public interface DisconnectCallback {
 
+    /**
+     * Invoked after successfully disconnected from server
+     */
     void onDisconnected();
 }

@@ -11,6 +11,9 @@ import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Main class of VoicePing.
+ */
 public class VoicePing {
 
     private Context mContext;
@@ -28,10 +31,25 @@ public class VoicePing {
         VoicePingPrefs.getInstance(context).putServerUrl(serverUrl);
     }
 
+    /**
+     * Instantiate VoicePing. VoicePing instance is the most important instance in this SDK.
+     * The developer that use this SDK can do other processes using VoicePing instance.
+     *
+     * @param context
+     * @param serverUrl
+     * @return VoicePing instance
+     */
     public static VoicePing init(Context context, String serverUrl) {
         return new VoicePing(context, serverUrl);
     }
 
+    /**
+     * Connect to server. This method can be assumed as sign in to server. After the user connected
+     * to server, the user can then receive PTT from any other user using private channel.
+     *
+     * @param userId
+     * @param callback
+     */
     public void connect(String userId, ConnectCallback callback) {
         Map<String, String> props = new HashMap<>();
         props.put("user_id", userId);
@@ -41,6 +59,12 @@ public class VoicePing {
         mConnection.connect(props, callback);
     }
 
+    /**
+     * Disconnect from server. This method can be assumed as sign out from server. After
+     * disconnected from server, the user will not receive any incoming message.
+     *
+     * @param callback
+     */
     public void disconnect(DisconnectCallback callback) {
         mConnection.disconnect(callback);
     }
@@ -58,10 +82,19 @@ public class VoicePing {
 
     }
 
+    /**
+     * Start talking using PTT.
+     *
+     * @param receiverId
+     * @param channelType
+     */
     public void startTalking(String receiverId, int channelType) {
         mRecorder.startTalking(receiverId, channelType);
     }
 
+    /**
+     * Stop talking.
+     */
     public void stopTalking() {
         mRecorder.stopTalking();
     }
