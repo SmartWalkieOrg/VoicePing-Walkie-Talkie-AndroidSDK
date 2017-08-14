@@ -150,6 +150,10 @@ public class Connection {
     }
 
     public void send(byte[] data) {
+        if (mOutgoingAudioListener != null && !mIsOpened) {
+            mOutgoingAudioListener.onError(data, new PingException("WebSocket is not connected!"));
+            return;
+        }
         mWebSocket.send(ByteString.of(data));
     }
 

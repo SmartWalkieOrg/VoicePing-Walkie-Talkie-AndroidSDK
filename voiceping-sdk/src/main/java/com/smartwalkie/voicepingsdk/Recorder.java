@@ -134,10 +134,8 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
             e.printStackTrace();
         }
 
-        if (mChannelListener != null) mChannelListener.onTalkStarted(this);
-        if (mAudioInterceptor != null) data = mAudioInterceptor.proceed(data);
-
         if (data == null || data.length == 0) return;
+        if (mAudioInterceptor != null) data = mAudioInterceptor.proceed(data);
 
         if (AudioParameters.USE_CODEC) {
             byte[] encodedBytes = new byte[data.length];
@@ -170,6 +168,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         Log.v(TAG, "stopRecording");
         IS_RECORDING = false;
         mBlockingQueue.clear();
+        mAudioInterceptor = null;
     }
 
     public boolean isRecording() {
@@ -182,6 +181,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         switch (message.getMessageType()) {
             case MessageType.ACK_START:
                 Log.v(TAG, "onAckStartSucceed: " + message);
+                if (mChannelListener != null) mChannelListener.onTalkStarted(this);
                 startRecording();
                 break;
             case MessageType.ACK_START_FAILED:
@@ -197,6 +197,14 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
                 break;
             case MessageType.MESSAGE_READ:
                 Log.v(TAG, "onMessageRead: " + message);
+        }
+    }
+
+    @Override
+    public void onError(byte[] data, PingException e) {
+        Message message = MessageHelper.unpackMessage(data);
+        if (message != null && message.getMessageType() == MessageType.ACK_START) {
+            if (mChannelListener != null) mChannelListener.onError(e);
         }
     }
 
