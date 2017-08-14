@@ -225,6 +225,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
+    public void onTalkStopped() {
+
+    }
+
+    @Override
     public void onTalkReceived(AudioPlayer audioPlayer) {
 
     }

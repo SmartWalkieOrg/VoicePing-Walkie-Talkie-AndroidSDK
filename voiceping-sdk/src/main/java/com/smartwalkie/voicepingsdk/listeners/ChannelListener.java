@@ -12,6 +12,8 @@ public interface ChannelListener {
 
     void onTalkStarted(AudioRecorder audioRecorder);
 
+    void onTalkStopped();
+
     void onTalkReceived(AudioPlayer audioPlayer);
 
     void onUnsubscribed(String channelId, int channelType);

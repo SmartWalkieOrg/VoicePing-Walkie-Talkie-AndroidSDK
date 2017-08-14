@@ -102,6 +102,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         mSenderHandler.removeMessages(CONTINUE_FOR_SENDING_AUDIO_DATA);
         stopRecording();
         sendAckStop();
+        if (mChannelListener != null) mChannelListener.onTalkStopped();
     }
 
     private void sendAckStart() {
