@@ -1,6 +1,7 @@
 package com.smartwalkie.voicepingsdk;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
@@ -9,7 +10,6 @@ import com.smartwalkie.voicepingsdk.exceptions.PingException;
 import com.smartwalkie.voicepingsdk.listeners.IncomingAudioListener;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
-import com.smartwalkie.voicepingsdk.models.MessageType;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
 import java.net.SocketException;
@@ -28,7 +28,7 @@ import okhttp3.WebSocketListener;
 import okio.ByteString;
 
 
-public class Connection extends WebSocketListener {
+public class Connection {
 
     private final String TAG = Connection.class.getSimpleName();
 
@@ -44,6 +44,11 @@ public class Connection extends WebSocketListener {
     private boolean mIsReconnecting;
     private boolean mIsOpened;
     private boolean mIsDisconnected;
+    private Handler mHandler;
+
+    private final int CONNECTED = 100;
+    private final int DISCONNECTED = 200;
+    private final int FAILURE = 300;
 
     public Connection(Context context, String serverUrl, IncomingAudioListener listener) {
         mContext = context;
@@ -55,6 +60,41 @@ public class Connection extends WebSocketListener {
                 .pingInterval(30, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
+
+        mHandler = new Handler(new Handler.Callback() {
+
+            @Override
+            public boolean handleMessage(android.os.Message message) {
+                switch (message.what) {
+                    case CONNECTED:
+                        String userId = VoicePingPrefs.getInstance(mContext).getUserId();
+                        mIsDisconnected = false;
+                        mIsOpened = true;
+                        send(MessageHelper.createConnectionMessage(userId));
+                        if (mConnectCallback != null) {
+                            mConnectCallback.onConnected();
+                            mConnectCallback = null;
+                        }
+                        return true;
+                    case DISCONNECTED:
+                        mIsDisconnected = true;
+                        mIsOpened = false;
+                        if (mDisconnectCallback != null) {
+                            mDisconnectCallback.onDisconnected();
+                            mDisconnectCallback = null;
+                        }
+                        return true;
+                    case FAILURE:
+                        mIsOpened = false;
+                        if (mConnectCallback != null) {
+                            mConnectCallback.onFailed(new PingException("Failed to connect!"));
+                            mConnectCallback = null;
+                        }
+                        return true;
+                }
+                return false;
+            }
+        });
     }
 
     public void setOutgoingAudioListener(OutgoingAudioListener listener) {
@@ -78,7 +118,7 @@ public class Connection extends WebSocketListener {
         Request request = builder.build();
 
         Log.d(TAG, "connecting...");
-        mWebSocket = mOkHttpClient.newWebSocket(request, this);
+        mWebSocket = mOkHttpClient.newWebSocket(request, new SocketListener());
 //        mOkHttpClient.dispatcher().executorService().shutdown();
     }
 
@@ -90,7 +130,6 @@ public class Connection extends WebSocketListener {
                 public void run() {
                     mIsReconnecting = false;
                     if (!mIsOpened && !mIsDisconnected) {
-                        mWebSocket = null;
                         connect();
                     }
                 }
@@ -101,112 +140,55 @@ public class Connection extends WebSocketListener {
 
     public void disconnect(DisconnectCallback callback) {
         mDisconnectCallback = callback;
-        if (mWebSocket != null) {
-            Log.d(TAG, "close WebSocket...");
-            mWebSocket.cancel();
-            mIsDisconnected = true;
-            if (mDisconnectCallback != null) {
-                mDisconnectCallback.onDisconnected();
-                mDisconnectCallback = null;
-            }
-        } else {
-            if (mDisconnectCallback != null) {
-                mDisconnectCallback.onFailed(new PingException("Failed to disconnect!"));
-                mDisconnectCallback = null;
-            }
-        }
-    }
-
-    public void send(byte[] data) {
-        if (mWebSocket != null) {
-            mWebSocket.send(ByteString.of(data));
-        } else {
-            Log.d(TAG, "WebSocket closed...");
-        }
-    }
-
-    @Override
-    public void onOpen(WebSocket webSocket, Response response) {
-        Log.d(TAG, "WebSocket onOpen...");
-        if (response != null) Log.d(TAG, response.toString());
-        String userId = VoicePingPrefs.getInstance(mContext).getUserId();
-        mIsDisconnected = false;
-        mIsOpened = true;
-        send(MessageHelper.createConnectionMessage(userId));
-        if (mConnectCallback != null) {
-            mConnectCallback.onConnected();
-            mConnectCallback = null;
-        }
-    }
-
-    @Override
-    public void onMessage(WebSocket webSocket, String text) {
-        Log.d(TAG, "WebSocket onMessage String...");
-    }
-
-    @Override
-    public void onMessage(WebSocket webSocket, ByteString bytes) {
-        Log.d(TAG, "WebSocket onMessage ByteString...");
-
-        Message message = MessageHelper.unpackMessage(bytes.toByteArray());
-        if (mIncomingAudioListener != null) {
-            if (message.getMessageType() == MessageType.START_TALKING) {
-                mIncomingAudioListener.onStartTalkingMessage(message);
-            } else if (message.getMessageType() == MessageType.AUDIO) {
-                mIncomingAudioListener.onAudioTalkingMessage(message);
-            } else if (message.getMessageType() == MessageType.STOP_TALKING) {
-                mIncomingAudioListener.onStopTalkingMessage(message);
-            }
-        }
-
-        if (mOutgoingAudioListener != null) {
-            switch (message.getMessageType()) {
-                case MessageType.ACK_START:
-                    mOutgoingAudioListener.onAckStartSucceed(message);
-                    break;
-                case MessageType.ACK_START_FAILED:
-                    mOutgoingAudioListener.onAckStartFailed(message);
-                    break;
-                case MessageType.ACK_END:
-                    mOutgoingAudioListener.onAckEndSucceed(message);
-                    break;
-                case MessageType.MESSAGE_DELIVERED:
-                    mOutgoingAudioListener.onMessageDelivered(message);
-                    break;
-                case MessageType.MESSAGE_READ:
-                    mOutgoingAudioListener.onMessageRead(message);
-            }
-        }
-
-        Log.d(TAG, "message: " + message.getMessageType());
-    }
-
-    @Override
-    public void onClosed(WebSocket webSocket, int code, String reason) {
-        Log.d(TAG, "WebSocket onClosed...");
-        Log.d(TAG, "reason: " + reason);
+        Log.d(TAG, "close WebSocket...");
+        mWebSocket.cancel();
         mIsDisconnected = true;
-        mIsOpened = false;
         if (mDisconnectCallback != null) {
             mDisconnectCallback.onDisconnected();
             mDisconnectCallback = null;
         }
     }
 
-    @Override
-    public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-        Log.d(TAG, "WebSocket onFailure...");
-        t.printStackTrace();
-        if (response != null) Log.d(TAG, response.toString());
-        mIsOpened = false;
-        if (mConnectCallback != null) {
-            mConnectCallback.onFailed(new PingException("Failed to connect!"));
-            mConnectCallback = null;
+    public void send(byte[] data) {
+        mWebSocket.send(ByteString.of(data));
+    }
+
+    private class SocketListener extends WebSocketListener {
+
+        @Override
+        public void onOpen(WebSocket webSocket, Response response) {
+            Log.d(TAG, "WebSocket onOpen...");
+            if (response != null) Log.d(TAG, response.toString());
+            mHandler.sendEmptyMessage(CONNECTED);
         }
-        if (t instanceof UnknownHostException ||
-                t instanceof SocketException ||
-                t instanceof SocketTimeoutException) {
-            reconnectWithDelay();
+
+        @Override
+        public void onMessage(WebSocket webSocket, ByteString bytes) {
+            Log.d(TAG, "WebSocket onMessage ByteString...");
+            Message message = MessageHelper.unpackMessage(bytes.toByteArray());
+            Log.d(TAG, "message: " + message.getMessageType());
+            if (mIncomingAudioListener != null) mIncomingAudioListener.onMessageReceived(message);
+            if (mOutgoingAudioListener != null) mOutgoingAudioListener.onMessageReceived(message);
+        }
+
+        @Override
+        public void onClosed(WebSocket webSocket, int code, String reason) {
+            Log.d(TAG, "WebSocket onClosed...");
+            Log.d(TAG, "reason: " + reason);
+            mHandler.sendEmptyMessage(DISCONNECTED);
+        }
+
+        @Override
+        public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+            Log.d(TAG, "WebSocket onFailure...");
+            t.printStackTrace();
+            if (response != null) Log.d(TAG, response.toString());
+            mHandler.sendEmptyMessage(FAILURE);
+            if (t instanceof UnknownHostException ||
+                    t instanceof SocketException ||
+                    t instanceof SocketTimeoutException) {
+                reconnectWithDelay();
+            }
         }
     }
 }

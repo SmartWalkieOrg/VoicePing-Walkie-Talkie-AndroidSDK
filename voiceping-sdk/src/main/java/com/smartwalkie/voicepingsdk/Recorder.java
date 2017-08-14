@@ -15,6 +15,7 @@ import com.smartwalkie.voicepingsdk.listeners.AudioRecorder;
 import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
+import com.smartwalkie.voicepingsdk.models.MessageType;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 import com.smartwalkie.voicepingsdk.services.RecorderService;
 
@@ -176,31 +177,26 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     // OutgoingAudioListener
     @Override
-    public void onAckStartSucceed(Message message) {
-        Log.v(TAG, "onAckStartSucceed: " + message);
-        startRecording();
-    }
-
-    @Override
-    public void onAckStartFailed(Message message) {
-        Log.v(TAG, "onAckStartFailed: " + message);
-        stopRecording();
-        mState = STOPPED;
-    }
-
-    @Override
-    public void onAckEndSucceed(Message message) {
-        Log.v(TAG, "onAckEndSucceed: " + message);
-    }
-
-    @Override
-    public void onMessageDelivered(Message message) {
-        Log.v(TAG, "onMessageDelivered: " + message);
-    }
-
-    @Override
-    public void onMessageRead(Message message) {
-        Log.v(TAG, "onMessageRead: " + message);
+    public void onMessageReceived(Message message) {
+        switch (message.getMessageType()) {
+            case MessageType.ACK_START:
+                Log.v(TAG, "onAckStartSucceed: " + message);
+                startRecording();
+                break;
+            case MessageType.ACK_START_FAILED:
+                Log.v(TAG, "onAckStartFailed: " + message);
+                stopRecording();
+                mState = STOPPED;
+                break;
+            case MessageType.ACK_END:
+                Log.v(TAG, "onAckEndSucceed: " + message);
+                break;
+            case MessageType.MESSAGE_DELIVERED:
+                Log.v(TAG, "onMessageDelivered: " + message);
+                break;
+            case MessageType.MESSAGE_READ:
+                Log.v(TAG, "onMessageRead: " + message);
+        }
     }
 
     // AudioRecorder

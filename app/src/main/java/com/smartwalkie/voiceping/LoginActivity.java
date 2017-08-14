@@ -90,28 +90,19 @@ public class LoginActivity extends AppCompatActivity implements
                 @Override
                 public void onConnected() {
                     Log.v(TAG, "onConnected");
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showProgress(false);
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            intent.putExtra("user_id", userId);
-                            startActivity(intent);
-                            finish();
-                        }
-                    });
+                    showProgress(false);
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    intent.putExtra("user_id", userId);
+                    startActivity(intent);
+                    finish();
                 }
 
                 @Override
                 public void onFailed(final PingException exception) {
                     Log.v(TAG, "onFailed");
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showProgress(false);
-                            Toast.makeText(LoginActivity.this, exception.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    showProgress(false);
+                    Toast.makeText(LoginActivity.this, exception.getMessage(), Toast.LENGTH_SHORT)
+                            .show();
                 }
             });
         }

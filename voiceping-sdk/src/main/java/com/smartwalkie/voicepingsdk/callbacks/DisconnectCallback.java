@@ -1,7 +1,5 @@
 package com.smartwalkie.voicepingsdk.callbacks;
 
-import com.smartwalkie.voicepingsdk.exceptions.PingException;
-
 /**
  * Created by kukuhsain on 8/2/17.
  */
@@ -9,6 +7,4 @@ import com.smartwalkie.voicepingsdk.exceptions.PingException;
 public interface DisconnectCallback {
 
     void onDisconnected();
-
-    void onFailed(PingException exception);
 }

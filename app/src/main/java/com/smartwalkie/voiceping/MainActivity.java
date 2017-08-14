@@ -146,18 +146,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                             startActivity(new Intent(MainActivity.this,
                                                     LoginActivity.class));
                                             finish();
+                                            Toast.makeText(MainActivity.this, "Disconnected!",
+                                                    Toast.LENGTH_SHORT).show();
                                         }
-                                    }
-
-                                    @Override
-                                    public void onFailed(final PingException exception) {
-                                        exception.printStackTrace();
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                Toast.makeText(MainActivity.this, exception.getMessage(), Toast.LENGTH_SHORT).show();
-                                            }
-                                        });
                                     }
                                 });
                             }

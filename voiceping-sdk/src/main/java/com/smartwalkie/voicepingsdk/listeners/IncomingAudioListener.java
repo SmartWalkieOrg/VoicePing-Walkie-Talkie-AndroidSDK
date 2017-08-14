@@ -13,4 +13,6 @@ public interface IncomingAudioListener {
     void onAudioTalkingMessage(Message message);
 
     void onStopTalkingMessage(Message message);
+
+    void onMessageReceived(Message message);
 }

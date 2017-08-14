@@ -15,6 +15,7 @@ import com.smartwalkie.voicepingsdk.listeners.AudioPlayer;
 import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
 import com.smartwalkie.voicepingsdk.listeners.IncomingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
+import com.smartwalkie.voicepingsdk.models.MessageType;
 
 
 public class Player implements IncomingAudioListener, AudioPlayer {
@@ -169,18 +170,33 @@ public class Player implements IncomingAudioListener, AudioPlayer {
     // IncomingAudioListener
     @Override
     public void onStartTalkingMessage(Message message) {
-        Log.v(TAG, "onStartTalkingMessage: " + message.toString());
+
     }
 
     @Override
     public void onAudioTalkingMessage(Message message) {
-        Log.v(TAG, "onAudioTalkingMessage: " + message.toString());
-        play(message.getPayload());
+
     }
 
     @Override
     public void onStopTalkingMessage(Message message) {
-        Log.v(TAG, "onStopTalkingMessage: " + message.toString());
+
+    }
+
+    @Override
+    public void onMessageReceived(Message message) {
+        switch (message.getMessageType()) {
+            case MessageType.START_TALKING:
+                Log.v(TAG, "onStartTalkingMessage: " + message.toString());
+                break;
+            case MessageType.AUDIO:
+                Log.v(TAG, "onAudioTalkingMessage: " + message.toString());
+                play(message.getPayload());
+                break;
+            case MessageType.STOP_TALKING:
+                Log.v(TAG, "onStopTalkingMessage: " + message.toString());
+                break;
+        }
     }
 
     // AudioPlayer
