@@ -94,6 +94,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         Log.v(TAG, "startTalking");
         this.mReceiverId = receiverId;
         this.mChannelType = channelType;
+        IS_RECORDING = true;
         sendAckStart();
     }
 
@@ -161,7 +162,6 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     private void startRecording() {
         Log.v(TAG, "startRecording");
-        IS_RECORDING = true;
         mContext.startService(new Intent(mContext, RecorderService.class));
         mState = RECORDING;
     }
