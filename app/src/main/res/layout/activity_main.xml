@@ -65,29 +65,52 @@
                 style="?android:textAppearanceSmall"/>
 
             <LinearLayout
-                android:id="@+id/ll_amplitude"
+                android:id="@+id/ll_outgoing_talk"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:padding="32dp">
+                android:padding="24dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Recording"/>
+                    android:text="Outgoing"/>
 
                 <ProgressBar
-                    android:id="@+id/pb_amplitude"
+                    android:id="@+id/pb_outgoing_talk"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                     android:max="12000"
-                    android:progress="6000"
-                    android:progressDrawable="@drawable/pb_audio_amplitude"/>
+                    android:progress="12000"
+                    android:progressDrawable="@drawable/pb_audio_amplitude_outgoing"/>
 
+            </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/ll_incoming_talk"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:padding="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Incoming"/>
+
+                <ProgressBar
+                    android:id="@+id/pb_incoming_talk"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                    android:max="12000"
+                    android:progress="12000"
+                    android:progressDrawable="@drawable/pb_audio_amplitude_incoming"/>
 
             </LinearLayout>
 

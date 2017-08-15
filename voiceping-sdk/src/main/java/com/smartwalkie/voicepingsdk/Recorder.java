@@ -103,7 +103,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         mSenderHandler.removeMessages(CONTINUE_FOR_SENDING_AUDIO_DATA);
         stopRecording();
         sendAckStop();
-        if (mChannelListener != null) mChannelListener.onTalkStopped();
+        if (mChannelListener != null) mChannelListener.onOutgoingTalkStopped();
     }
 
     private void sendAckStart() {
@@ -181,7 +181,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         switch (message.getMessageType()) {
             case MessageType.ACK_START:
                 Log.v(TAG, "onAckStartSucceed: " + message);
-                if (mChannelListener != null) mChannelListener.onTalkStarted(this);
+                if (mChannelListener != null) mChannelListener.onOutgoingTalkStarted(this);
                 startRecording();
                 break;
             case MessageType.ACK_START_FAILED:

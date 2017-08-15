@@ -73,7 +73,7 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                             Log.v(TAG, "USE_CODEC");
                             if (decodeSize > 0) {
                                 if (mChannelListener != null) {
-                                    mChannelListener.onTalkReceived(Player.this);
+                                    mChannelListener.onIncomingTalkStarted(Player.this);
                                 }
                                 if (mAudioInterceptor != null) {
                                     pcmFrame = mAudioInterceptor.proceed(pcmFrame);
@@ -84,7 +84,7 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                             }
                         } else {
                             if (mChannelListener != null) {
-                                mChannelListener.onTalkReceived(Player.this);
+                                mChannelListener.onIncomingTalkStarted(Player.this);
                             }
                             if (mAudioInterceptor != null) {
                                 payload = mAudioInterceptor.proceed(payload);

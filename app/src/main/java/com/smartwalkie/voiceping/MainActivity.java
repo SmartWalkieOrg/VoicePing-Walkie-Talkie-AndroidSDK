@@ -44,8 +44,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private Button talkButton;
     private Spinner channelTypeSpinner;
     private TextInputLayout channelInputLayout;
-    private LinearLayout llAmplitude;
-    private ProgressBar pbAmplitude;
+    private LinearLayout llOutgoingTalk;
+    private ProgressBar pbOutgoingTalk;
+    private LinearLayout llIncomingTalk;
+    private ProgressBar pbIncomingTalk;
     private int channelType = ChannelType.PRIVATE;
 
     private final View.OnTouchListener touchListener = new View.OnTouchListener() {
@@ -100,10 +102,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         talkButton = (Button) findViewById(R.id.talk_button);
         talkButton.setOnTouchListener(touchListener);
 
-        llAmplitude = (LinearLayout) findViewById(R.id.ll_amplitude);
-        pbAmplitude = (ProgressBar) findViewById(R.id.pb_amplitude);
+        llOutgoingTalk = (LinearLayout) findViewById(R.id.ll_outgoing_talk);
+        pbOutgoingTalk = (ProgressBar) findViewById(R.id.pb_outgoing_talk);
+        llIncomingTalk = (LinearLayout) findViewById(R.id.ll_incoming_talk);
+        pbIncomingTalk = (ProgressBar) findViewById(R.id.pb_incoming_talk);
 
-        llAmplitude.setVisibility(View.GONE);
+        llOutgoingTalk.setVisibility(View.GONE);
+        llIncomingTalk.setVisibility(View.GONE);
 
         String userId = getIntent().getStringExtra("user_id");
         if (userId != null) setTitle("User ID: " + userId);
@@ -196,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public void onTalkStarted(AudioRecorder audioRecorder) {
+    public void onOutgoingTalkStarted(AudioRecorder audioRecorder) {
         audioRecorder.addAudioInterceptor(new AudioInterceptor() {
             @Override
             public byte[] proceed(byte[] data) {
@@ -207,8 +212,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        llAmplitude.setVisibility(View.VISIBLE);
-                        pbAmplitude.setProgress((int) amplitude - 7000);
+                        llOutgoingTalk.setVisibility(View.VISIBLE);
+                        pbOutgoingTalk.setProgress((int) amplitude - 7000);
                     }
                 });
                 return data;
@@ -217,13 +222,34 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public void onTalkStopped() {
-        llAmplitude.setVisibility(View.GONE);
+    public void onOutgoingTalkStopped() {
+        llOutgoingTalk.setVisibility(View.GONE);
     }
 
     @Override
-    public void onTalkReceived(AudioPlayer audioPlayer) {
+    public void onIncomingTalkStarted(AudioPlayer audioPlayer) {
+        audioPlayer.addAudioInterceptor(new AudioInterceptor() {
+            @Override
+            public byte[] proceed(byte[] data) {
+                ShortBuffer sb = ByteBuffer.wrap(data).asShortBuffer();
+                short[] dataShortArray = new short[sb.limit()];
+                sb.get(dataShortArray);
+                final double amplitude = getRmsAmplitude(dataShortArray);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        llIncomingTalk.setVisibility(View.VISIBLE);
+                        pbIncomingTalk.setProgress((int) amplitude - 7000);
+                    }
+                });
+                return data;
+            }
+        });
+    }
 
+    @Override
+    public void onIncomingTalkStopped() {
+        llIncomingTalk.setVisibility(View.GONE);
     }
 
     @Override
