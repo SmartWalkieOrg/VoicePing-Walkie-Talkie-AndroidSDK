@@ -38,9 +38,9 @@ public class Connection {
     private DisconnectCallback mDisconnectCallback;
     private IncomingAudioListener mIncomingAudioListener;
     private OutgoingAudioListener mOutgoingAudioListener;
-    private boolean mIsReconnecting;
-    private boolean mIsOpened;
-    private boolean mIsDisconnected;
+    private volatile boolean mIsReconnecting;
+    private volatile boolean mIsOpened;
+    private volatile boolean mIsDisconnected;
     private Handler mHandler;
 
     private final int CONNECTED = 100;

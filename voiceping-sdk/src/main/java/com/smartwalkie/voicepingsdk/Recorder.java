@@ -43,15 +43,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
     private ChannelListener mChannelListener;
     private AudioInterceptor mAudioInterceptor;
 
-    private static final int STOPPED = 0;
-    private static final int STARTED = 10;
-    private static final int RECORDING = 20;
-    private static final int SENDING = 30;
-    private static final int WAITING_FOR_ACK_END = 60;
-
     private static final int ACK_TIMEOUT_IN_MILLIS = 10 * 1000;
-
-    private static int mState;
 
     private static final int CONTINUE_FOR_SENDING_AUDIO_DATA = 1000;
 
@@ -59,7 +51,6 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         mContext = context;
         mConnection = connection;
         mBlockingQueue = new LinkedBlockingQueue<>();
-        mState = STOPPED;
         EventBus.getDefault().register(this);
         initSenderThread();
         mOpus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
@@ -79,7 +70,6 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
                 }
             }
         };
-        mState = STOPPED;
     }
 
     public void setChannelListener(ChannelListener channelListener) {
@@ -112,7 +102,6 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         Message message = MessageHelper.createAckStartMessage(
                 userId, mReceiverId, mChannelType, System.currentTimeMillis());
         mConnection.send(message.getPayload());
-        mState = STARTED;
     }
 
     @Subscribe
@@ -147,7 +136,6 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         Message message = MessageHelper.createAudioMessage(
                 userId, mReceiverId, mChannelType, data, data.length);
         mConnection.send(message.getPayload());
-        mState = SENDING;
     }
 
     private void sendAckStop() {
@@ -155,13 +143,11 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
         byte[] message = MessageHelper.createAckStopMessage(userId, mReceiverId, mChannelType);
         mConnection.send(message);
-        mState = WAITING_FOR_ACK_END;
     }
 
     private void startRecording() {
         Log.v(TAG, "startRecording");
         mContext.startService(new Intent(mContext, RecorderService.class));
-        mState = RECORDING;
     }
 
     private void stopRecording() {
@@ -187,7 +173,6 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
             case MessageType.ACK_START_FAILED:
                 Log.v(TAG, "onAckStartFailed: " + message);
                 stopRecording();
-                mState = STOPPED;
                 break;
             case MessageType.ACK_END:
                 Log.v(TAG, "onAckEndSucceed: " + message);

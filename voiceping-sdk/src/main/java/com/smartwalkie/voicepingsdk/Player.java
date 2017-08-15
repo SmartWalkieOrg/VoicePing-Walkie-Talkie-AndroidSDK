@@ -40,7 +40,6 @@ public class Player implements IncomingAudioListener, AudioPlayer {
 
     private int mCurrentState;
     private long mStartTalkingTime = 0;
-    private byte[] mCurrentPlayingPlayload;
 
     public Player(Context context) {
         mContext = context;
@@ -66,7 +65,6 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                         return true;
                     case PLAY:
                         byte[] payload = (byte[]) msg.obj;
-                        mCurrentPlayingPlayload = payload;
                         byte[] pcmFrame = new byte[1920];
                         if (AudioParameters.USE_CODEC) {
                             int decodeSize = mOpus.decode(payload, 0, payload.length, pcmFrame, 0, AudioParameters.FRAME_SIZE, 0);
@@ -92,14 +90,12 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                         Log.d(TAG, "Stop...");
                         mAudioTrack.stop();
                         mAudioTrack.flush();
-                        mCurrentPlayingPlayload = null;
                         mStartTalkingTime =0;
                         return true;
                     case DESTROY:
                         Log.d(TAG, "Destroy...");
                         mAudioTrack.stop();
                         mAudioTrack.flush();
-                        mCurrentPlayingPlayload = null;
                         mAudioTrack.release();
                         return true;
                     case STOP_PLAYING_AFTER_A_TIME:
