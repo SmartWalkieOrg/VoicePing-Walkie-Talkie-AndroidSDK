@@ -12,9 +12,6 @@ import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -90,6 +87,7 @@ public class Connection {
                             mConnectCallback.onFailed(new PingException("Failed to connect!"));
                             mConnectCallback = null;
                         }
+                        reconnectWithDelay();
                         return true;
                 }
                 return false;
@@ -188,11 +186,6 @@ public class Connection {
             t.printStackTrace();
             if (response != null) Log.d(TAG, response.toString());
             mHandler.sendEmptyMessage(FAILURE);
-            if (t instanceof UnknownHostException ||
-                    t instanceof SocketException ||
-                    t instanceof SocketTimeoutException) {
-                reconnectWithDelay();
-            }
         }
     }
 }
