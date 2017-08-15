@@ -72,9 +72,6 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                             int decodeSize = mOpus.decode(payload, 0, payload.length, pcmFrame, 0, AudioParameters.FRAME_SIZE, 0);
                             Log.v(TAG, "USE_CODEC");
                             if (decodeSize > 0) {
-                                if (mChannelListener != null) {
-                                    mChannelListener.onIncomingTalkStarted(Player.this);
-                                }
                                 if (mAudioInterceptor != null) {
                                     pcmFrame = mAudioInterceptor.proceed(pcmFrame);
                                     if (pcmFrame == null || pcmFrame.length == 0) return false;
@@ -83,9 +80,6 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                                 Log.v(TAG, "decodeSize: "+decodeSize);
                             }
                         } else {
-                            if (mChannelListener != null) {
-                                mChannelListener.onIncomingTalkStarted(Player.this);
-                            }
                             if (mAudioInterceptor != null) {
                                 payload = mAudioInterceptor.proceed(payload);
                                 if (payload == null || payload.length == 0) return false;
@@ -173,6 +167,7 @@ public class Player implements IncomingAudioListener, AudioPlayer {
         switch (message.getMessageType()) {
             case MessageType.START_TALKING:
                 Log.v(TAG, "onStartTalkingMessage: " + message.toString());
+                if (mChannelListener != null) mChannelListener.onIncomingTalkStarted(this);
                 break;
             case MessageType.AUDIO:
                 Log.v(TAG, "onAudioTalkingMessage: " + message.toString());
@@ -180,6 +175,8 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                 break;
             case MessageType.STOP_TALKING:
                 Log.v(TAG, "onStopTalkingMessage: " + message.toString());
+                mAudioInterceptor = null;
+                if (mChannelListener != null) mChannelListener.onIncomingTalkStopped();
                 break;
         }
     }

@@ -249,7 +249,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onIncomingTalkStopped() {
-        llIncomingTalk.setVisibility(View.GONE);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                llIncomingTalk.setVisibility(View.GONE);
+            }
+        });
     }
 
     @Override
