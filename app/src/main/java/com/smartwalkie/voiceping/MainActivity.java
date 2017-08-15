@@ -206,16 +206,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 ShortBuffer sb = ByteBuffer.wrap(data).asShortBuffer();
                 short[] dataShortArray = new short[sb.limit()];
                 sb.get(dataShortArray);
-                int max = Math.abs(dataShortArray[0]);
-                for (short singleShort : dataShortArray) {
-                    if (max < singleShort) max = Math.abs(singleShort);
-                }
-                final int amplitude = max;
+                final double amplitude = getRmsAmplitude(dataShortArray);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         llAmplitude.setVisibility(View.VISIBLE);
-                        pbAmplitude.setProgress(amplitude);
+                        pbAmplitude.setProgress((int) amplitude);
                         tvAmplitude.setText("" + amplitude);
                     }
                 });
@@ -243,5 +239,22 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onError(PingException e) {
         e.printStackTrace();
         Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+    }
+
+    private double getRmsAmplitude(short[] dataShortArray) {
+        double sum = 0;
+        for (short singleShort : dataShortArray) {
+            sum += singleShort * singleShort;
+        }
+        double meanSquare = sum / dataShortArray.length;
+        return Math.sqrt(meanSquare);
+    }
+
+    private double getMaxAmplitude(short[] dataShortArray) {
+        double max = Math.abs(dataShortArray[0]);
+        for (short singleShort : dataShortArray) {
+            if (max < singleShort) max = Math.abs(singleShort);
+        }
+        return max;
     }
 }
