@@ -114,6 +114,69 @@ VoicePingClientApp.getVoicePing().disconnect(new DisconnectCallback() {
         });
 ```
 
+## Advance
+
+To do some advance techniques, such as showing audio amplitude of recorded / received audio data, 
+change pitch, and save the audio to local database, you need to implement ChannelListener to your 
+class.
+
+```java
+public class MainActivity extends AppCompatActivity implements ChannelListener {
+    
+    /*
+     * Class code
+     */
+        
+    @Override
+    public void onSubscribed(String channelId, int channelType) {
+        // Do something after the user subscribed to a group channel.
+    }
+
+    @Override
+    public void onOutgoingTalkStarted(AudioRecorder audioRecorder) {
+        // Do something after invoking startTalking.
+    }
+
+    @Override
+    public void onOutgoingTalkStopped() {
+        // Do something after invoking stopTalking.
+    }
+
+    @Override
+    public void onIncomingTalkStarted(AudioPlayer audioPlayer) {
+        // Do something after incoming talk started.
+    }
+
+    @Override
+    public void onIncomingTalkStopped() {
+        // Do something after incoming talk stopped.
+    }
+
+    @Override
+    public void onUnsubscribed(String channelId, int channelType) {
+        // Do something after the user unsubscribed from a group channel.
+    }
+
+    @Override
+    public void onError(PingException e) {
+        // Do something on error.
+    }
+}
+```
+
+In order to make ChannelListener works, ChannelListener needs to be registered to VoicePing 
+instance using,
+
+```java
+VoicePingClientApp.getVoicePing().setChannelListener(this);
+```
+
+You need to be careful about implementing code that touch UI in some method because those methods 
+are run on background thread. Those methods are,
+1. onOutgoingTalkStarted(AudioRecorder audioRecorder)
+2. onIncomingTalkStarted(AudioPlayer audioPlayer)
+3. onIncomingTalkStopped()
+
 ### TO DO
 
 1. Add Subscribe - Unsubscribe. User can subscribes to a group channel to enable listening for 
