@@ -70,14 +70,14 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                         byte[] pcmFrame = new byte[1920];
                         if (AudioParameters.USE_CODEC) {
                             int decodeSize = mOpus.decode(payload, 0, payload.length, pcmFrame, 0, AudioParameters.FRAME_SIZE, 0);
-                            Log.v(TAG, "USE_CODEC");
+//                            Log.v(TAG, "USE_CODEC");
                             if (decodeSize > 0) {
                                 if (mAudioInterceptor != null) {
                                     pcmFrame = mAudioInterceptor.proceed(pcmFrame);
                                     if (pcmFrame == null || pcmFrame.length == 0) return false;
                                 }
                                 mAudioTrack.write(pcmFrame, 0, pcmFrame.length);
-                                Log.v(TAG, "decodeSize: "+decodeSize);
+//                                Log.v(TAG, "decodeSize: "+decodeSize);
                             }
                         } else {
                             if (mAudioInterceptor != null) {
@@ -85,7 +85,7 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                                 if (payload == null || payload.length == 0) return false;
                             }
                             mAudioTrack.write(payload, 0, payload.length);
-                            Log.v(TAG, "!USE_CODEC");
+//                            Log.v(TAG, "!USE_CODEC");
                         }
                         return true;
                     case STOP:
@@ -170,7 +170,7 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                 if (mChannelListener != null) mChannelListener.onIncomingTalkStarted(this);
                 break;
             case MessageType.AUDIO:
-                Log.v(TAG, "onAudioTalkingMessage: " + message.toString());
+//                Log.v(TAG, "onAudioTalkingMessage: " + message.toString());
                 play(message.getPayload());
                 break;
             case MessageType.STOP_TALKING:

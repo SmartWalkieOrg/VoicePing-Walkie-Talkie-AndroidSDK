@@ -168,9 +168,9 @@ public class Connection {
 
         @Override
         public void onMessage(WebSocket webSocket, ByteString bytes) {
-            Log.d(TAG, "WebSocket onMessage ByteString...");
+//            Log.d(TAG, "WebSocket onMessage ByteString...");
             Message message = MessageHelper.unpackMessage(bytes.toByteArray());
-            Log.d(TAG, "message: " + message.getMessageType());
+//            Log.d(TAG, "message: " + message.getMessageType());
             if (mIncomingAudioListener != null) mIncomingAudioListener.onMessageReceived(message);
             if (mOutgoingAudioListener != null) mOutgoingAudioListener.onMessageReceived(message);
         }

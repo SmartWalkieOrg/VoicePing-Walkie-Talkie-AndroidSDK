@@ -7,7 +7,6 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.smartwalkie.voicepingsdk.Recorder;
 import com.smartwalkie.voicepingsdk.constants.AudioParameters;
@@ -47,7 +46,7 @@ public class RecorderService extends IntentService {
 
         int numberOfFrames = 0;
         while (Recorder.IS_RECORDING) {
-            Log.d(getClass().getSimpleName(), "isRecording... number of frames: " + numberOfFrames);
+//            Log.d(getClass().getSimpleName(), "isRecording... number of frames: " + numberOfFrames);
             // check if message is too long
             long currentTimestamp = System.currentTimeMillis();
             long distance = currentTimestamp - startRecordingTimestamp;
