@@ -30,7 +30,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     private final String TAG = Recorder.class.getSimpleName();
 
-    public static boolean IS_RECORDING;
+    public volatile static boolean IS_RECORDING;
 
     private Context mContext;
     private Connection mConnection;
