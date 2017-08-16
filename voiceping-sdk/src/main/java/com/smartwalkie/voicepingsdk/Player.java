@@ -25,7 +25,9 @@ public class Player implements IncomingAudioListener, AudioPlayer {
     private Context mContext;
     private Opus mOpus;
     private AudioTrack mAudioTrack;
+    private Handler mMainHandler;
     private Handler mPlayerHandler;
+    private Runnable mLastPlayTimeCheckRunner;
     private ChannelListener mChannelListener;
     private AudioInterceptor mAudioInterceptor;
 
@@ -40,11 +42,21 @@ public class Player implements IncomingAudioListener, AudioPlayer {
 
     private int mCurrentState;
     private long mStartTalkingTime = 0;
+    private volatile boolean mIsPlayed;
+    private volatile long mLastMessagePlayedTime;
 
     public Player(Context context) {
         mContext = context;
         mOpus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
+        mMainHandler = new Handler();
         initPlayerThread();
+        mLastPlayTimeCheckRunner = new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "check for last play time");
+                onConnectionFailure();
+            }
+        };
     }
 
     private void initPlayerThread() {
@@ -85,6 +97,7 @@ public class Player implements IncomingAudioListener, AudioPlayer {
                             mAudioTrack.write(payload, 0, payload.length);
 //                            Log.v(TAG, "!USE_CODEC");
                         }
+                        mLastMessagePlayedTime = System.currentTimeMillis();
                         return true;
                     case STOP:
                         Log.d(TAG, "Stop...");
@@ -168,11 +181,17 @@ public class Player implements IncomingAudioListener, AudioPlayer {
             case MessageType.AUDIO:
 //                Log.v(TAG, "onAudioTalkingMessage: " + message.toString());
                 play(message.getPayload());
+                mMainHandler.removeCallbacks(mLastPlayTimeCheckRunner);
+                mMainHandler.postDelayed(mLastPlayTimeCheckRunner, 500);
+                mIsPlayed = true;
                 break;
             case MessageType.STOP_TALKING:
                 Log.v(TAG, "onStopTalkingMessage: " + message.toString());
                 mAudioInterceptor = null;
-                if (mChannelListener != null) mChannelListener.onIncomingTalkStopped();
+                if (mChannelListener != null) {
+                    mIsPlayed = false;
+                    mChannelListener.onIncomingTalkStopped();
+                }
                 break;
         }
     }
@@ -180,7 +199,10 @@ public class Player implements IncomingAudioListener, AudioPlayer {
     @Override
     public void onConnectionFailure() {
         mAudioInterceptor = null;
-        if (mChannelListener != null) mChannelListener.onIncomingTalkStopped();
+        if (mChannelListener != null && mIsPlayed) {
+            mChannelListener.onIncomingTalkStopped();
+            mIsPlayed = false;
+        }
     }
 
     // AudioPlayer
