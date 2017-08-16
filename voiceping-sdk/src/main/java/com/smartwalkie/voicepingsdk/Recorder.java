@@ -1,7 +1,9 @@
 package com.smartwalkie.voicepingsdk;
 
 import android.content.Context;
-import android.content.Intent;
+import android.media.AudioManager;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
@@ -17,7 +19,6 @@ import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.MessageType;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
-import com.smartwalkie.voicepingsdk.services.RecorderService;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -42,6 +43,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
     private Opus mOpus;
     private ChannelListener mChannelListener;
     private AudioInterceptor mAudioInterceptor;
+    private RecorderThread mRecorderThread;
 
     private static final int ACK_TIMEOUT_IN_MILLIS = 10 * 1000;
 
@@ -52,7 +54,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         mConnection = connection;
         mBlockingQueue = new LinkedBlockingQueue<>();
         EventBus.getDefault().register(this);
-        initSenderThread();
+//        initSenderThread();
         mOpus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
     }
 
@@ -90,7 +92,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     public void stopTalking() {
         Log.v(TAG, "stopTalking");
-        mSenderHandler.removeMessages(CONTINUE_FOR_SENDING_AUDIO_DATA);
+//        mSenderHandler.removeMessages(CONTINUE_FOR_SENDING_AUDIO_DATA);
         stopRecording();
         sendAckStop();
         if (mChannelListener != null) mChannelListener.onOutgoingTalkStopped();
@@ -147,14 +149,17 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     private void startRecording() {
         Log.v(TAG, "startRecording");
-        mContext.startService(new Intent(mContext, RecorderService.class));
+//        mContext.startService(new Intent(mContext, RecorderService.class));
+        mRecorderThread = new RecorderThread();
+        mRecorderThread.start();
     }
 
     private void stopRecording() {
         Log.v(TAG, "stopRecording");
         IS_RECORDING = false;
-        mBlockingQueue.clear();
+//        mBlockingQueue.clear();
         mAudioInterceptor = null;
+        mRecorderThread = null;
     }
 
     public boolean isRecording() {
@@ -197,5 +202,70 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
     @Override
     public void addAudioInterceptor(AudioInterceptor audioInterceptor) {
         mAudioInterceptor = audioInterceptor;
+    }
+
+    private class RecorderThread extends Thread {
+
+        @Override
+        public void run() {
+            AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+            AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION,
+                    AudioParameters.SAMPLE_RATE,
+                    AudioParameters.CHANNEL_CONFIG,
+                    AudioParameters.AUDIO_FORMAT,
+                    AudioParameters.RECORD_MIN_BUFFER_SIZE);
+
+            long startRecordingTimestamp;
+            try {
+                audioRecord.startRecording();
+                startRecordingTimestamp = System.currentTimeMillis();
+            } catch (IllegalStateException ise) {
+                ise.printStackTrace();
+                return;
+            }
+
+            int numberOfFrames = 0;
+            while (Recorder.IS_RECORDING) {
+//            Log.d(getClass().getSimpleName(), "isRecording... number of frames: " + numberOfFrames);
+                // check if message is too long
+                long currentTimestamp = System.currentTimeMillis();
+                long distance = currentTimestamp - startRecordingTimestamp;
+                if (distance > 60 * 1000 + 5000) {
+                    break;
+                }
+
+                byte[] recordedBytes = new byte[AudioParameters.FRAME_SIZE * 2 * AudioParameters.CHANNEL];
+                int numOfFrames = audioRecord.read(recordedBytes, 0, AudioParameters.FRAME_SIZE * 2);
+                if (numOfFrames == AudioRecord.ERROR_INVALID_OPERATION) {
+                    audioRecord.stop();
+                    audioRecord.release();
+                    audioManager.stopBluetoothSco();
+                    Recorder.IS_RECORDING = false;
+                    interrupt();
+                    return;
+                }
+
+                numberOfFrames++;
+//                EventBus.getDefault().post(new AudioDataEvent(Arrays.copyOfRange(recordedBytes, 0, numOfFrames)));
+
+                byte[] data = Arrays.copyOfRange(recordedBytes, 0, numOfFrames);
+                if (data == null || data.length == 0) return;
+                if (mAudioInterceptor != null) data = mAudioInterceptor.proceed(data);
+
+                if (AudioParameters.USE_CODEC) {
+                    byte[] encodedBytes = new byte[data.length];
+                    int encodedSize = mOpus.encode(data, 0, AudioParameters.FRAME_SIZE, encodedBytes, 0, encodedBytes.length);
+                    data = Arrays.copyOfRange(encodedBytes, 0, encodedSize);
+                }
+
+                String userId = VoicePingPrefs.getInstance(mContext).getUserId();
+                Message message = MessageHelper.createAudioMessage(
+                        userId, mReceiverId, mChannelType, data, data.length);
+                mConnection.send(message.getPayload());
+            }
+
+            audioRecord.stop();
+            audioRecord.release();
+        }
     }
 }
