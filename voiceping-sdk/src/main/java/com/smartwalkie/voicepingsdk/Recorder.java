@@ -64,7 +64,6 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         Log.v(TAG, "stopTalking");
         stopRecording();
         sendAckStop();
-        if (mChannelListener != null) mChannelListener.onOutgoingTalkStopped();
     }
 
     private void sendAckStart() {
@@ -114,6 +113,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
                 break;
             case MessageType.ACK_END:
                 Log.v(TAG, "onAckEndSucceed: " + message);
+                if (mChannelListener != null) mChannelListener.onOutgoingTalkStopped();
                 break;
             case MessageType.MESSAGE_DELIVERED:
                 Log.v(TAG, "onMessageDelivered: " + message);
