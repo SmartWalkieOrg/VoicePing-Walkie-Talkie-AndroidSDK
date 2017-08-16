@@ -4,13 +4,10 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.util.Log;
 
 import com.media2359.voiceping.codec.Opus;
 import com.smartwalkie.voicepingsdk.constants.AudioParameters;
-import com.smartwalkie.voicepingsdk.events.AudioDataEvent;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
 import com.smartwalkie.voicepingsdk.listeners.AudioInterceptor;
 import com.smartwalkie.voicepingsdk.listeners.AudioRecorder;
@@ -20,23 +17,17 @@ import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.MessageType;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
 import java.util.Arrays;
-import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     private final String TAG = Recorder.class.getSimpleName();
 
-    public volatile static boolean IS_RECORDING;
+    private volatile boolean mIsRecording;
 
     private Context mContext;
     private Connection mConnection;
-    private Handler mSenderHandler;
-    private LinkedBlockingQueue<byte[]> mBlockingQueue;
     private boolean isRecording;
     private String mReceiverId;
     private int mChannelType;
@@ -47,31 +38,10 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     private static final int ACK_TIMEOUT_IN_MILLIS = 10 * 1000;
 
-    private static final int CONTINUE_FOR_SENDING_AUDIO_DATA = 1000;
-
     public Recorder(Context context, Connection connection) {
         mContext = context;
         mConnection = connection;
-        mBlockingQueue = new LinkedBlockingQueue<>();
-        EventBus.getDefault().register(this);
-//        initSenderThread();
         mOpus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
-    }
-
-    private void initSenderThread() {
-        HandlerThread senderThread = new HandlerThread("SenderThread", Thread.MAX_PRIORITY);
-        senderThread.start();
-        mSenderHandler = new Handler(senderThread.getLooper()) {
-
-            @Override
-            public void handleMessage(android.os.Message msg) {
-                switch (msg.what) {
-                    case CONTINUE_FOR_SENDING_AUDIO_DATA:
-                        sendAudio();
-                        break;
-                }
-            }
-        };
     }
 
     public void setChannelListener(ChannelListener channelListener) {
@@ -86,13 +56,12 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         Log.v(TAG, "startTalking");
         this.mReceiverId = receiverId;
         this.mChannelType = channelType;
-        IS_RECORDING = true;
+        mIsRecording = true;
         sendAckStart();
     }
 
     public void stopTalking() {
         Log.v(TAG, "stopTalking");
-//        mSenderHandler.removeMessages(CONTINUE_FOR_SENDING_AUDIO_DATA);
         stopRecording();
         sendAckStop();
         if (mChannelListener != null) mChannelListener.onOutgoingTalkStopped();
@@ -106,40 +75,6 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         mConnection.send(message.getPayload());
     }
 
-    @Subscribe
-    public void onAudioDataEvent(AudioDataEvent audioDataEvent) {
-        try {
-            mBlockingQueue.put(audioDataEvent.getData());
-            mSenderHandler.sendEmptyMessage(CONTINUE_FOR_SENDING_AUDIO_DATA);
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
-        }
-    }
-
-    private void sendAudio() {
-        if (mBlockingQueue.isEmpty()) return;
-        byte[] data = null;
-        try {
-            data = mBlockingQueue.take();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if (data == null || data.length == 0) return;
-        if (mAudioInterceptor != null) data = mAudioInterceptor.proceed(data);
-
-        if (AudioParameters.USE_CODEC) {
-            byte[] encodedBytes = new byte[data.length];
-            int encodedSize = mOpus.encode(data, 0, AudioParameters.FRAME_SIZE, encodedBytes, 0, encodedBytes.length);
-            data = Arrays.copyOfRange(encodedBytes, 0, encodedSize);
-        }
-
-        String userId = VoicePingPrefs.getInstance(mContext).getUserId();
-        Message message = MessageHelper.createAudioMessage(
-                userId, mReceiverId, mChannelType, data, data.length);
-        mConnection.send(message.getPayload());
-    }
-
     private void sendAckStop() {
         Log.v(TAG, "sendAckStop");
         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
@@ -149,15 +84,13 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     private void startRecording() {
         Log.v(TAG, "startRecording");
-//        mContext.startService(new Intent(mContext, RecorderService.class));
         mRecorderThread = new RecorderThread();
         mRecorderThread.start();
     }
 
     private void stopRecording() {
         Log.v(TAG, "stopRecording");
-        IS_RECORDING = false;
-//        mBlockingQueue.clear();
+        mIsRecording = false;
         mAudioInterceptor = null;
         mRecorderThread = null;
     }
@@ -225,7 +158,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
             }
 
             int numberOfFrames = 0;
-            while (Recorder.IS_RECORDING) {
+            while (mIsRecording) {
 //            Log.d(getClass().getSimpleName(), "isRecording... number of frames: " + numberOfFrames);
                 // check if message is too long
                 long currentTimestamp = System.currentTimeMillis();
@@ -240,13 +173,12 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
                     audioRecord.stop();
                     audioRecord.release();
                     audioManager.stopBluetoothSco();
-                    Recorder.IS_RECORDING = false;
+                    mIsRecording = false;
                     interrupt();
                     return;
                 }
 
                 numberOfFrames++;
-//                EventBus.getDefault().post(new AudioDataEvent(Arrays.copyOfRange(recordedBytes, 0, numOfFrames)));
 
                 byte[] data = Arrays.copyOfRange(recordedBytes, 0, numOfFrames);
                 if (data == null || data.length == 0) return;
