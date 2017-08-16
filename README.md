@@ -32,7 +32,7 @@ public class VoicePingClientApp extends Application {
 ```
 
 You can then use the instance to connect to server, subscribe a channel, or do PTT.
-In order to use the instance, we need to expose the instance to public.
+In order to use the instance, you need to expose the instance to public.
 
 ```java
 public class VoicePingClientApp extends Application {
@@ -78,14 +78,14 @@ receiver using,
 
 ```java
 String receiverId = "your_receiver_id";
-VoicePingClientApp.getVoicePing().startTalking(receiverId, ChannelType.PRIVATE);
+VoicePingClientApp.getVoicePing().startTalking(receiverId, ChannelType.PRIVATE, this);
 ```
 
 or in a group using,
 
 ```java
 String groupId = "your_group_id";
-VoicePingClientApp.getVoicePing().startTalking(groupId, ChannelType.GROUP);
+VoicePingClientApp.getVoicePing().startTalking(groupId, ChannelType.GROUP, this);
 ```
 
 4. Stop Talking
@@ -117,21 +117,27 @@ VoicePingClientApp.getVoicePing().disconnect(new DisconnectCallback() {
 ## Advance
 
 To do some advance techniques, such as showing audio amplitude of recorded / received audio data, 
-change pitch, and save the audio to local database, you need to implement ChannelListener to your 
-class.
+change pitch, and save the audio to local database, you need to implement OutgoingTalkCallback 
+and / or ChannelListener to your class.
+
+1. OutgoingTalkCallback
+
+OutgoingTalkCallback is needed to do ```startTalking```,
 
 ```java
-public class MainActivity extends AppCompatActivity implements ChannelListener {
+String receiverId = "your_receiver_id";
+VoicePingClientApp.getVoicePing().startTalking(receiverId, ChannelType.PRIVATE, this);
+```
+
+with ```this``` is the instance that has implemented OutgoingTalkCallback.
+
+```java
+public class MainActivity extends AppCompatActivity implements OutgoingTalkListener {
     
     /*
-     * Class code
+     * Other class code
      */
-        
-    @Override
-    public void onSubscribed(String channelId, int channelType) {
-        // Do something after the user subscribed to a group channel.
-    }
-
+    
     @Override
     public void onOutgoingTalkStarted(AudioRecorder audioRecorder) {
         // Do something after invoking startTalking.
@@ -140,6 +146,31 @@ public class MainActivity extends AppCompatActivity implements ChannelListener {
     @Override
     public void onOutgoingTalkStopped() {
         // Do something after invoking stopTalking.
+    }
+
+    @Override
+    public void onOutgoingTalkError(PingException e) {
+        // Do something on outgoing talk error.
+    }
+}
+```
+
+You can do a lot of thing by putting your code inside the appropriate methods.
+
+2. ChannelListener
+
+ChannelListener is needed to customize incoming talk.
+
+```java
+public class MainActivity extends AppCompatActivity implements ChannelListener {
+    
+    /*
+     * Other class code
+     */
+        
+    @Override
+    public void onSubscribed(String channelId, int channelType) {
+        // Do something after the user subscribed to a group channel.
     }
 
     @Override
@@ -158,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements ChannelListener {
     }
 
     @Override
-    public void onError(PingException e) {
+    public void onChannelError(PingException e) {
         // Do something on error.
     }
 }
@@ -171,11 +202,12 @@ instance using,
 VoicePingClientApp.getVoicePing().setChannelListener(this);
 ```
 
-You need to be careful about implementing code that touch UI in some method because those methods 
-are run on background thread. Those methods are,
-1. onOutgoingTalkStarted(AudioRecorder audioRecorder)
-2. onIncomingTalkStarted(AudioPlayer audioPlayer)
-3. onIncomingTalkStopped()
+### Warning
+
+```AudioInterceptor``` in ```audioRecorder.addAudioInterceptor(AudioInterceptor audioInterceptor)``` 
+and ```audioPlayer.addAudioInterceptor(AudioInterceptor audioInterceptor)``` are running on 
+separated thread. If you want to touch UI from there, you need to run it in Main Thread. 
+
 
 ### TO DO
 
