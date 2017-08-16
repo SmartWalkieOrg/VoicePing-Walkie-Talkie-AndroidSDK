@@ -4,7 +4,6 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Handler;
 import android.util.Log;
 
 import com.media2359.voiceping.codec.Opus;
@@ -62,15 +61,10 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         Log.v(TAG, "stopTalking");
         stopRecording();
         sendAckStop();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (mOutgoingTalkCallback != null) {
-                    mOutgoingTalkCallback.onOutgoingTalkStopped();
-                    mOutgoingTalkCallback = null;
-                }
-            }
-        }, 500);
+        if (mOutgoingTalkCallback != null) {
+            mOutgoingTalkCallback.onOutgoingTalkStopped();
+            mOutgoingTalkCallback = null;
+        }
     }
 
     private void sendAckStart() {
@@ -111,7 +105,9 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         switch (message.getMessageType()) {
             case MessageType.ACK_START:
                 Log.v(TAG, "onAckStartSucceed: " + message);
-                if (mOutgoingTalkCallback != null) mOutgoingTalkCallback.onOutgoingTalkStarted(this);
+                if (mOutgoingTalkCallback != null) {
+                    mOutgoingTalkCallback.onOutgoingTalkStarted(this);
+                }
                 startRecording();
                 break;
             case MessageType.ACK_START_FAILED:
