@@ -10,6 +10,7 @@ import com.smartwalkie.voicepingsdk.exceptions.PingException;
 import com.smartwalkie.voicepingsdk.listeners.IncomingAudioListener;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.models.Message;
+import com.smartwalkie.voicepingsdk.models.MessageType;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
 import java.util.Map;
@@ -45,7 +46,8 @@ public class Connection {
 
     private final int CONNECTED = 100;
     private final int DISCONNECTED = 200;
-    private final int FAILURE = 300;
+    private final int MESSAGE = 300;
+    private final int FAILURE = 400;
 
     public Connection(Context context, String serverUrl, IncomingAudioListener listener) {
         mContext = context;
@@ -61,8 +63,8 @@ public class Connection {
         mHandler = new Handler(new Handler.Callback() {
 
             @Override
-            public boolean handleMessage(android.os.Message message) {
-                switch (message.what) {
+            public boolean handleMessage(android.os.Message msg) {
+                switch (msg.what) {
                     case CONNECTED:
                         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
                         mIsDisconnected = false;
@@ -80,6 +82,13 @@ public class Connection {
                             mDisconnectCallback.onDisconnected();
                             mDisconnectCallback = null;
                         }
+                        return true;
+                    case MESSAGE:
+                        Message message = (Message) msg.obj;
+                        if (mIncomingAudioListener != null) mIncomingAudioListener
+                                .onMessageReceived(message);
+                        if (mOutgoingAudioListener != null) mOutgoingAudioListener
+                                .onMessageReceived(message);
                         return true;
                     case FAILURE:
                         mIsOpened = false;
@@ -169,8 +178,15 @@ public class Connection {
 //            Log.d(TAG, "WebSocket onMessage ByteString...");
             Message message = MessageHelper.unpackMessage(bytes.toByteArray());
 //            Log.d(TAG, "message: " + message.getMessageType());
-            if (mIncomingAudioListener != null) mIncomingAudioListener.onMessageReceived(message);
-            if (mOutgoingAudioListener != null) mOutgoingAudioListener.onMessageReceived(message);
+            if (message.getMessageType() == MessageType.AUDIO) {
+                if (mIncomingAudioListener != null) mIncomingAudioListener
+                        .onMessageReceived(message);
+            } else {
+                android.os.Message msg = new android.os.Message();
+                msg.what = MESSAGE;
+                msg.obj = message;
+                mHandler.sendMessage(msg);
+            }
         }
 
         @Override

@@ -202,6 +202,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onOutgoingTalkStarted(AudioRecorder audioRecorder) {
+        Log.d(TAG, "onOutgoingTalkStarted");
+        llOutgoingTalk.setVisibility(View.VISIBLE);
         audioRecorder.addAudioInterceptor(new AudioInterceptor() {
             @Override
             public byte[] proceed(byte[] data) {
@@ -212,7 +214,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        llOutgoingTalk.setVisibility(View.VISIBLE);
                         pbOutgoingTalk.setProgress((int) amplitude - 7000);
                     }
                 });
@@ -223,11 +224,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onOutgoingTalkStopped() {
+        Log.d(TAG, "onOutgoingTalkStopped");
         llOutgoingTalk.setVisibility(View.GONE);
     }
 
     @Override
     public void onIncomingTalkStarted(AudioPlayer audioPlayer) {
+        Log.d(TAG, "onIncomingTalkStarted");
+        llIncomingTalk.setVisibility(View.VISIBLE);
         audioPlayer.addAudioInterceptor(new AudioInterceptor() {
             @Override
             public byte[] proceed(byte[] data) {
@@ -238,7 +242,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        llIncomingTalk.setVisibility(View.VISIBLE);
                         pbIncomingTalk.setProgress((int) amplitude - 7000);
                     }
                 });
@@ -249,12 +252,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onIncomingTalkStopped() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                llIncomingTalk.setVisibility(View.GONE);
-            }
-        });
+        Log.d(TAG, "onIncomingTalkStopped");
+        llIncomingTalk.setVisibility(View.GONE);
     }
 
     @Override
