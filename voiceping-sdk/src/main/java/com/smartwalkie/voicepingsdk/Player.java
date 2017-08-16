@@ -177,6 +177,12 @@ public class Player implements IncomingAudioListener, AudioPlayer {
         }
     }
 
+    @Override
+    public void onConnectionFailure() {
+        mAudioInterceptor = null;
+        if (mChannelListener != null) mChannelListener.onIncomingTalkStopped();
+    }
+
     // AudioPlayer
     @Override
     public void addAudioInterceptor(AudioInterceptor audioInterceptor) {

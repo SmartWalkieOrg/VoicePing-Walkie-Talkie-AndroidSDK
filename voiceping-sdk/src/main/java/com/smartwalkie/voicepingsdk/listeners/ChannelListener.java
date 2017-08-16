@@ -28,11 +28,6 @@ public interface ChannelListener {
     void onIncomingTalkStopped();
 
     /**
-     * Invoked on incoming talk error.
-     */
-    void onIncomingTalkError(PingException e);
-
-    /**
      * Invoked after successfully unsubscribing from a group channel.
      *
      * @param channelId

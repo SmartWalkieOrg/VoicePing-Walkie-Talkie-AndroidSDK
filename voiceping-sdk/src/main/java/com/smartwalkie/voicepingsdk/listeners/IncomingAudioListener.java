@@ -9,4 +9,6 @@ import com.smartwalkie.voicepingsdk.models.Message;
 public interface IncomingAudioListener {
 
     void onMessageReceived(Message message);
+
+    void onConnectionFailure();
 }

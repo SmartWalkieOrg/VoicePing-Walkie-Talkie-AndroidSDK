@@ -96,6 +96,8 @@ public class Connection {
                             mConnectCallback.onFailed(new PingException("Failed to connect!"));
                             mConnectCallback = null;
                         }
+                        if (mIncomingAudioListener != null) mIncomingAudioListener
+                                .onConnectionFailure();
                         if (mOutgoingAudioListener != null) mOutgoingAudioListener
                                 .onConnectionFailure();
                         reconnectWithDelay();

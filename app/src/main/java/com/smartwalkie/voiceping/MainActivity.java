@@ -230,13 +230,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public void onIncomingTalkError(PingException e) {
-        e.printStackTrace();
-        llIncomingTalk.setVisibility(View.GONE);
-        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
     public void onUnsubscribed(String channelId, int channelType) {
 
     }
