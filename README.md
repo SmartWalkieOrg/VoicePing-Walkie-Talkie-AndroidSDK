@@ -213,6 +213,6 @@ separated thread. If you want to touch UI from there, you need to run it in Main
 
 1. Add Subscribe - Unsubscribe. User can subscribes to a group channel to enable listening for 
 incoming PTT message in that channel.
-2. Add documentation inside the code (Javadoc).
+2. Improve javadoc.
 3. Improve sample app, add some advanced customizations.
 4. Unit tests.
