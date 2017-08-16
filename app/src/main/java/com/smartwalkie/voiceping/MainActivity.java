@@ -28,13 +28,14 @@ import com.smartwalkie.voicepingsdk.listeners.AudioInterceptor;
 import com.smartwalkie.voicepingsdk.listeners.AudioPlayer;
 import com.smartwalkie.voicepingsdk.listeners.AudioRecorder;
 import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
+import com.smartwalkie.voicepingsdk.listeners.OutgoingTalkCallback;
 import com.smartwalkie.voicepingsdk.models.ChannelType;
 
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
-        ChannelListener {
+        ChannelListener, OutgoingTalkCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     talkButton.setText("RELEASE TO STOP");
                     talkButton.setBackgroundColor(Color.YELLOW);
                     //VoicePing.startTalking(64, ChannelType.PRIVATE);
-                    VoicePingClientApp.getVoicePing().startTalking(receiverId, channelType);
+                    VoicePingClientApp.getVoicePing().startTalking(receiverId, channelType, MainActivity.this);
                     break;
                 case MotionEvent.ACTION_UP:
                     talkButton.setText("START TALKING");
@@ -201,34 +202,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public void onOutgoingTalkStarted(AudioRecorder audioRecorder) {
-        Log.d(TAG, "onOutgoingTalkStarted");
-        llOutgoingTalk.setVisibility(View.VISIBLE);
-        audioRecorder.addAudioInterceptor(new AudioInterceptor() {
-            @Override
-            public byte[] proceed(byte[] data) {
-                ShortBuffer sb = ByteBuffer.wrap(data).asShortBuffer();
-                short[] dataShortArray = new short[sb.limit()];
-                sb.get(dataShortArray);
-                final double amplitude = getRmsAmplitude(dataShortArray);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        pbOutgoingTalk.setProgress((int) amplitude - 7000);
-                    }
-                });
-                return data;
-            }
-        });
-    }
-
-    @Override
-    public void onOutgoingTalkStopped() {
-        Log.d(TAG, "onOutgoingTalkStopped");
-        llOutgoingTalk.setVisibility(View.GONE);
-    }
-
-    @Override
     public void onIncomingTalkStarted(AudioPlayer audioPlayer) {
         Log.d(TAG, "onIncomingTalkStarted");
         llIncomingTalk.setVisibility(View.VISIBLE);
@@ -257,13 +230,55 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
+    public void onIncomingTalkError(PingException e) {
+        e.printStackTrace();
+        llIncomingTalk.setVisibility(View.GONE);
+        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     public void onUnsubscribed(String channelId, int channelType) {
 
     }
 
     @Override
-    public void onError(PingException e) {
+    public void onChannelError(PingException e) {
+
+    }
+
+    // OutgoingTalkCallback
+    @Override
+    public void onOutgoingTalkStarted(AudioRecorder audioRecorder) {
+        Log.d(TAG, "onOutgoingTalkStarted");
+        llOutgoingTalk.setVisibility(View.VISIBLE);
+        audioRecorder.addAudioInterceptor(new AudioInterceptor() {
+            @Override
+            public byte[] proceed(byte[] data) {
+                ShortBuffer sb = ByteBuffer.wrap(data).asShortBuffer();
+                short[] dataShortArray = new short[sb.limit()];
+                sb.get(dataShortArray);
+                final double amplitude = getRmsAmplitude(dataShortArray);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        pbOutgoingTalk.setProgress((int) amplitude - 7000);
+                    }
+                });
+                return data;
+            }
+        });
+    }
+
+    @Override
+    public void onOutgoingTalkStopped() {
+        Log.d(TAG, "onOutgoingTalkStopped");
+        llOutgoingTalk.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onOutgoingTalkError(PingException e) {
         e.printStackTrace();
+        llOutgoingTalk.setVisibility(View.GONE);
         Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
     }
 

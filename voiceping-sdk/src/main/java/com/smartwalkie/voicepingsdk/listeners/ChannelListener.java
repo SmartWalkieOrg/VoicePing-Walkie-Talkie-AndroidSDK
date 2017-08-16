@@ -16,18 +16,6 @@ public interface ChannelListener {
     void onSubscribed(String channelId, int channelType);
 
     /**
-     * Invoked after outgoing talk started.
-     *
-     * @param audioRecorder
-     */
-    void onOutgoingTalkStarted(AudioRecorder audioRecorder);
-
-    /**
-     * Invoked after outgoing talk stopped.
-     */
-    void onOutgoingTalkStopped();
-
-    /**
      * Invoked after incoming talk started.
      *
      * @param audioPlayer
@@ -38,6 +26,11 @@ public interface ChannelListener {
      * Invoked after incoming talk stopped.
      */
     void onIncomingTalkStopped();
+
+    /**
+     * Invoked on incoming talk error.
+     */
+    void onIncomingTalkError(PingException e);
 
     /**
      * Invoked after successfully unsubscribing from a group channel.
@@ -52,5 +45,5 @@ public interface ChannelListener {
      *
      * @param e
      */
-    void onError(PingException e);
+    void onChannelError(PingException e);
 }

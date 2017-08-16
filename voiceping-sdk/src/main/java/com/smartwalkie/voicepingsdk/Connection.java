@@ -96,6 +96,8 @@ public class Connection {
                             mConnectCallback.onFailed(new PingException("Failed to connect!"));
                             mConnectCallback = null;
                         }
+                        if (mOutgoingAudioListener != null) mOutgoingAudioListener
+                                .onConnectionFailure();
                         reconnectWithDelay();
                         return true;
                 }
@@ -158,7 +160,7 @@ public class Connection {
 
     public void send(byte[] data) {
         if (mOutgoingAudioListener != null && !mIsOpened) {
-            mOutgoingAudioListener.onError(data, new PingException("WebSocket is not connected!"));
+            mOutgoingAudioListener.onSendMessageFailed(data, new PingException("WebSocket is not connected!"));
             return;
         }
         mWebSocket.send(ByteString.of(data));

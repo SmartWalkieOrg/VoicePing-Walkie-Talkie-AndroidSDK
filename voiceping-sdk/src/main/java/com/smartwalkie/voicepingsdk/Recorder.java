@@ -11,8 +11,8 @@ import com.smartwalkie.voicepingsdk.constants.AudioParameters;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
 import com.smartwalkie.voicepingsdk.listeners.AudioInterceptor;
 import com.smartwalkie.voicepingsdk.listeners.AudioRecorder;
-import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
+import com.smartwalkie.voicepingsdk.listeners.OutgoingTalkCallback;
 import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.MessageType;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
@@ -32,7 +32,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
     private String mReceiverId;
     private int mChannelType;
     private Opus mOpus;
-    private ChannelListener mChannelListener;
+    private OutgoingTalkCallback mOutgoingTalkCallback;
     private AudioInterceptor mAudioInterceptor;
     private RecorderThread mRecorderThread;
 
@@ -44,18 +44,15 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         mOpus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
     }
 
-    public void setChannelListener(ChannelListener channelListener) {
-        mChannelListener = channelListener;
-    }
-
-    public void startTalking(String receiverId, int channelType) {
-        if (!NetworkUtil.isNetworkConnected(mContext) && mChannelListener != null) {
-            mChannelListener.onError(new PingException("Please check your internet connection!"));
+    public void startTalking(String receiverId, int channelType, OutgoingTalkCallback callback) {
+        if (!NetworkUtil.isNetworkConnected(mContext)) {
+            callback.onOutgoingTalkError(new PingException("Please check your internet connection!"));
             return;
         }
         Log.v(TAG, "startTalking");
-        this.mReceiverId = receiverId;
-        this.mChannelType = channelType;
+        mReceiverId = receiverId;
+        mChannelType = channelType;
+        mOutgoingTalkCallback = callback;
         mIsRecording = true;
         sendAckStart();
     }
@@ -104,7 +101,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         switch (message.getMessageType()) {
             case MessageType.ACK_START:
                 Log.v(TAG, "onAckStartSucceed: " + message);
-                if (mChannelListener != null) mChannelListener.onOutgoingTalkStarted(this);
+                if (mOutgoingTalkCallback != null) mOutgoingTalkCallback.onOutgoingTalkStarted(this);
                 startRecording();
                 break;
             case MessageType.ACK_START_FAILED:
@@ -113,7 +110,10 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
                 break;
             case MessageType.ACK_END:
                 Log.v(TAG, "onAckEndSucceed: " + message);
-                if (mChannelListener != null) mChannelListener.onOutgoingTalkStopped();
+                if (mOutgoingTalkCallback != null) {
+                    mOutgoingTalkCallback.onOutgoingTalkStopped();
+                    mOutgoingTalkCallback = null;
+                }
                 break;
             case MessageType.MESSAGE_DELIVERED:
                 Log.v(TAG, "onMessageDelivered: " + message);
@@ -124,10 +124,21 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
     }
 
     @Override
-    public void onError(byte[] data, PingException e) {
+    public void onSendMessageFailed(byte[] data, PingException e) {
         Message message = MessageHelper.unpackMessage(data);
         if (message != null && message.getMessageType() == MessageType.ACK_START) {
-            if (mChannelListener != null) mChannelListener.onError(e);
+            if (mOutgoingTalkCallback != null) {
+                mOutgoingTalkCallback.onOutgoingTalkError(e);
+                mOutgoingTalkCallback = null;
+            }
+        }
+    }
+
+    @Override
+    public void onConnectionFailure() {
+        if (mOutgoingTalkCallback != null) {
+            mOutgoingTalkCallback.onOutgoingTalkError(new PingException("Network error!"));
+            mOutgoingTalkCallback = null;
         }
     }
 

@@ -7,5 +7,7 @@ public interface OutgoingAudioListener {
 
     void onMessageReceived(Message message);
 
-    void onError(byte[] data, PingException e);
+    void onSendMessageFailed(byte[] data, PingException e);
+
+    void onConnectionFailure();
 }

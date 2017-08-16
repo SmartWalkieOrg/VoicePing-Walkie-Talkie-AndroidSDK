@@ -6,6 +6,7 @@ import android.provider.Settings;
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
 import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
 import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
+import com.smartwalkie.voicepingsdk.listeners.OutgoingTalkCallback;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
 import java.util.HashMap;
@@ -71,7 +72,6 @@ public class VoicePing {
 
     public void setChannelListener(ChannelListener channelListener) {
         mPlayer.setChannelListener(channelListener);
-        mRecorder.setChannelListener(channelListener);
     }
 
     public void subscribe(String channelId, int channelType) {
@@ -88,8 +88,8 @@ public class VoicePing {
      * @param receiverId
      * @param channelType
      */
-    public void startTalking(String receiverId, int channelType) {
-        mRecorder.startTalking(receiverId, channelType);
+    public void startTalking(String receiverId, int channelType, OutgoingTalkCallback callback) {
+        mRecorder.startTalking(receiverId, channelType, callback);
     }
 
     /**
