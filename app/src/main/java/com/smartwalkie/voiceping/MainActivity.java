@@ -182,8 +182,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             case 1:
                 receiverIdText.setHint("Group ID");
                 channelType = ChannelType.GROUP;
-                String receiverId = receiverIdText.getText().toString().trim();
-                VoicePingClientApp.getVoicePing().subscribe(receiverId, ChannelType.GROUP);
                 break;
             default:
                 break;
