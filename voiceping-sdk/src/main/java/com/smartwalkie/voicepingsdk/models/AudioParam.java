@@ -3,9 +3,6 @@ package com.smartwalkie.voicepingsdk.models;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 
-/**
- * Created by kukuhsain on 8/18/17.
- */
 
 public class AudioParam {
 

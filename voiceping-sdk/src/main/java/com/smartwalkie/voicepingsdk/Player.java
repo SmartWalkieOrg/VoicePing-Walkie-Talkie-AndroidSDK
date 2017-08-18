@@ -17,7 +17,7 @@ import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.MessageType;
 
 
-public class Player implements IncomingAudioListener, AudioPlayer {
+class Player implements IncomingAudioListener, AudioPlayer {
 
     private final String TAG = Player.class.getSimpleName();
 

@@ -20,7 +20,7 @@ import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 import java.util.Arrays;
 
 
-public class Recorder implements OutgoingAudioListener, AudioRecorder {
+class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     private final String TAG = Recorder.class.getSimpleName();
 

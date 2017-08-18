@@ -115,6 +115,7 @@ public class VoicePing {
         mRecorder.stopTalking();
     }
 
+
     /**
      * Builder class to instantiate VoicePing with custom parameters
      */

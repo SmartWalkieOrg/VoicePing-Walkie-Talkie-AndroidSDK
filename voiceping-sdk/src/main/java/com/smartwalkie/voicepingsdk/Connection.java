@@ -26,7 +26,7 @@ import okhttp3.WebSocketListener;
 import okio.ByteString;
 
 
-public class Connection {
+class Connection {
 
     private final String TAG = Connection.class.getSimpleName();
 

@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class MessageHelper {
+class MessageHelper {
 
     private static final String TAG = MessageHelper.class.getSimpleName();
     private static final MessagePack mMessagePack = new MessagePack();
