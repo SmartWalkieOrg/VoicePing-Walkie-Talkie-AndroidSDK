@@ -46,6 +46,10 @@ public class VoicePing {
         return new Builder().buildAndInit(context, serverUrl);
     }
 
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
     /**
      * Connect to server. This method can be assumed as sign in to server. After the user connected
      * to server, the user can then receive PTT from any other user using private channel.
@@ -113,7 +117,7 @@ public class VoicePing {
         private int channelOutConfig;
         private int audioFormat;
 
-        public Builder() {
+        private Builder() {
             isUsingOpusCodec = true;
             sampleRate = 16000;
             frameSize = 960;
