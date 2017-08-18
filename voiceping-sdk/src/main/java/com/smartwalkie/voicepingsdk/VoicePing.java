@@ -43,10 +43,7 @@ public class VoicePing {
      * @return VoicePing instance
      */
     public static VoicePing init(Context context, String serverUrl) {
-        AudioParam audioParam = new AudioParam(true, 16000, 960, 133, 1, 2,
-                AudioFormat.CHANNEL_IN_MONO, AudioFormat.CHANNEL_OUT_MONO,
-                AudioFormat.ENCODING_PCM_16BIT);
-        return new VoicePing(context, serverUrl, audioParam);
+        return new Builder().buildAndInit(context, serverUrl);
     }
 
     /**
@@ -102,5 +99,82 @@ public class VoicePing {
      */
     public void stopTalking() {
         mRecorder.stopTalking();
+    }
+
+    public static final class Builder {
+
+        private boolean isUsingOpusCodec;
+        private int sampleRate;
+        private int frameSize;
+        private int encoderSize;
+        private int channelSize;
+        private int bufferSizeFactor;
+        private int channelInConfig;
+        private int channelOutConfig;
+        private int audioFormat;
+
+        public Builder() {
+            isUsingOpusCodec = true;
+            sampleRate = 16000;
+            frameSize = 960;
+            encoderSize = 133;
+            channelSize = 1;
+            bufferSizeFactor = 2;
+            channelInConfig = AudioFormat.CHANNEL_IN_MONO;
+            channelOutConfig = AudioFormat.CHANNEL_OUT_MONO;
+            audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+        }
+
+        public Builder setUsingOpusCodec(boolean usingOpusCodec) {
+            isUsingOpusCodec = usingOpusCodec;
+            return this;
+        }
+
+        public Builder setSampleRate(int sampleRate) {
+            this.sampleRate = sampleRate;
+            return this;
+        }
+
+        public Builder setFrameSize(int frameSize) {
+            this.frameSize = frameSize;
+            return this;
+        }
+
+        public Builder setEncoderSize(int encoderSize) {
+            this.encoderSize = encoderSize;
+            return this;
+        }
+
+        public Builder setChannelSize(int channelSize) {
+            this.channelSize = channelSize;
+            return this;
+        }
+
+        public Builder setBufferSizeFactor(int bufferSizeFactor) {
+            this.bufferSizeFactor = bufferSizeFactor;
+            return this;
+        }
+
+        public Builder setChannelInConfig(int channelInConfig) {
+            this.channelInConfig = channelInConfig;
+            return this;
+        }
+
+        public Builder setChannelOutConfig(int channelOutConfig) {
+            this.channelOutConfig = channelOutConfig;
+            return this;
+        }
+
+        public Builder setAudioFormat(int audioFormat) {
+            this.audioFormat = audioFormat;
+            return this;
+        }
+
+        public VoicePing buildAndInit(Context context, String serverUrl) {
+            AudioParam audioParam = new AudioParam(isUsingOpusCodec, sampleRate, frameSize,
+                    encoderSize, channelSize, bufferSizeFactor, channelInConfig, channelOutConfig,
+                    audioFormat);
+            return new VoicePing(context, serverUrl, audioParam);
+        }
     }
 }
