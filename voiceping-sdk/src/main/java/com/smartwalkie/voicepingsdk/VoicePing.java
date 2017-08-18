@@ -1,12 +1,14 @@
 package com.smartwalkie.voicepingsdk;
 
 import android.content.Context;
+import android.media.AudioFormat;
 import android.provider.Settings;
 
 import com.smartwalkie.voicepingsdk.callbacks.ConnectCallback;
 import com.smartwalkie.voicepingsdk.callbacks.DisconnectCallback;
 import com.smartwalkie.voicepingsdk.listeners.ChannelListener;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingTalkCallback;
+import com.smartwalkie.voicepingsdk.models.AudioParam;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
 
 import java.util.HashMap;
@@ -22,9 +24,9 @@ public class VoicePing {
     private Connection mConnection;
     private Recorder mRecorder;
 
-    private VoicePing(Context context, String serverUrl) {
+    private VoicePing(Context context, String serverUrl, AudioParam audioParam) {
         mContext = context;
-        mPlayer = new Player(context);
+        mPlayer = new Player(context, audioParam);
         mPlayer.start();
         mConnection = new Connection(context, serverUrl, mPlayer);
         mRecorder = new Recorder(context, mConnection);
@@ -41,7 +43,10 @@ public class VoicePing {
      * @return VoicePing instance
      */
     public static VoicePing init(Context context, String serverUrl) {
-        return new VoicePing(context, serverUrl);
+        AudioParam audioParam = new AudioParam(true, 16000, 960, 133, 1, 2,
+                AudioFormat.CHANNEL_IN_MONO, AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_16BIT);
+        return new VoicePing(context, serverUrl, audioParam);
     }
 
     /**

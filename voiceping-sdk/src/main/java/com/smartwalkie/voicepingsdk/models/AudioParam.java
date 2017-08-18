@@ -1,5 +1,8 @@
 package com.smartwalkie.voicepingsdk.models;
 
+import android.media.AudioRecord;
+import android.media.AudioTrack;
+
 /**
  * Created by kukuhsain on 8/18/17.
  */
@@ -12,14 +15,15 @@ public class AudioParam {
     private int mEncoderSize;
     private int mChannelSize;
     private int mBufferSizeFactor;
-    private int mChannelConfig;
+    private int mChannelInConfig;
+    private int mChannelOutConfig;
     private int mAudioFormat;
     private int mRecordMinBufferSize;
     private int mPlayMinBufferSize;
 
     public AudioParam(boolean isUsingOpusCodec, int sampleRate, int frameSize, int encoderSize, 
-                      int channelSize, int bufferSizeFactor, int channelConfig, int audioFormat,
-                      int recordMinBufferSize, int playMinBufferSize) {
+                      int channelSize, int bufferSizeFactor, int channelInConfig,
+                      int channelOutConfig, int audioFormat) {
         
         mIsUsingOpusCodec = isUsingOpusCodec;
         mSampleRate = sampleRate;
@@ -27,13 +31,16 @@ public class AudioParam {
         mEncoderSize = encoderSize;
         mChannelSize = channelSize;
         mBufferSizeFactor = bufferSizeFactor;
-        mChannelConfig = channelConfig;
+        mChannelInConfig = channelInConfig;
+        mChannelOutConfig = channelOutConfig;
         mAudioFormat = audioFormat;
-        mRecordMinBufferSize = recordMinBufferSize;
-        mPlayMinBufferSize = playMinBufferSize;
+        mRecordMinBufferSize = Math.max(AudioRecord.getMinBufferSize(sampleRate, channelInConfig,
+                audioFormat), frameSize * bufferSizeFactor);
+        mPlayMinBufferSize = Math.max(AudioTrack.getMinBufferSize(sampleRate, channelOutConfig,
+                audioFormat), frameSize * bufferSizeFactor);
     }
 
-    public boolean isIsUsingOpusCodec() {
+    public boolean isUsingOpusCodec() {
         return mIsUsingOpusCodec;
     }
 
@@ -57,8 +64,12 @@ public class AudioParam {
         return mBufferSizeFactor;
     }
 
-    public int getChannelConfig() {
-        return mChannelConfig;
+    public int getChannelInConfig() {
+        return mChannelInConfig;
+    }
+
+    public int getChannelOutConfig() {
+        return mChannelOutConfig;
     }
 
     public int getAudioFormat() {
