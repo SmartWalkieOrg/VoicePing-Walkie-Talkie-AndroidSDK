@@ -26,7 +26,8 @@ public class VoicePingClientApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        VoicePing voicePing = VoicePing.init(this, "ws://vpjsex.southeastasia.cloudapp.azure.com");
+        String serverUrl = "voiceping_sdk_server_url";
+        VoicePing voicePing = VoicePing.init(this, serverUrl);
     }
 }
 ```
@@ -42,7 +43,8 @@ public class VoicePingClientApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        mVoicePing = VoicePing.init(this, "ws://vpjsex.southeastasia.cloudapp.azure.com");
+        String serverUrl = "voiceping_sdk_server_url";
+        mVoicePing = VoicePing.init(this, serverUrl);
     }
 
     public static VoicePing getVoicePing() {
@@ -122,7 +124,7 @@ You can use custom audio parameters in your app using builder pattern. Instead o
 
 ```java
 String serverUrl = "voiceping_sdk_server_url";
-VoicePing.init(this, serverUrl);
+mVoicePing = VoicePing.init(this, serverUrl);
 ```
 
 to instantiate VoicePing, you can use,
@@ -138,16 +140,10 @@ mVoicePing = VoicePing.newBuilder()
         .buildAndInit(this, serverUrl);
 ```
 
-
-
-To do some advance techniques, such as showing audio amplitude of recorded / received audio data, 
-change pitch, and save the audio to local database, you need to implement OutgoingTalkCallback 
-and / or ChannelListener to your class.
-
 2. OutgoingTalkCallback
 
 To do some advance techniques for the recorded audio, such as showing amplitude of the 
-audio data, change pitch, and save the audio to local storage, you need to implement 
+audio, change pitch, and save the audio to local storage, you need to implement 
 OutgoingTalkCallback and attach it to ```startTalking```.
 OutgoingTalkCallback is needed to do ```startTalking```,
 
@@ -186,7 +182,7 @@ You can do a lot of thing by putting your code inside the appropriate methods.
 
 3. ChannelListener
 
-To do some advance techniques for the recorded audio, you need to implement ChannelListener.
+To do some advance techniques for the received audio, you need to implement ChannelListener.
 ChannelListener is needed to customize incoming talk.
 
 ```java
@@ -234,7 +230,7 @@ VoicePingClientApp.getVoicePing().setChannelListener(this);
 
 ```AudioInterceptor``` in ```audioRecorder.addAudioInterceptor(AudioInterceptor audioInterceptor)``` 
 and ```audioPlayer.addAudioInterceptor(AudioInterceptor audioInterceptor)``` are running on 
-separated thread. If you want to touch UI from there, you need to run it in Main Thread. 
+separated thread. If you want to touch UI from there, you need to run it on Main Thread. 
 
 
 ### TO DO
