@@ -46,6 +46,11 @@ public class VoicePing {
         return new Builder().buildAndInit(context, serverUrl);
     }
 
+    /**
+     * Instantiate VoicePing.Builder class.
+     *
+     * @return VoicePing.Builder
+     */
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -76,17 +81,22 @@ public class VoicePing {
         mConnection.disconnect(callback);
     }
 
+    /**
+     * Set ChannelListener to VoicePing to do some advanced techniques to the audio data.
+     *
+     * @param channelListener
+     */
     public void setChannelListener(ChannelListener channelListener) {
         mPlayer.setChannelListener(channelListener);
     }
 
-    public void subscribe(String channelId, int channelType) {
+    /*public void subscribe(String channelId, int channelType) {
 
     }
 
     public void unsubscribe(String channelId, int channelType) {
 
-    }
+    }*/
 
     /**
      * Start talking using PTT.
@@ -105,6 +115,9 @@ public class VoicePing {
         mRecorder.stopTalking();
     }
 
+    /**
+     * Builder class to instantiate VoicePing with custom parameters
+     */
     public static final class Builder {
 
         private boolean isUsingOpusCodec;
@@ -127,46 +140,103 @@ public class VoicePing {
             audioFormat = AudioFormat.ENCODING_PCM_16BIT;
         }
 
+        /**
+         * Set whether the SDK will use Opus as audio codec or not. The default value is true.
+         *
+         * @param usingOpusCodec
+         * @return Builder
+         */
         public Builder setUsingOpusCodec(boolean usingOpusCodec) {
             isUsingOpusCodec = usingOpusCodec;
             return this;
         }
 
+        /**
+         * Set sample rate of the audio data. The default value is 16000.
+         *
+         * @param sampleRate
+         * @return Builder
+         */
         public Builder setSampleRate(int sampleRate) {
             this.sampleRate = sampleRate;
             return this;
         }
 
+        /**
+         * Set frame size of the audio data. The default value is 960.
+         *
+         * @param frameSize
+         * @return Builder
+         */
         public Builder setFrameSize(int frameSize) {
             this.frameSize = frameSize;
             return this;
         }
 
+        /**
+         * Set channel size of the audio data. The default value is 1.
+         *
+         * @param channelSize
+         * @return Builder
+         */
         public Builder setChannelSize(int channelSize) {
             this.channelSize = channelSize;
             return this;
         }
 
+        /**
+         * Set buffer size factor of the audio data. The default value is 2.
+         *
+         * @param bufferSizeFactor
+         * @return Builder
+         */
         public Builder setBufferSizeFactor(int bufferSizeFactor) {
             this.bufferSizeFactor = bufferSizeFactor;
             return this;
         }
 
+        /**
+         * Set Channel-In configuration of the audio data. The default value is
+         * AudioFormat.CHANNEL_IN_MONO
+         *
+         * @param channelInConfig
+         * @return Builder
+         */
         public Builder setChannelInConfig(int channelInConfig) {
             this.channelInConfig = channelInConfig;
             return this;
         }
 
+        /**
+         * Set Channel-Out configuration of the audio data. The default value is
+         * AudioFormat.CHANNEL_OUT_MONO
+         *
+         * @param channelOutConfig
+         * @return Builder
+         */
         public Builder setChannelOutConfig(int channelOutConfig) {
             this.channelOutConfig = channelOutConfig;
             return this;
         }
 
+        /**
+         * Set audio format of the audio data. The default value is AudioFormat.ENCODING_PCM_16BIT
+         *
+         * @param audioFormat
+         * @return Builder
+         */
         public Builder setAudioFormat(int audioFormat) {
             this.audioFormat = audioFormat;
             return this;
         }
 
+        /**
+         * Build the Builder instance to be VoicePing instance, and initiate it.
+         *
+         * @param context
+         * @param serverUrl
+         * @return VoicePing
+         */
         public VoicePing buildAndInit(Context context, String serverUrl) {
             AudioParam audioParam = new AudioParam(isUsingOpusCodec, sampleRate, frameSize,
                     channelSize, bufferSizeFactor, channelInConfig, channelOutConfig, audioFormat);
