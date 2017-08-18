@@ -25,11 +25,9 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
     private final String TAG = Recorder.class.getSimpleName();
 
     private volatile boolean mIsRecording;
-
     private Context mContext;
     private Connection mConnection;
     private AudioParam mAudioParam;
-    private boolean isRecording;
     private String mReceiverId;
     private int mChannelType;
     private Opus mOpus;
@@ -95,10 +93,6 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         mIsRecording = false;
         mAudioInterceptor = null;
         mRecorderThread = null;
-    }
-
-    public boolean isRecording() {
-        return isRecording;
     }
 
     // OutgoingAudioListener
