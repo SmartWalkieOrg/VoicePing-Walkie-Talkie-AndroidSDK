@@ -12,7 +12,6 @@ public class AudioParam {
     private boolean mIsUsingOpusCodec;
     private int mSampleRate;
     private int mFrameSize;
-    private int mEncoderSize;
     private int mChannelSize;
     private int mBufferSizeFactor;
     private int mChannelInConfig;
@@ -21,14 +20,13 @@ public class AudioParam {
     private int mRecordMinBufferSize;
     private int mPlayMinBufferSize;
 
-    public AudioParam(boolean isUsingOpusCodec, int sampleRate, int frameSize, int encoderSize, 
-                      int channelSize, int bufferSizeFactor, int channelInConfig,
-                      int channelOutConfig, int audioFormat) {
+    public AudioParam(boolean isUsingOpusCodec, int sampleRate, int frameSize, int channelSize,
+                      int bufferSizeFactor, int channelInConfig, int channelOutConfig,
+                      int audioFormat) {
         
         mIsUsingOpusCodec = isUsingOpusCodec;
         mSampleRate = sampleRate;
         mFrameSize = frameSize;
-        mEncoderSize = encoderSize;
         mChannelSize = channelSize;
         mBufferSizeFactor = bufferSizeFactor;
         mChannelInConfig = channelInConfig;
@@ -50,10 +48,6 @@ public class AudioParam {
 
     public int getFrameSize() {
         return mFrameSize;
-    }
-
-    public int getEncoderSize() {
-        return mEncoderSize;
     }
 
     public int getChannelSize() {

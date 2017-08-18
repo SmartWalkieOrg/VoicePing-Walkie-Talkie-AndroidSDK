@@ -110,7 +110,6 @@ public class VoicePing {
         private boolean isUsingOpusCodec;
         private int sampleRate;
         private int frameSize;
-        private int encoderSize;
         private int channelSize;
         private int bufferSizeFactor;
         private int channelInConfig;
@@ -121,7 +120,6 @@ public class VoicePing {
             isUsingOpusCodec = true;
             sampleRate = 16000;
             frameSize = 960;
-            encoderSize = 133;
             channelSize = 1;
             bufferSizeFactor = 2;
             channelInConfig = AudioFormat.CHANNEL_IN_MONO;
@@ -141,11 +139,6 @@ public class VoicePing {
 
         public Builder setFrameSize(int frameSize) {
             this.frameSize = frameSize;
-            return this;
-        }
-
-        public Builder setEncoderSize(int encoderSize) {
-            this.encoderSize = encoderSize;
             return this;
         }
 
@@ -176,8 +169,7 @@ public class VoicePing {
 
         public VoicePing buildAndInit(Context context, String serverUrl) {
             AudioParam audioParam = new AudioParam(isUsingOpusCodec, sampleRate, frameSize,
-                    encoderSize, channelSize, bufferSizeFactor, channelInConfig, channelOutConfig,
-                    audioFormat);
+                    channelSize, bufferSizeFactor, channelInConfig, channelOutConfig, audioFormat);
             return new VoicePing(context, serverUrl, audioParam);
         }
     }
