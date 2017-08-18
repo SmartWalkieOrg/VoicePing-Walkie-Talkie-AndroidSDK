@@ -29,7 +29,7 @@ public class VoicePing {
         mPlayer = new Player(context, audioParam);
         mPlayer.start();
         mConnection = new Connection(context, serverUrl, mPlayer);
-        mRecorder = new Recorder(context, mConnection);
+        mRecorder = new Recorder(context, mConnection, audioParam);
         mConnection.setOutgoingAudioListener(mRecorder);
         VoicePingPrefs.getInstance(context).putServerUrl(serverUrl);
     }

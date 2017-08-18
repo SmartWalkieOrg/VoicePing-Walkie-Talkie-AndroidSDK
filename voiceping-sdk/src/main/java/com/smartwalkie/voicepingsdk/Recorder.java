@@ -7,12 +7,12 @@ import android.media.MediaRecorder;
 import android.util.Log;
 
 import com.media2359.voiceping.codec.Opus;
-import com.smartwalkie.voicepingsdk.constants.AudioParameters;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
 import com.smartwalkie.voicepingsdk.listeners.AudioInterceptor;
 import com.smartwalkie.voicepingsdk.listeners.AudioRecorder;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingAudioListener;
 import com.smartwalkie.voicepingsdk.listeners.OutgoingTalkCallback;
+import com.smartwalkie.voicepingsdk.models.AudioParam;
 import com.smartwalkie.voicepingsdk.models.Message;
 import com.smartwalkie.voicepingsdk.models.MessageType;
 import com.smartwalkie.voicepingsdk.models.local.VoicePingPrefs;
@@ -28,6 +28,7 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     private Context mContext;
     private Connection mConnection;
+    private AudioParam mAudioParam;
     private boolean isRecording;
     private String mReceiverId;
     private int mChannelType;
@@ -38,10 +39,11 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
 
     private static final int ACK_TIMEOUT_IN_MILLIS = 10 * 1000;
 
-    public Recorder(Context context, Connection connection) {
+    public Recorder(Context context, Connection connection, AudioParam audioParam) {
         mContext = context;
         mConnection = connection;
-        mOpus = Opus.getCodec(AudioParameters.SAMPLE_RATE, AudioParameters.CHANNEL);
+        mAudioParam = audioParam;
+        mOpus = Opus.getCodec(audioParam.getSampleRate(), audioParam.getChannelSize());
     }
 
     public void startTalking(String receiverId, int channelType, OutgoingTalkCallback callback) {
@@ -160,10 +162,10 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
         public void run() {
             AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
             AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION,
-                    AudioParameters.SAMPLE_RATE,
-                    AudioParameters.CHANNEL_CONFIG,
-                    AudioParameters.AUDIO_FORMAT,
-                    AudioParameters.RECORD_MIN_BUFFER_SIZE);
+                    mAudioParam.getSampleRate(),
+                    mAudioParam.getChannelInConfig(),
+                    mAudioParam.getAudioFormat(),
+                    mAudioParam.getRecordMinBufferSize());
 
             long startRecordingTimestamp;
             try {
@@ -184,8 +186,8 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
                     break;
                 }
 
-                byte[] recordedBytes = new byte[AudioParameters.FRAME_SIZE * 2 * AudioParameters.CHANNEL];
-                int numOfFrames = audioRecord.read(recordedBytes, 0, AudioParameters.FRAME_SIZE * 2);
+                byte[] recordedBytes = new byte[mAudioParam.getFrameSize() * 2 * mAudioParam.getChannelSize()];
+                int numOfFrames = audioRecord.read(recordedBytes, 0, mAudioParam.getFrameSize() * 2);
                 if (numOfFrames == AudioRecord.ERROR_INVALID_OPERATION) {
                     audioRecord.stop();
                     audioRecord.release();
@@ -201,9 +203,9 @@ public class Recorder implements OutgoingAudioListener, AudioRecorder {
                 if (data == null || data.length == 0) return;
                 if (mAudioInterceptor != null) data = mAudioInterceptor.proceed(data);
 
-                if (AudioParameters.USE_CODEC) {
+                if (mAudioParam.isUsingOpusCodec()) {
                     byte[] encodedBytes = new byte[data.length];
-                    int encodedSize = mOpus.encode(data, 0, AudioParameters.FRAME_SIZE, encodedBytes, 0, encodedBytes.length);
+                    int encodedSize = mOpus.encode(data, 0, mAudioParam.getFrameSize(), encodedBytes, 0, encodedBytes.length);
                     data = Arrays.copyOfRange(encodedBytes, 0, encodedSize);
                 }
 

@@ -182,6 +182,7 @@ public class Connection {
 //            Log.d(TAG, "WebSocket onMessage ByteString...");
             Message message = MessageHelper.unpackMessage(bytes.toByteArray());
 //            Log.d(TAG, "message: " + message.getMessageType());
+            if (message == null) return;
             if (message.getMessageType() == MessageType.AUDIO) {
                 if (mIncomingAudioListener != null) mIncomingAudioListener
                         .onMessageReceived(message);
