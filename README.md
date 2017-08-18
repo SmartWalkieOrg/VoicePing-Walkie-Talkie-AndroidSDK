@@ -116,12 +116,39 @@ VoicePingClientApp.getVoicePing().disconnect(new DisconnectCallback() {
 
 ## Advance
 
+1. Custom audio parameters
+
+You can use custom audio parameters in your app using builder pattern. Instead of directly using,
+
+```java
+String serverUrl = "voiceping_sdk_server_url";
+VoicePing.init(this, serverUrl);
+```
+
+to instantiate VoicePing, you can use,
+
+```java
+String serverUrl = "voiceping_sdk_server_url";
+mVoicePing = VoicePing.newBuilder()
+        .setUsingOpusCodec(true)
+        .setSampleRate(16000)
+        .setFrameSize(960)
+        .setChannelSize(1)
+        .setBufferSizeFactor(2)
+        .buildAndInit(this, serverUrl);
+```
+
+
+
 To do some advance techniques, such as showing audio amplitude of recorded / received audio data, 
 change pitch, and save the audio to local database, you need to implement OutgoingTalkCallback 
 and / or ChannelListener to your class.
 
-1. OutgoingTalkCallback
+2. OutgoingTalkCallback
 
+To do some advance techniques for the recorded audio, such as showing amplitude of the 
+audio data, change pitch, and save the audio to local storage, you need to implement 
+OutgoingTalkCallback and attach it to ```startTalking```.
 OutgoingTalkCallback is needed to do ```startTalking```,
 
 ```java
@@ -157,8 +184,9 @@ public class MainActivity extends AppCompatActivity implements OutgoingTalkListe
 
 You can do a lot of thing by putting your code inside the appropriate methods.
 
-2. ChannelListener
+3. ChannelListener
 
+To do some advance techniques for the recorded audio, you need to implement ChannelListener.
 ChannelListener is needed to customize incoming talk.
 
 ```java
