@@ -49,6 +49,10 @@ class Recorder implements OutgoingAudioListener, AudioRecorder {
             callback.onOutgoingTalkError(new PingException("Please check your internet connection!"));
             return;
         }
+        if (!mConnection.isConnected()) {
+            callback.onOutgoingTalkError(new PingException("You are not connected!"));
+            return;
+        }
         Log.v(TAG, "startTalking");
         mReceiverId = receiverId;
         mChannelType = channelType;
