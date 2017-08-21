@@ -3,7 +3,7 @@ package com.smartwalkie.voicepingsdk.listeners;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
 
 /**
- * Interface for listener of channel.
+ * Interface for listening events and actions to the channel.
  */
 public interface ChannelListener {
 
@@ -18,7 +18,7 @@ public interface ChannelListener {
     /**
      * Invoked after incoming talk started.
      *
-     * @param audioPlayer
+     * @param audioPlayer AudioPlayer
      */
     void onIncomingTalkStarted(AudioPlayer audioPlayer);
 
@@ -36,9 +36,9 @@ public interface ChannelListener {
     void onUnsubscribed(String channelId, int channelType);
 
     /**
-     * Invoked on error.
+     * Invoked on channel error.
      *
-     * @param e
+     * @param e PingException
      */
     void onChannelError(PingException e);
 }

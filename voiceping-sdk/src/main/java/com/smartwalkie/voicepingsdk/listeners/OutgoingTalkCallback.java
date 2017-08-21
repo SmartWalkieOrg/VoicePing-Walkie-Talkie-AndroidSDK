@@ -3,15 +3,14 @@ package com.smartwalkie.voicepingsdk.listeners;
 import com.smartwalkie.voicepingsdk.exceptions.PingException;
 
 /**
- * Created by kukuhsain on 8/16/17.
+ * Interface to provide callback to outgoing talk action
  */
-
 public interface OutgoingTalkCallback {
 
     /**
      * Invoked after outgoing talk started.
      *
-     * @param audioRecorder
+     * @param audioRecorder AudioRecorder
      */
     void onOutgoingTalkStarted(AudioRecorder audioRecorder);
 

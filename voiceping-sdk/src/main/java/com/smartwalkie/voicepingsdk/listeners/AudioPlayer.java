@@ -8,7 +8,7 @@ public interface AudioPlayer {
     /**
      * Add interceptor that will be processed before playing the received audio data from server.
      *
-     * @param audioInterceptor
+     * @param audioInterceptor AudioInterceptor
      */
     void addAudioInterceptor(AudioInterceptor audioInterceptor);
 }

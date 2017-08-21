@@ -8,7 +8,7 @@ public interface AudioRecorder {
     /**
      * Add interceptor that will be processed before sending the recorded audio data to server.
      *
-     * @param audioInterceptor
+     * @param audioInterceptor AudioInterceptor
      */
     void addAudioInterceptor(AudioInterceptor audioInterceptor);
 }

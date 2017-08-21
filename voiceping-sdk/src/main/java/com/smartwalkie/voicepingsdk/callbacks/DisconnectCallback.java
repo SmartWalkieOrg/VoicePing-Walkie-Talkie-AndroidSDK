@@ -1,7 +1,7 @@
 package com.smartwalkie.voicepingsdk.callbacks;
 
 /**
- * Interface to provide callback to disconnecting action.
+ * Interface to provide callback to disconnect action.
  */
 public interface DisconnectCallback {
 
