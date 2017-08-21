@@ -177,13 +177,21 @@ class Player implements IncomingAudioListener, AudioPlayer {
         switch (message.getMessageType()) {
             case MessageType.START_TALKING:
                 Log.v(TAG, "onStartTalkingMessage: " + message.toString());
-                if (mChannelListener != null) mChannelListener.onIncomingTalkStarted(this);
+//                if (mChannelListener != null) mChannelListener.onIncomingTalkStarted(this);
                 break;
             case MessageType.AUDIO:
 //                Log.v(TAG, "onAudioTalkingMessage: " + message.toString());
                 play(message.getPayload());
+                if (mChannelListener != null && !mIsPlayed) {
+                    mMainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mChannelListener.onIncomingTalkStarted(Player.this);
+                        }
+                    });
+                }
                 mMainHandler.removeCallbacks(mLastPlayTimeCheckRunner);
-                mMainHandler.postDelayed(mLastPlayTimeCheckRunner, 500);
+                mMainHandler.postDelayed(mLastPlayTimeCheckRunner, 1000);
                 mIsPlayed = true;
                 break;
             case MessageType.STOP_TALKING:
