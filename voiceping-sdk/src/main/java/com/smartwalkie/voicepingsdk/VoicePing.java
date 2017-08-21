@@ -38,9 +38,9 @@ public class VoicePing {
      * Instantiate VoicePing. VoicePing instance is the most important instance in this SDK.
      * The developer that use this SDK can do other processes using VoicePing instance.
      *
-     * @param context
-     * @param serverUrl
-     * @return VoicePing instance
+     * @param context Application Context
+     * @param serverUrl The URL of VoicePing SDK server
+     * @return VoicePing instance with default parameters
      */
     public static VoicePing init(Context context, String serverUrl) {
         return new Builder().buildAndInit(context, serverUrl);
@@ -49,7 +49,8 @@ public class VoicePing {
     /**
      * Instantiate VoicePing.Builder class.
      *
-     * @return VoicePing.Builder
+     * @return VoicePing.Builder instance that can be used to build VoicePing instance with custom
+     * parameters
      */
     public static Builder newBuilder() {
         return new Builder();
@@ -59,8 +60,8 @@ public class VoicePing {
      * Connect to server. This method can be assumed as sign in to server. After the user connected
      * to server, the user can then receive PTT from any other user using private channel.
      *
-     * @param userId
-     * @param callback
+     * @param userId User ID or Username
+     * @param callback Callback
      */
     public void connect(String userId, ConnectCallback callback) {
         Map<String, String> props = new HashMap<>();
@@ -75,7 +76,7 @@ public class VoicePing {
      * Disconnect from server. This method can be assumed as sign out from server. After
      * disconnected from server, the user will not receive any incoming message.
      *
-     * @param callback
+     * @param callback Callback
      */
     public void disconnect(DisconnectCallback callback) {
         mConnection.disconnect(callback);
@@ -84,7 +85,7 @@ public class VoicePing {
     /**
      * Set ChannelListener to VoicePing to do some advanced techniques to the audio data.
      *
-     * @param channelListener
+     * @param channelListener Listener
      */
     public void setChannelListener(ChannelListener channelListener) {
         mPlayer.setChannelListener(channelListener);
@@ -99,10 +100,10 @@ public class VoicePing {
     }*/
 
     /**
-     * Start talking using PTT.
+     * Start talking using VoicePing's PTT functionality.
      *
-     * @param receiverId
-     * @param channelType
+     * @param receiverId Receiver ID for private channel, or Group ID for group channel
+     * @param channelType ChannelType.PRIVATE or ChannelType.GROUP
      */
     public void startTalking(String receiverId, int channelType, OutgoingTalkCallback callback) {
         mRecorder.startTalking(receiverId, channelType, callback);
@@ -144,7 +145,7 @@ public class VoicePing {
         /**
          * Set whether the SDK will use Opus as audio codec or not. The default value is true.
          *
-         * @param usingOpusCodec
+         * @param usingOpusCodec true for using Opus Codec, false otherwise
          * @return Builder
          */
         public Builder setUsingOpusCodec(boolean usingOpusCodec) {
@@ -155,7 +156,7 @@ public class VoicePing {
         /**
          * Set sample rate of the audio data. The default value is 16000.
          *
-         * @param sampleRate
+         * @param sampleRate Sample rate in Hz. Max 48000 Hz
          * @return Builder
          */
         public Builder setSampleRate(int sampleRate) {
@@ -166,7 +167,7 @@ public class VoicePing {
         /**
          * Set frame size of the audio data. The default value is 960.
          *
-         * @param frameSize
+         * @param frameSize Frame size
          * @return Builder
          */
         public Builder setFrameSize(int frameSize) {
@@ -177,7 +178,7 @@ public class VoicePing {
         /**
          * Set channel size of the audio data. The default value is 1.
          *
-         * @param channelSize
+         * @param channelSize Channel size. 1 for Mono, 2 for Stereo
          * @return Builder
          */
         public Builder setChannelSize(int channelSize) {
@@ -188,7 +189,7 @@ public class VoicePing {
         /**
          * Set buffer size factor of the audio data. The default value is 2.
          *
-         * @param bufferSizeFactor
+         * @param bufferSizeFactor Buffer size in bytes
          * @return Builder
          */
         public Builder setBufferSizeFactor(int bufferSizeFactor) {
@@ -200,7 +201,7 @@ public class VoicePing {
          * Set Channel-In configuration of the audio data. The default value is
          * AudioFormat.CHANNEL_IN_MONO
          *
-         * @param channelInConfig
+         * @param channelInConfig Channel-In config
          * @return Builder
          */
         public Builder setChannelInConfig(int channelInConfig) {
@@ -212,7 +213,7 @@ public class VoicePing {
          * Set Channel-Out configuration of the audio data. The default value is
          * AudioFormat.CHANNEL_OUT_MONO
          *
-         * @param channelOutConfig
+         * @param channelOutConfig Channel-Out config
          * @return Builder
          */
         public Builder setChannelOutConfig(int channelOutConfig) {
@@ -223,7 +224,7 @@ public class VoicePing {
         /**
          * Set audio format of the audio data. The default value is AudioFormat.ENCODING_PCM_16BIT
          *
-         * @param audioFormat
+         * @param audioFormat Audio format
          * @return Builder
          */
         public Builder setAudioFormat(int audioFormat) {
@@ -234,9 +235,9 @@ public class VoicePing {
         /**
          * Build the Builder instance to be VoicePing instance, and initiate it.
          *
-         * @param context
-         * @param serverUrl
-         * @return VoicePing
+         * @param context Application context
+         * @param serverUrl The URL of VoicePing SDK server
+         * @return VoicePing instance
          */
         public VoicePing buildAndInit(Context context, String serverUrl) {
             AudioParam audioParam = new AudioParam(isUsingOpusCodec, sampleRate, frameSize,
