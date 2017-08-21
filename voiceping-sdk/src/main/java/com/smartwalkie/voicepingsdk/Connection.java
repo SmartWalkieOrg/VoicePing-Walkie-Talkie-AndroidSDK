@@ -41,7 +41,7 @@ class Connection {
     private OutgoingAudioListener mOutgoingAudioListener;
     private volatile boolean mIsReconnecting;
     private volatile boolean mIsOpened;
-    private volatile boolean mIsDisconnected;
+    private volatile boolean mIsConnected;
     private Handler mHandler;
 
     private final int CONNECTED = 100;
@@ -67,7 +67,7 @@ class Connection {
                 switch (msg.what) {
                     case CONNECTED:
                         String userId = VoicePingPrefs.getInstance(mContext).getUserId();
-                        mIsDisconnected = false;
+                        mIsConnected = true;
                         mIsOpened = true;
                         send(MessageHelper.createConnectionMessage(userId));
                         if (mConnectCallback != null) {
@@ -76,7 +76,7 @@ class Connection {
                         }
                         return true;
                     case DISCONNECTED:
-                        mIsDisconnected = true;
+                        mIsConnected = false;
                         mIsOpened = false;
                         if (mDisconnectCallback != null) {
                             mDisconnectCallback.onDisconnected();
@@ -122,6 +122,10 @@ class Connection {
         connect();
     }
 
+    public boolean isConnected() {
+        return mIsConnected;
+    }
+
     private void connect() {
         Request.Builder builder = new Request.Builder().url(mServerUrl);
         if (mHeaders.containsKey("user_id")) builder.addHeader("user_id", mHeaders.get("user_id"));
@@ -140,7 +144,7 @@ class Connection {
                 @Override
                 public void run() {
                     mIsReconnecting = false;
-                    if (!mIsOpened && !mIsDisconnected) {
+                    if (!mIsOpened && mIsConnected) {
                         connect();
                     }
                 }
@@ -153,7 +157,7 @@ class Connection {
         mDisconnectCallback = callback;
         Log.d(TAG, "close WebSocket...");
         mWebSocket.cancel();
-        mIsDisconnected = true;
+        mIsConnected = false;
         if (mDisconnectCallback != null) {
             mDisconnectCallback.onDisconnected();
             mDisconnectCallback = null;
