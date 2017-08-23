@@ -116,6 +116,15 @@ public class VoicePing {
         mRecorder.stopTalking();
     }
 
+    public void subscribe(String groupId) {
+        String userId = VoicePingPrefs.getInstance(mContext).getUserId();
+        mConnection.send(MessageHelper.createSubscribeMessage(userId, groupId));
+    }
+
+    public void unsubscribe(String groupId) {
+        String userId = VoicePingPrefs.getInstance(mContext).getUserId();
+        mConnection.send(MessageHelper.createUnsubscribeMessage(userId, groupId));
+    }
 
     /**
      * Builder class to instantiate VoicePing with custom parameters

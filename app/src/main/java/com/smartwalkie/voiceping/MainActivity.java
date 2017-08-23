@@ -43,6 +43,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private EditText receiverIdText;
     private Button talkButton;
+    private LinearLayout unsubscribeButtonsLayout;
+    private Button subscribeButton;
+    private Button unsubscribeButton;
     private Spinner channelTypeSpinner;
     private TextInputLayout channelInputLayout;
     private LinearLayout llOutgoingTalk;
@@ -84,6 +87,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     };
 
+    private final View.OnClickListener subscribeListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Log.v(TAG, "subscribeListener");
+            String groupId = receiverIdText.getText().toString().trim();
+            VoicePingClientApp.getVoicePing().subscribe(groupId);
+        }
+    };
+
+    private final View.OnClickListener unsubscribeListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Log.v(TAG, "unsubscribeListener");
+            String groupId = receiverIdText.getText().toString().trim();
+            VoicePingClientApp.getVoicePing().unsubscribe(groupId);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,6 +123,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         talkButton = (Button) findViewById(R.id.talk_button);
         talkButton.setOnTouchListener(touchListener);
+
+        subscribeButton = (Button) findViewById(R.id.subscribe_button);
+        subscribeButton.setOnClickListener(subscribeListener);
+        subscribeButton.setBackgroundColor(Color.CYAN);
+        unsubscribeButton = (Button) findViewById(R.id.unsubscribe_button);
+        unsubscribeButton.setOnClickListener(unsubscribeListener);
+        unsubscribeButton.setBackgroundColor(Color.YELLOW);
+        unsubscribeButtonsLayout = (LinearLayout) findViewById(R.id.ll_unsubscribe_buttons);
+        unsubscribeButtonsLayout.setVisibility(View.GONE);
 
         llOutgoingTalk = (LinearLayout) findViewById(R.id.ll_outgoing_talk);
         pbOutgoingTalk = (ProgressBar) findViewById(R.id.pb_outgoing_talk);
@@ -178,10 +208,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             case 0:
                 receiverIdText.setHint("Receiver ID");
                 channelType = ChannelType.PRIVATE;
+                unsubscribeButtonsLayout.setVisibility(View.GONE);
                 break;
             case 1:
                 receiverIdText.setHint("Group ID");
                 channelType = ChannelType.GROUP;
+                unsubscribeButtonsLayout.setVisibility(View.VISIBLE);
                 break;
             default:
                 break;

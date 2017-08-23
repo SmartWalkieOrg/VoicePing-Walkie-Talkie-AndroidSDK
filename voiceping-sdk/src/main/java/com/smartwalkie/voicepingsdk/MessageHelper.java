@@ -317,4 +317,40 @@ class MessageHelper {
         return out.toByteArray();
     }
 
+    public static byte[] createSubscribeMessage(String senderId, String groupId) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Packer packer = mMessagePack.createPacker(out);
+
+        try {
+            packer.writeArrayBegin(4);
+            packer.write(ChannelType.GROUP);
+            packer.write(MessageType.CHANNEL_ADDED_USER);
+            packer.write(senderId);
+            packer.write(groupId);
+            packer.writeArrayEnd(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return out.toByteArray();
+    }
+
+    public static byte[] createUnsubscribeMessage(String senderId, String groupId) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Packer packer = mMessagePack.createPacker(out);
+
+        try {
+            packer.writeArrayBegin(4);
+            packer.write(ChannelType.GROUP);
+            packer.write(MessageType.CHANNEL_REMOVED_USER);
+            packer.write(senderId);
+            packer.write(groupId);
+            packer.writeArrayEnd(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return out.toByteArray();
+    }
+
 }

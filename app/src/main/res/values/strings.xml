@@ -4,7 +4,9 @@
     <string name="title_activity_main">VoicePing</string>
 
     <string name="text_button_connect">Connect</string>
+    <string name="text_button_subscribe">Subscribe</string>
     <string name="text_button_talk">Talk!</string>
+    <string name="text_button_unsubscribe">Unsubscribe</string>
     <string name="text_button_disconnect">Disconnect</string>
 
     <!-- Strings related to connect functionality -->
