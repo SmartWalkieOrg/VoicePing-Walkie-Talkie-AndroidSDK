@@ -1,3 +1,22 @@
 <resources>
-    <string name="app_name">VoicePingAndroidSDK</string>
+    <string name="app_name">VP SDK Demo</string>
+
+    <string name="user_id">User ID</string>
+    <string name="company">Company</string>
+    <string name="caution_same_company">You can only talk to other users in the same company.</string>
+    <string name="sign_in">Enter</string>
+    <string name="failed_to_sign_in">Failed to enter, please try again later</string>
+    <string name="cannot_be_blank">Cannot be blank</string>
+
+    <string name="join">Join</string>
+    <string name="leave">Leave</string>
+    <string name="mute">Mute</string>
+    <string name="unmute">Unmute</string>
+    <string name="open_player">Open Player</string>
+    <string name="sign_out">Exit</string>
+    <string name="sign_out_confirmation">Are you sure you want to exit?</string>
+
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="stop">Stop</string>
 </resources>

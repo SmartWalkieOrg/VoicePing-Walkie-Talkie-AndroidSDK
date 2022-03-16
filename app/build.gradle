@@ -1,21 +1,46 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+def getGitHash = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
     defaultConfig {
-        applicationId "com.smartwalkie.voiceping"
-        minSdkVersion 15
-        targetSdkVersion 25
+        applicationId "com.smartwalkie.voicepingdemo"
+        minSdkVersion 16
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        setProperty("archivesBaseName", "vpdemo-$versionName-$versionCode-${getGitHash()}")
+        buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
+    }
+    signingConfigs {
+        release {
+            storeFile file("../distribution/voicepingdemo.keystore")
+            storePassword "voicepingdemo"
+            keyAlias "voicepingdemo"
+            keyPassword "voicepingdemo"
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
+    }
+    buildFeatures {
+        viewBinding true
     }
 }
 
@@ -24,13 +49,15 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    testCompile 'junit:junit:4.12'
-    compile 'org.msgpack:msgpack-core:0.8.13'
-    compile 'org.java-websocket:Java-WebSocket:1.3.4'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':voiceping-sdk')
+    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.9.0'
+    implementation 'pub.devrel:easypermissions:0.4.2'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
 }
