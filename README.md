@@ -32,7 +32,7 @@ VoicePing Android SDK works together with <span style="text-decoration:underline
 
 ## Get Started
 
-You can test our sample app here: [Download VP Demo app](https://drive.google.com/file/d/1mI91tOuwPWiYsiU24fQuziiC9bOQRQuI/view?usp=sharing). To get the latest release [please see here](https://github.com/SmartWalkieOrg/VoicePingAndroidSDK/releases).
+You can test our sample app here: [Download VP Demo app](https://drive.google.com/file/d/1mI91tOuwPWiYsiU24fQuziiC9bOQRQuI/view?usp=sharing). To get the latest release [click here](https://github.com/SmartWalkieOrg/VoicePingAndroidSDK/releases).
 The sample app allows you to test the Walkie Talkie function.
 Input any user ID and company name. Devices should have same company name to be able to communicate, but different user ID.
 
