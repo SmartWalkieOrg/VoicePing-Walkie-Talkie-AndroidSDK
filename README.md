@@ -37,19 +37,6 @@ The sample app allows you to test the Walkie Talkie function.
 Input any user ID and company name. Devices should have same company name to be able to communicate, but different user ID.
 
 
-## How simple is it to add VoicePing SDK to your app?
-
-<center><a href="https://www.voicepingapp.com" target="_blank"><img alt="SDK in your app" src="https://i.ibb.co/jzbbcbx/Group-4-1.png" title="This is a sample how the SDK will look like in your app" /></a></center>
-
-See those mic buttons?
-
-Yup, that button is the only thing you need to add to your app to have PTT functionality.
-
-But what if you don't want a mic button but another UI instead?
-
-We have got it covered. You can customize it.
-
-
 ## Installation
 
 How to install this SDK to your Android project
