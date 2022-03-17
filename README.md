@@ -24,7 +24,7 @@ VoicePing Android SDK works together with <span style="text-decoration:underline
 
 ## Use Cases
 
-1. A Uber like application can connect a group of drivers together based on their location or zipcode
+1. An Uber like application can connect a group of drivers together based on their location or zipcode
 2. For Enterprise applications like housekeeping applications, allow a group call to all housekeepers on a certain floor (level) of the hotel
 3. For SOS apps, activate voice broadcast if a user is in distress
 4. For Chat Apps, allow some users to send instant voice messages that do not need to be manually played.
@@ -32,7 +32,7 @@ VoicePing Android SDK works together with <span style="text-decoration:underline
 
 ## Get Started
 
-You can test our sample app here: [Download VP Demo app](https://drive.google.com/file/d/1mI91tOuwPWiYsiU24fQuziiC9bOQRQuI/view?usp=sharing).
+You can test our sample app here: [Download VP Demo app](https://drive.google.com/file/d/1mI91tOuwPWiYsiU24fQuziiC9bOQRQuI/view?usp=sharing). To get the latest release [click here](https://github.com/SmartWalkieOrg/VoicePingAndroidSDK/releases).
 The sample app allows you to test the Walkie Talkie function.
 Input any user ID and company name. Devices should have same company name to be able to communicate, but different user ID.
 
@@ -65,7 +65,7 @@ The public server URL: `wss://router-lite.voiceping.info`
 
 If you need to self-host the server, you can find more documentation on the server repo:
 
-* [VoicePing Server](https://github.com/SmartWalkieOrg/walkie-talkie-server)
+* [VoicePing Server](https://github.com/SmartWalkieOrg/voiceping-router)
 
 
 ## Maintainers
