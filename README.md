@@ -42,7 +42,7 @@ Input any user ID and company name. Devices should have same company name to be 
 How to install this SDK to your Android project
 
 1. Clone the project
-2. Built voiceping-sdk module
+2. Build voiceping-sdk module
 3. Add .aar file to your project
 4. Sync
 5. Use it
