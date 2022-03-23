@@ -1,4 +1,4 @@
-package com.smartwalkie.voiceping;
+package com.smartwalkie.voicepingdemo;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.smartwalkie.voiceping;
+package com.smartwalkie.voicepingdemo;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getContext();
 
-        assertEquals("com.smartwalkie.voiceping", appContext.getPackageName());
+        assertEquals("com.smartwalkie.voicepingdemo.test", appContext.getPackageName());
     }
 }

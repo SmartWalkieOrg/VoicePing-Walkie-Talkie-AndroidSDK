@@ -24,19 +24,10 @@ android {
         setProperty("archivesBaseName", "vpdemo-$versionName-$versionCode-${getGitHash()}")
         buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
     }
-    signingConfigs {
-        release {
-            storeFile file("../distribution/voicepingdemo.keystore")
-            storePassword "voicepingdemo"
-            keyAlias "voicepingdemo"
-            keyPassword "voicepingdemo"
-        }
-    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
         }
     }
     buildFeatures {

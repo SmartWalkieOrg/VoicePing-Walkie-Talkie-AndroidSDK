@@ -24,15 +24,7 @@ class VoicePingClientApp : Application() {
     }
 
     companion object {
-
-        lateinit var context: Context
-
-        /**
-         * Old values:
-         * - "ws://vpjsex.southeastasia.cloudapp.azure.com"
-         * - "wss://vpjsex-router.voiceoverping.net"
-         * - "wss://vpprxy.anom.one"
-         */
         const val SERVER_URL: String = "wss://router-lite.voiceping.info"
+        lateinit var context: Context
     }
 }
