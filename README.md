@@ -10,7 +10,6 @@ your Android project.
 
 VoicePing Android SDK works together with <span style="text-decoration:underline;"> VoicePing Open Source Router</span> to allow you to quickly add group voice broadcast capability to your app. The Android SDK comes with a reference Android App with UI that demonstrates the one button Push-To-Talk interface.
 
-
 ## Features of VoicePing Android SDK
 
 1. Easy to integrate to your app
@@ -21,7 +20,6 @@ VoicePing Android SDK works together with <span style="text-decoration:underline
 6. Works for Android SDK (16 to 30) and Android OS version 4.1 to 11
 7. Low battery consumption
 
-
 ## Use Cases
 
 1. An Uber like application can connect a group of drivers together based on their location or zipcode
@@ -29,24 +27,22 @@ VoicePing Android SDK works together with <span style="text-decoration:underline
 3. For SOS apps, activate voice broadcast if a user is in distress
 4. For Chat Apps, allow some users to send instant voice messages that do not need to be manually played.
 
-
 ## Get Started
 
 You can test our sample app here: [Download VP Demo app](https://drive.google.com/file/d/1mI91tOuwPWiYsiU24fQuziiC9bOQRQuI/view?usp=sharing). To get the latest release [click here](https://github.com/SmartWalkieOrg/VoicePingAndroidSDK/releases).
 The sample app allows you to test the Walkie Talkie function.
 Input any user ID and company name. Devices should have same company name to be able to communicate, but different user ID.
 
-
 ## Installation
 
-How to install this SDK to your Android project
+To install this SDK in your Android project, you need to do the following steps,
 
 1. Clone the project
-2. Built voiceping-sdk module
-3. Add .aar file to your project
-4. Sync
-5. Use it
-
+2. Build ```voiceping-sdk``` module using the following command:
+   - For Mac/Linux: ```./gradlew :voiceping-sdk:assembleRelease```
+   - For Windows: ```gradlew :voiceping-sdk:assembleRelease```
+3. Go to ```./voiceping-sdk/build/outputs/aar``` directory, and add the aar file into your project. [Click here](https://stackoverflow.com/a/23326397) to learn how.
+4. Sync gradle and use it
 
 ## Documentation
 
@@ -55,7 +51,6 @@ You can find the documentation [on the website](https://voiceping-sdk.netlify.ap
 Check out the [Introduction](https://voiceping-sdk.netlify.app/docs/introduction) page for a quick review.
 
 You can improve it by sending pull requests to [this repo](https://github.com/SmartWalkieOrg/VoicePing-sdk-doc).
-
 
 ## VoicePing Server
 
@@ -66,7 +61,6 @@ The public server URL: `wss://router-lite.voiceping.info`
 If you need to self-host the server, you can find more documentation on the server repo:
 
 * [VoicePing Server](https://github.com/SmartWalkieOrg/voiceping-router)
-
 
 ## Maintainers
 
