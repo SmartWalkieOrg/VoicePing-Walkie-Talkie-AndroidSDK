@@ -1,4 +1,4 @@
-# VoicePing Android SDK
+# VoicePing Walkie Talkie Android SDK
 
 VoicePing Android SDK is an Android library, provided by
 [Smart Walkie Talkie](http://www.smartwalkie.com), for enabling Push-To-Talk (PTT) functionality to
@@ -10,7 +10,7 @@ your Android project.
 
 VoicePing Android SDK works together with <span style="text-decoration:underline;"> VoicePing Open Source Router</span> to allow you to quickly add group voice broadcast capability to your app. The Android SDK comes with a reference Android App with UI that demonstrates the one button Push-To-Talk interface.
 
-## Features of VoicePing Android SDK
+## Features of VoicePing Android SDK (Push-To-Talk)
 
 1. Easy to integrate to your app
 2. Low data consumption suitable for Mobile Devices: Opus Codec, defined as 16Khz, 60ms Frame size. ~300KB per 1 minute of speech.
@@ -20,7 +20,7 @@ VoicePing Android SDK works together with <span style="text-decoration:underline
 6. Works for Android SDK (16 to 30) and Android OS version 4.1 to 11
 7. Low battery consumption
 
-## Use Cases
+## Use Cases (Add Group Walkie Talkie)
 
 1. An Uber like application can connect a group of drivers together based on their location or zipcode
 2. For Enterprise applications like housekeeping applications, allow a group call to all housekeepers on a certain floor (level) of the hotel
@@ -53,13 +53,13 @@ You can improve it by sending pull requests to [this repo](https://github.com/Sm
 
 ## VoicePing Server
 
-VoicePing Android SDK needs a VoicePing Server to work. You can test with our hosted server.
+VoicePing Walkie Talkie Android SDK needs a VoicePing Server to work. You can test with our hosted server.
 
 The public server URL: `wss://router-lite.voiceping.info`
 
 If you need to self-host the server, you can find more documentation on the server repo:
 
-* [VoicePing Server](https://github.com/SmartWalkieOrg/voiceping-router)
+* [VoicePing Push-To-Talk Server](https://github.com/SmartWalkieOrg/voiceping-router)
 
 ## Maintainers
 
