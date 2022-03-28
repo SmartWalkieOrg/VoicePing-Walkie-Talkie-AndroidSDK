@@ -29,8 +29,7 @@ VoicePing Android SDK works together with <span style="text-decoration:underline
 
 ## Get Started
 
-You can test our sample app here: [Download VP Demo app](https://drive.google.com/file/d/1mI91tOuwPWiYsiU24fQuziiC9bOQRQuI/view?usp=sharing). To get the latest release [click here](https://github.com/SmartWalkieOrg/VoicePingAndroidSDK/releases).
-The sample app allows you to test the Walkie Talkie function.
+You can test our sample app here: [Download VP Demo app](https://github.com/SmartWalkieOrg/VoicePingAndroidSDK/releases). The sample app allows you to test the Walkie Talkie function.
 Input any user ID and company name. Devices should have same company name to be able to communicate, but different user ID.
 
 ## Installation
@@ -46,9 +45,9 @@ To install this SDK in your Android project, you need to do the following steps,
 
 ## Documentation
 
-You can find the documentation [on the website](https://voiceping-sdk.netlify.app).
+You can find the documentation [on the website](https://opensource.voiceping.info).
 
-Check out the [Introduction](https://voiceping-sdk.netlify.app/docs/introduction) page for a quick review.
+Check out the [Introduction](https://opensource.voiceping.info/docs/introduction) page for a quick review.
 
 You can improve it by sending pull requests to [this repo](https://github.com/SmartWalkieOrg/VoicePing-sdk-doc).
 
