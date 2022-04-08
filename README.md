@@ -45,12 +45,26 @@ Check out the [Introduction](https://opensource.voiceping.info/docs/introduction
 
 To install this SDK in your Android project, you need to do the following steps,
 
-1. Clone the project
-2. Build ```voiceping-sdk``` module using the following command:
-   - For Mac/Linux: ```./gradlew :voiceping-sdk:assembleRelease```
-   - For Windows: ```gradlew :voiceping-sdk:assembleRelease```
-3. Go to ```./voiceping-sdk/build/outputs/aar``` directory, and add the aar file into your project. [Click here](https://stackoverflow.com/a/23326397) to learn how.
-4. Sync gradle and use it
+1. Add jitpack to your project-level gradle file:
+
+    ```groovy
+    allprojects {
+        repositories {
+            ...
+            maven { url "https://jitpack.io" }
+        }
+    }
+    ```
+
+2. Add the module on your module-level gradle file:
+
+    ```groovy
+    dependencies {
+        implementation 'com.github.SmartWalkieOrg:VoicePing-Walkie-Talkie-AndroidSDK:1.0'
+    }
+    ```
+
+3. Sync gradle and use it
 
 <div name="voiceping-router"></div>
 
