@@ -39,11 +39,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
 
         val userId = MyPrefs.userId ?: ""
         val company = MyPrefs.company ?: ""
-        if (userId.isBlank() || company.isBlank()) {
+        val serverUrl = MyPrefs.serverUrl ?: ""
+        if (userId.isBlank() || company.isBlank() || serverUrl.isBlank()) {
             finish()
             return
         }
         initToolbar(userId, company)
+        binding.textServerUrl.text = serverUrl
         val channelTypes = arrayOf("GROUP", "PRIVATE")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, channelTypes)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -83,7 +85,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
         updateConnectionState(VoicePing.getConnectionState())
         VoicePing.setConnectionStateListener(this)
         if (VoicePing.getConnectionState() == ConnectionState.DISCONNECTED) {
-            VoicePing.connect(userId, company, object : ConnectCallback {
+            VoicePing.connect(serverUrl, userId, company, object : ConnectCallback {
                 override fun onConnected() {
                     // Ignored
                 }

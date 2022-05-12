@@ -1,19 +1,20 @@
 package com.smartwalkie.voicepingsdk
 
 import android.content.Context
-import com.smartwalkie.voicepingsdk.model.AudioParam
-import com.smartwalkie.voicepingsdk.callback.ConnectCallback
-import com.smartwalkie.voicepingsdk.callback.DisconnectCallback
-import com.smartwalkie.voicepingsdk.listener.IncomingTalkListener
-import com.smartwalkie.voicepingsdk.listener.OutgoingTalkCallback
 import android.os.Build
 import android.os.HandlerThread
+import com.smartwalkie.voicepingsdk.callback.ConnectCallback
+import com.smartwalkie.voicepingsdk.callback.DisconnectCallback
 import com.smartwalkie.voicepingsdk.listener.ConnectionStateListener
+import com.smartwalkie.voicepingsdk.listener.IncomingTalkListener
+import com.smartwalkie.voicepingsdk.listener.OutgoingTalkCallback
+import com.smartwalkie.voicepingsdk.model.AudioParam
 
 /**
  * Main class of VoicePing.
  */
 object VoicePing {
+    private const val DEFAULT_SERVER_URL: String = "wss://router-lite.voiceping.info"
     private lateinit var audioParam: AudioParam
     private lateinit var player: Player
     private lateinit var connection: Connection
@@ -26,25 +27,23 @@ object VoicePing {
      * Initialize VoicePing. This process should be done in onCreate of your Application class
      *
      * @param context   Application Context
-     * @param serverUrl The URL of VoicePing SDK server
      */
-    fun init(context: Context, serverUrl: String) {
-        init(context, serverUrl, AudioParam.Builder().build())
+    fun init(context: Context) {
+        init(context, AudioParam.Builder().build())
     }
 
     /**
      * Initialize VoicePing. This process should be done in onCreate of your Application class
      *
      * @param context   Application Context
-     * @param serverUrl The URL of VoicePing SDK server
      * @param audioParam Audio parameters
      */
-    fun init(context: Context, serverUrl: String, audioParam: AudioParam) {
+    fun init(context: Context, audioParam: AudioParam) {
         this.audioParam = audioParam
         val voicePingThread = HandlerThread("VoicePingThread", Thread.MAX_PRIORITY)
         voicePingThread.start()
-        player = Player(context, audioParam, serverUrl, voicePingThread.looper)
-        connection = OkConnection(context, serverUrl, player, voicePingThread.looper)
+        player = Player(context, audioParam, DEFAULT_SERVER_URL, voicePingThread.looper)
+        connection = OkConnection(context, player, voicePingThread.looper)
         recorder = Recorder(context, connection, audioParam, voicePingThread.looper)
         connection.setOutgoingAudioListener(recorder)
     }
@@ -57,11 +56,29 @@ object VoicePing {
      * @param callback Callback
      */
     fun connect(userId: String, company: String, callback: ConnectCallback) {
+        connect(DEFAULT_SERVER_URL, userId, company, callback)
+    }
+
+    /**
+     * Connect to server. This method can be assumed as sign in to server. After the user connected
+     * to server, the user can then receive PTT from any other user using private channel.
+     *
+     * @param serverUrl Server URL
+     * @param userId    User ID or Username
+     * @param callback  Callback
+     */
+    fun connect(serverUrl: String, userId: String, company: String, callback: ConnectCallback) {
+        val realServerUrl = when {
+            serverUrl.isBlank() -> DEFAULT_SERVER_URL
+            serverUrl.endsWith("/") -> serverUrl.substring(0, serverUrl.length - 1)
+            else -> serverUrl
+        }
         this.userId = userId
         this.company = company
         val deviceId =
             "${Build.MANUFACTURER}_${Build.MODEL}_${Build.FINGERPRINT}_${Build.BOOTLOADER}_${Build.DISPLAY}_${Build.HOST}"
-        connection.connect(getFullUserId(), deviceId, callback)
+        player.setServerUrl(realServerUrl)
+        connection.connect(realServerUrl, getFullUserId(), deviceId, callback)
         recorder.setUserId(getFullUserId())
     }
 

@@ -3,6 +3,7 @@
 
     <string name="user_id">User ID</string>
     <string name="company">Company</string>
+    <string name="server_url">Server URL</string>
     <string name="caution_same_company">You can only talk to other users in the same company.</string>
     <string name="sign_in">Enter</string>
     <string name="failed_to_sign_in">Failed to enter, please try again later</string>

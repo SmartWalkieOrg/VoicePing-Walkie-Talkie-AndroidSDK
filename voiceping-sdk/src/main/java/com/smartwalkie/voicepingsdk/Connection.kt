@@ -16,7 +16,7 @@ internal interface Connection {
 
     val serverUrl: String?
 
-    fun connect(userId: String, deviceId: String, callback: ConnectCallback)
+    fun connect(serverUrl: String, userId: String, deviceId: String, callback: ConnectCallback)
 
     val connectionState: ConnectionState
 
