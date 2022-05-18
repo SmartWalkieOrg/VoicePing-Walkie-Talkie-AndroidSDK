@@ -24,8 +24,18 @@ android {
         setProperty("archivesBaseName", "vpdemo-$versionName-$versionCode-${getGitHash()}")
         buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
     }
+    signingConfigs {
+        development {
+            storeFile file("development.keystore")
+            storePassword "voicepingdemo"
+            keyAlias "voicepingdemo"
+            keyPassword "voicepingdemo"
+        }
+    }
     buildTypes {
         release {
+            // Uncomment the following code to sign a development release build
+            //signingConfig signingConfigs.development
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
