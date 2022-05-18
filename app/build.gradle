@@ -19,7 +19,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0"
+        versionName "1.1"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         setProperty("archivesBaseName", "vpdemo-$versionName-$versionCode-${getGitHash()}")
         buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
