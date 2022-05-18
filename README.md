@@ -16,8 +16,8 @@ your Android project. It allows you to quickly add group voice broadcast capabil
 
 ## Get Started
 
-You can test our sample app here: [Download VP Demo app](https://github.com/SmartWalkieOrg/VoicePingAndroidSDK/releases). The sample app allows you to test the Walkie Talkie function. You will need at least two android devices to test properly.  
-You can input any user ID and company name. To communicate, devices should have same company name but different user ID.
+You can test our sample app here: [Download VP Demo app](https://github.com/SmartWalkieOrg/VoicePingAndroidSDK/releases). The sample app allows you to test the Walkie Talkie function. You will need at least _two_ android devices to test properly.  
+You can input **_any_** user ID and company name. To communicate, devices should have same company name but different user ID.
 
 ## Documentation
 
@@ -67,6 +67,9 @@ To install this SDK in your Android project, you need to do the following steps,
 3. Sync gradle and use it
 
 <div name="voiceping-router"></div>
+
+## Usage
+For more detailed info, please refer to [VoicePing Android sample usage](https://opensource.voiceping.info/docs/android/basic/#how-to-use-voiceping-android-sdk)
 
 ## VoicePing Server
 VoicePing Walkie Talkie Android SDK needs a VoicePing Router Server to work. You can test with our hosted server.
