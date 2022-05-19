@@ -45,7 +45,7 @@ Check out the [Introduction](https://opensource.voiceping.info/docs/introduction
 
 To install this SDK in your Android project, you need to do the following steps,
 
-1. Add jitpack to your project-level gradle file:
+1. Add jitpack to your project-level (settings.gradle on Gradle >= 7) gradle file:
 
     ```groovy
     allprojects {
