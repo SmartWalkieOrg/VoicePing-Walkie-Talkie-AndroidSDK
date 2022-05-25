@@ -45,9 +45,9 @@ class OkConnection implements Connection {
     private final int FAILURE = 400;
 
     private final Context mContext;
-    private final OkHttpClient mOkHttpClient;
+    private OkHttpClient mOkHttpClient;
     private WebSocket mWebSocket;
-    private final String mServerUrl;
+    private String mServerUrl;
     private String mUserId;
     private String mDeviceId;
     private final Handler mMainHandler;
@@ -61,16 +61,9 @@ class OkConnection implements Connection {
     private volatile ConnectionState mConnectionState = ConnectionState.DISCONNECTED;
     private volatile boolean mIsReconnecting;
 
-    OkConnection(Context context, String serverUrl, IncomingAudioListener listener, Looper backgroundLooper) {
+    OkConnection(Context context, IncomingAudioListener listener, Looper backgroundLooper) {
         mContext = context;
-        if (serverUrl != null && !serverUrl.isEmpty()) {
-            if (serverUrl.endsWith("/")) {
-                serverUrl = serverUrl.substring(0, serverUrl.length() - 1);
-            }
-        }
-        mServerUrl = serverUrl;
         mIncomingAudioListener = listener;
-        mOkHttpClient = createHttpClient(serverUrl);
         mMainHandler = new Handler(Looper.getMainLooper());
         mBackgroundHandler = new Handler(backgroundLooper, new Handler.Callback() {
 
@@ -236,16 +229,20 @@ class OkConnection implements Connection {
     }
 
     @Override
-    public void connect(String userId, String deviceId, ConnectCallback callback) {
+    public void connect(@NotNull String serverUrl, @NotNull String userId, @NotNull String deviceId, @NotNull ConnectCallback callback) {
         if (!NetworkUtil.isNetworkConnected(mContext)) {
             callback.onFailed(new VoicePingException("Please check your internet connection!", ErrorCode.INTERNET_DISCONNECTED));
             return;
         }
+        if (serverUrl.isEmpty() || userId.isEmpty() || deviceId.isEmpty()) {
+            callback.onFailed(new VoicePingException("Invalid parameters!", ErrorCode.INTERNET_DISCONNECTED));
+            return;
+        }
+        mServerUrl = serverUrl;
+        mOkHttpClient = createHttpClient(serverUrl);
         mUserId = userId;
         mDeviceId = deviceId;
-        if (callback != null) {
-            mConnectCallback = callback;
-        }
+        mConnectCallback = callback;
         connect();
     }
 
@@ -265,6 +262,8 @@ class OkConnection implements Connection {
     }
 
     private void connect() {
+        if (mServerUrl == null || mServerUrl.isEmpty()) return;
+        if (mOkHttpClient == null) return;
         updateConnectionState(ConnectionState.CONNECTING);
         Request request = new Request.Builder().url(mServerUrl)
                 .addHeader("VoicePingToken", mUserId != null ? mUserId : "")

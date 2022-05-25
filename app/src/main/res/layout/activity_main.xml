@@ -13,6 +13,23 @@
             style="@style/InputLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Server URL" />
+
+        <TextView
+            android:id="@+id/text_server_url"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="24dp"
+            android:padding="4dp"
+            android:text="Server URL"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            style="@style/InputLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="Connection State" />
 
         <TextView

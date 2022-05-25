@@ -32,7 +32,7 @@ class Player implements IncomingAudioListener {
 
     private final Context mContext;
     private AudioParam mAudioParam;
-    private final String mServerUrl;
+    private String mServerUrl;
     private Opus mOpus;
     private AudioTrack mAudioTrack;
     private final Handler mBackgroundHandler;
@@ -150,6 +150,10 @@ class Player implements IncomingAudioListener {
     public void setAudioParam(AudioParam audioParam) {
         mAudioParam = audioParam;
         mOpus = new Opus(audioParam.getSampleRate(), audioParam.getChannelSize());
+    }
+
+    public void setServerUrl(String serverUrl) {
+        mServerUrl = serverUrl;
     }
 
     public void setIncomingTalkListener(IncomingTalkListener listener) {
