@@ -23,7 +23,8 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        initToolbar()
+        supportActionBar?.title = getString(R.string.app_name)
+        binding.editServerUrl.setText(MyPrefs.serverUrl ?: "")
         binding.buttonConnect.setOnClickListener {
             EasyPermissions.requestPermissions(
                 this@LoginActivity,
@@ -34,16 +35,12 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
         }
     }
 
-    private fun initToolbar() {
-        supportActionBar?.title = getString(R.string.app_name)
-        supportActionBar?.subtitle = "Server: " + VoicePingClientApp.SERVER_URL
-    }
-
     override fun onStart() {
         super.onStart()
         val userId = MyPrefs.userId ?: ""
         val company = MyPrefs.company ?: ""
-        if (userId.isNotBlank() && company.isNotBlank()) {
+        val serverUrl = MyPrefs.serverUrl ?: ""
+        if (userId.isNotBlank() && company.isNotBlank() && serverUrl.isNotBlank()) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
@@ -74,10 +71,12 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
         // Reset errors.
         binding.editUserId.error = null
         binding.editCompany.error = null
+        binding.editServerUrl.error = null
 
         // Store values at the time of the connect attempt.
         val userId = binding.editUserId.text.toString().trim { it <= ' ' }
         val company = binding.editCompany.text.toString().trim { it <= ' ' }
+        val serverUrl = binding.editServerUrl.text.toString().trim { it <= ' ' }
 
         when {
             userId.isEmpty() -> {
@@ -88,16 +87,21 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
                 binding.editCompany.error = getString(R.string.cannot_be_blank)
                 binding.editCompany.requestFocus()
             }
+            serverUrl.isEmpty() -> {
+                binding.editServerUrl.error = getString(R.string.cannot_be_blank)
+                binding.editServerUrl.requestFocus()
+            }
             else -> {
                 // Show a progress spinner, and kick off a background task to perform the user connect attempt.
                 Utils.closeKeyboard(this, currentFocus)
                 showProgress(true)
-                VoicePing.connect(userId, company, object : ConnectCallback {
+                VoicePing.connect(serverUrl, userId, company, object : ConnectCallback {
                     override fun onConnected() {
                         Log.v(TAG, "onConnected")
                         showProgress(false)
                         MyPrefs.userId = userId
                         MyPrefs.company = company
+                        MyPrefs.serverUrl = serverUrl
                         startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                         finish()
                     }

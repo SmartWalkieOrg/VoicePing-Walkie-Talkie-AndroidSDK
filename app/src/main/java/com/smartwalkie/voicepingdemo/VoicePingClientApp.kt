@@ -20,11 +20,10 @@ class VoicePingClientApp : Application() {
             .build()
         val audioSourceText = AudioSourceConfig.getAudioSourceText(audioParam.audioSource)
         Log.d(TAG, "Manufacturer: ${Build.MANUFACTURER}, audio source: $audioSourceText")
-        VoicePing.init(this, SERVER_URL, audioParam)
+        VoicePing.init(this, audioParam)
     }
 
     companion object {
-        const val SERVER_URL: String = "wss://router-lite.voiceping.info"
         lateinit var context: Context
     }
 }
