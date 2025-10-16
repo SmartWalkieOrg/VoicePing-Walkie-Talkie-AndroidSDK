@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
         }
         initToolbar(userId, company)
         binding.textServerUrl.text = serverUrl
-        val channelTypes = arrayOf("GROUP", "PRIVATE")
+        val channelTypes = arrayOf("GROUP CALL", "PRIVATE CALL")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, channelTypes)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerChannelType.adapter = adapter
@@ -135,6 +135,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
         when (position) {
             0 -> {
                 binding.textReceiverIdLabel.text = "Group ID"
+                binding.editReceiverId.setText("${MyPrefs.company}")
                 channelType = ChannelType.GROUP
                 binding.layoutGroupButtons.visibility = View.VISIBLE
                 binding.voicePingButton.channelType = ChannelType.GROUP
@@ -142,6 +143,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
             1 -> {
                 binding.textReceiverIdLabel.text = "Target User ID"
                 channelType = ChannelType.PRIVATE
+                binding.editReceiverId.setText("@${MyPrefs.company}")
                 binding.layoutGroupButtons.visibility = View.GONE
                 binding.voicePingButton.channelType = ChannelType.PRIVATE
             }
