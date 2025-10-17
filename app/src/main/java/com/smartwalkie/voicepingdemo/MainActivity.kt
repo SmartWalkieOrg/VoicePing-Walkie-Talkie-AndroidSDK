@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
         }
         initToolbar(userId, company)
         binding.textServerUrl.text = serverUrl
-        val channelTypes = arrayOf("GROUP CALL", "PRIVATE CALL")
+        val channelTypes = arrayOf("GROUP", "PRIVATE")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, channelTypes)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerChannelType.adapter = adapter
