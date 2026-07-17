@@ -60,7 +60,7 @@ To install this SDK in your Android project, you need to do the following steps,
 
     ```groovy
     dependencies {
-        implementation 'com.github.SmartWalkieOrg:VoicePing-Walkie-Talkie-AndroidSDK:1.0'
+        implementation 'com.github.SmartWalkieOrg:VoicePing-Walkie-Talkie-AndroidSDK:1.2.0'
     }
     ```
 
