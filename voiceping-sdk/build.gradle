@@ -41,6 +41,24 @@ base {
     archivesName = "voiceping-sdk-$sdkVersionName"
 }
 
+// JitPack needs an explicit Maven publication wired to AGP's 'release' component.
+// Without it the AAR publishes as `build:voiceping-sdk-x:unspecified` and JitPack
+// reports "No build artifacts found". afterEvaluate is required because AGP
+// registers components.release late in configuration.
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = 'com.github.SmartWalkieOrg'
+                artifactId = 'VoicePing-Walkie-Talkie-AndroidSDK'
+                version = sdkVersionName
+            }
+        }
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation libs.okhttp
