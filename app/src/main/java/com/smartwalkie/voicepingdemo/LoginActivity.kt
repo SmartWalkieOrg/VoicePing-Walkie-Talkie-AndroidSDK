@@ -2,11 +2,14 @@ package com.smartwalkie.voicepingdemo
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
-import pub.devrel.easypermissions.EasyPermissions.PermissionCallbacks
 import android.os.Bundle
-import pub.devrel.easypermissions.EasyPermissions
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.smartwalkie.voicepingsdk.callback.ConnectCallback
 import android.util.Log
 import android.view.View
@@ -14,10 +17,20 @@ import com.smartwalkie.voicepingdemo.databinding.ActivityLoginBinding
 import com.smartwalkie.voicepingsdk.VoicePing
 import com.smartwalkie.voicepingsdk.exception.VoicePingException
 
-class LoginActivity : AppCompatActivity(), PermissionCallbacks {
+class LoginActivity : AppCompatActivity() {
     private val TAG = "LoginActivity"
-    private val RC_RECORD_AUDIO = 1000
     private lateinit var binding: ActivityLoginBinding
+
+    private val recordAudioPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            attemptToLogin()
+        } else {
+            Toast.makeText(this, "You need to allow the permission request!", Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,12 +40,26 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
         supportActionBar?.title = getString(R.string.app_name)
         binding.editServerUrl.setText(MyPrefs.serverUrl ?: "")
         binding.buttonConnect.setOnClickListener {
-            EasyPermissions.requestPermissions(
-                this@LoginActivity,
-                "This app needs your permission to allow recording audio",
-                RC_RECORD_AUDIO,
-                Manifest.permission.RECORD_AUDIO
-            )
+            checkRecordAudioPermissionThenLogin()
+        }
+    }
+
+    private fun checkRecordAudioPermissionThenLogin() {
+        when {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) ==
+                    PackageManager.PERMISSION_GRANTED -> attemptToLogin()
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this, Manifest.permission.RECORD_AUDIO
+            ) -> {
+                AlertDialog.Builder(this)
+                    .setMessage("This app needs your permission to allow recording audio")
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
+            else -> recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
     }
 
@@ -45,23 +72,6 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
-    }
-
-    override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
-        if (requestCode == RC_RECORD_AUDIO) attemptToLogin()
-    }
-
-    override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
-        Toast.makeText(this, "You need to allow the permission request!", Toast.LENGTH_SHORT).show()
     }
 
     /**
