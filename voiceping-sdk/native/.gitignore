@@ -1,0 +1,4 @@
+# Native build artifacts (see README.md)
+/opus/
+/out/
+/cmake-build/

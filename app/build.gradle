@@ -36,6 +36,12 @@ android {
             //signingConfig signingConfigs.development
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            ndk {
+                // Limit to this for smaller APK size. arm64-v8a covers all modern
+                // physical devices and is 16 KB page-size compliant. Debug builds
+                // keep every ABI the SDK ships (incl. x86_64) so emulators still work.
+                abiFilters 'arm64-v8a'
+            }
         }
     }
     compileOptions {
@@ -46,6 +52,15 @@ android {
     buildFeatures {
         viewBinding true
         buildConfig true
+    }
+    packaging {
+        jniLibs {
+            // Store native libs uncompressed and load them directly from the APK
+            // (extractNativeLibs=false). Combined with the libraries' 16 KB-aligned
+            // ELF segments, this is the recommended 16 KB page-size-compliant
+            // packaging for apps targeting Android 15+.
+            useLegacyPackaging = false
+        }
     }
 }
 
