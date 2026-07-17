@@ -23,6 +23,7 @@ class LoginActivity : AppCompatActivity(), PermissionCallbacks {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        Utils.applyEdgeToEdgeInsets(binding.root)
         supportActionBar?.title = getString(R.string.app_name)
         binding.editServerUrl.setText(MyPrefs.serverUrl ?: "")
         binding.buttonConnect.setOnClickListener {
