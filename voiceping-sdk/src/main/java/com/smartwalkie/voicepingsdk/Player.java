@@ -1,8 +1,12 @@
 package com.smartwalkie.voicepingsdk;
 
 import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
+import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -40,6 +44,7 @@ class Player implements IncomingAudioListener {
     private IncomingTalkListener mIncomingTalkListener;
     private final PlayerMuteManager mPlayerMuteManager;
     private final Map<String, IncomingTalkSession> mActiveSessions;
+    private AudioFocusRequest mAudioFocusRequest; // API 26+
 
     private final int PLAY = 1;
     private final int STOP = 2;
@@ -138,6 +143,7 @@ class Player implements IncomingAudioListener {
                             mAudioTrack.stop();
                             mAudioTrack.flush();
                             mAudioTrack.release();
+                            abandonAudioFocus();
                             return true;
                         }
                         return false;
@@ -195,20 +201,63 @@ class Player implements IncomingAudioListener {
     }
 
     private AudioTrack newAudioTrack() {
-        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        if (am != null) {
-            am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-        }
+        requestAudioFocus();
         int minBufferSize = mAudioParam.getPlayMinBufferSize();
 //        Log.d(TAG, "init minbuffer size=" + minBufferSize);
-        int streamType = AudioManager.STREAM_MUSIC;
+        AudioFormat audioFormat = new AudioFormat.Builder()
+                .setSampleRate(mAudioParam.getSampleRate())
+                .setChannelMask(mAudioParam.getChannelOutConfig())
+                .setEncoding(mAudioParam.getAudioFormat())
+                .build();
         return new AudioTrack(
-                streamType,
-                mAudioParam.getSampleRate(),
-                mAudioParam.getChannelOutConfig(),
-                mAudioParam.getAudioFormat(),
+                newAudioAttributes(),
+                audioFormat,
                 Math.min(minBufferSize, mAudioParam.getFrameSize() * mAudioParam.getBufferSizeFactor()),
-                AudioTrack.MODE_STREAM);
+                AudioTrack.MODE_STREAM,
+                AudioManager.AUDIO_SESSION_ID_GENERATE);
+    }
+
+    private AudioAttributes newAudioAttributes() {
+        // USAGE_MEDIA + CONTENT_TYPE_SPEECH keeps the previous STREAM_MUSIC volume behavior.
+        return new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build();
+    }
+
+    /**
+     * Requests audio focus before playing incoming PTT audio.
+     * <p>
+     * NOTE: Starting with Android 17 (API 37), audio focus requests and playback from an app
+     * that is not visible are blocked unless the app has a foreground service with
+     * while-in-use capabilities running. Host apps must run such a service while connected.
+     */
+    private void requestAudioFocus() {
+        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        if (am == null) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (mAudioFocusRequest == null) {
+                mAudioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                        .setAudioAttributes(newAudioAttributes())
+                        .setWillPauseWhenDucked(false)
+                        .build();
+            }
+            am.requestAudioFocus(mAudioFocusRequest);
+        } else {
+            am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        }
+    }
+
+    private void abandonAudioFocus() {
+        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        if (am == null) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (mAudioFocusRequest != null) {
+                am.abandonAudioFocusRequest(mAudioFocusRequest);
+            }
+        } else {
+            am.abandonAudioFocus(null);
+        }
     }
 
     private void playAudioTrack() {

@@ -31,7 +31,7 @@ Check out the [Introduction](https://opensource.voiceping.info/docs/introduction
 3. Works over all network conditions (2G, 3G, 4G or Wifi)
 4. Auto-reconnect feature when Internet connection is lost
 5. Uses secure WebSocket for transport
-6. Works for Android SDK (16 to 30) and Android OS version 4.1 to 11
+6. Works for Android SDK (21 to 37) and Android OS version 5.0 to 17
 7. Low battery consumption
 
 ## Use Cases (Add Group Walkie Talkie)
@@ -65,6 +65,50 @@ To install this SDK in your Android project, you need to do the following steps,
     ```
 
 3. Sync gradle and use it
+
+## Android 17 (API 37) Support
+
+The SDK compiles against and targets Android 17 (API level 37), with `minSdk 21` (Android 5.0).
+
+### Background audio requires a foreground service
+
+Starting with Android 17, **audio playback and audio focus requests from an app that is not
+visible are blocked** unless the app has a foreground service with while-in-use capabilities
+running. For a walkie talkie app this means: without a foreground service, incoming PTT audio
+is silently muted as soon as your app goes to the background.
+
+The SDK itself is service-free by design — your app must run a foreground service while
+connected to VoicePing. The demo app ships a reference implementation in
+[`PttForegroundService`](app/src/main/java/com/smartwalkie/voicepingdemo/PttForegroundService.kt).
+To adopt it in your app:
+
+1. Declare the service and permissions in your manifest:
+
+    ```xml
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+
+    <service
+        android:name=".YourPttForegroundService"
+        android:exported="false"
+        android:foregroundServiceType="mediaPlayback|microphone" />
+    ```
+
+2. Start the service **while your app is visible** (required for the `microphone` type on
+   Android 14+), right after `VoicePing.connect(...)`, and stop it after
+   `VoicePing.disconnect(...)`.
+
+3. Request `POST_NOTIFICATIONS` on Android 13+ so the user can see the ongoing notification.
+
+### Other behavior notes on Android 17
+
+* The demo app requests audio focus with `AudioFocusRequest` and plays incoming PTT audio
+  through `AudioTrack` with `USAGE_MEDIA`/`CONTENT_TYPE_SPEECH` attributes.
+* If your server URL points to a device on the local network (e.g. a self-hosted router on
+  the LAN), apps targeting API 37 must also request the `ACCESS_LOCAL_NETWORK` runtime
+  permission. Connections to Internet hosts are unaffected.
 
 <div name="voiceping-router"></div>
 

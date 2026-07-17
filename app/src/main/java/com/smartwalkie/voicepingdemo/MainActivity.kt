@@ -1,6 +1,9 @@
 package com.smartwalkie.voicepingdemo
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import com.smartwalkie.voicepingsdk.model.ChannelType
 import android.os.Bundle
@@ -9,6 +12,7 @@ import android.content.Intent
 import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import com.smartwalkie.voicepingdemo.databinding.ActivityMainBinding
@@ -24,6 +28,7 @@ import java.nio.ByteBuffer
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
     ConnectionStateListener, IncomingTalkListener {
     private val TAG = "MainActivity"
+    private val RC_POST_NOTIFICATIONS = 2000
     private lateinit var binding: ActivityMainBinding
 
     private var mDestinationPath: String? = null
@@ -36,6 +41,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        Utils.applyEdgeToEdgeInsets(binding.root)
 
         val userId = MyPrefs.userId ?: ""
         val company = MyPrefs.company ?: ""
@@ -94,6 +100,22 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
                     // Ignored
                 }
             })
+        }
+        requestNotificationPermissionIfNeeded()
+        // Required on Android 17+ so that incoming PTT audio keeps playing while the app is in
+        // the background. Must be started while the app is visible.
+        PttForegroundService.start(this)
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val granted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!granted) {
+            ActivityCompat.requestPermissions(
+                this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), RC_POST_NOTIFICATIONS
+            )
         }
     }
 
@@ -163,6 +185,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
                 if (!isFinishing) {
                     VoicePing.unmuteAll()
                     MyPrefs.clear()
+                    PttForegroundService.stop(this)
                     startActivity(Intent(this, LoginActivity::class.java))
                     finish()
                 }
@@ -269,6 +292,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener,
             disconnectConfirmationDialog =
                 DisconnectConfirmationDialog(this, object : DisconnectConfirmationDialog.Listener {
                     override fun onDisconnected() {
+                        PttForegroundService.stop(this@MainActivity)
                         startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                         finish()
                     }

@@ -9,6 +9,8 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import kotlin.Throws
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import okhttp3.*
 import java.io.FileOutputStream
 import java.io.IOException
@@ -82,9 +84,9 @@ object Utils {
                     val fileName = split[split.size - 1]
                     val destinationPath =
                         context.getExternalFilesDir(null).toString() + "/" + fileName
-                    if (response.body() == null) return
+                    val body = response.body ?: return
                     val fileOutputStream = FileOutputStream(destinationPath)
-                    fileOutputStream.write(response.body()!!.bytes())
+                    fileOutputStream.write(body.bytes())
                     fileOutputStream.close()
                     Log.d(TAG, "file downloaded to: $destinationPath")
                 }
@@ -95,5 +97,19 @@ object Utils {
         if (view == null) return
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
         imm?.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    /**
+     * Apps targeting API 35+ are always edge-to-edge; pad the content root so it is not drawn
+     * behind the system bars.
+     */
+    fun applyEdgeToEdgeInsets(root: View) {
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
     }
 }

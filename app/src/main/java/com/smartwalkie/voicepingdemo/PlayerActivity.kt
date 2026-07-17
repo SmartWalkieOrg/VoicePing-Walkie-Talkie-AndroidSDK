@@ -28,6 +28,7 @@ class PlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        Utils.applyEdgeToEdgeInsets(binding.root)
 
         mFilePath = intent.getStringExtra(FILE_PATH_DATA)
         if (mFilePath.isNullOrEmpty()) {
