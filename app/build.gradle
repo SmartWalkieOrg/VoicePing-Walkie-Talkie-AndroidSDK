@@ -69,7 +69,7 @@ base {
 }
 
 dependencies {
-    implementation project(':voiceping-sdk')
+    implementation libs.voiceping.sdk
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material

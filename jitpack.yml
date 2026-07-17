@@ -1,2 +1,9 @@
 jdk:
   - openjdk21
+install:
+  # Publish only the SDK module's Maven publication. Letting JitPack run its
+  # default whole-project command also assembles :app, and its artifact scanner
+  # then matches the same coordinates in both modules' build dirs and stores a
+  # broken layout (AAR under a '-release' classifier, packaging=pom POM) that
+  # no consumer can resolve. ~/.m2 after this task is exactly what JitPack serves.
+  - ./gradlew :voiceping-sdk:publishToMavenLocal
